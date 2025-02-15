@@ -76,6 +76,11 @@
 			android:summary="启用ecj时建议用此格式化方案"
 			android:key="zero_aicy_enable_eclipse_java_format"
 			android:defaultValue="true" />
+		<SwitchPreference
+			android:title="编辑器启用异步读取"
+			android:summary="异步加载文件--偶尔会闪退"
+			android:key="zero_aicy_enable_asyn_read"
+			android:defaultValue="false" />
 		
 	</PreferenceScreen>
 

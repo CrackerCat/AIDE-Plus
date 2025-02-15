@@ -118,6 +118,13 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 	public static boolean isEnableEclipseJavaFormat() {
 		return getDefaultSpBoolean("zero_aicy_enable_eclipse_java_format", true); 
 	}
+	/**
+	 * 是否启用异步读取
+	 */
+	public static boolean isEnableAsynRead() {
+		return getDefaultSpBoolean("zero_aicy_enable_asyn_read", false); 
+	}
+	
 	/*
 	 * 构建运行
 	 */

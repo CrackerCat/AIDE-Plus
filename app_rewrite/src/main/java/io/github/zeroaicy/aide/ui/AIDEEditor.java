@@ -27,6 +27,7 @@ import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import android.content.res.Resources;
+import io.github.zeroaicy.aide.preference.ZeroAicySetting;
 
 public class AIDEEditor extends com.aide.ui.AIDEEditor {
 
@@ -193,8 +194,13 @@ public class AIDEEditor extends com.aide.ui.AIDEEditor {
 	//*
 	@Override
 	protected OpenFileService.OpenFileModel Z1( final String filePath ) {
-		// 先返回，内容异步塞入
-		return new AIDEEditorModel(filePath);
+		
+		if( ZeroAicySetting.isEnableAsynRead() ){
+			// 先返回，内容异步塞入
+			return new AIDEEditorModel(filePath);
+		}else{
+			return super.Z1(filePath);
+		}
 	}
 
 	//*/
