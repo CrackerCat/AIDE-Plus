@@ -49,7 +49,6 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.FS;
 import org.eclipse.jgit.util.SystemReader;
 
-/* loaded from: /storage/emulated/0/AppProjects1/.ZeroAicy/git/AIDE+/build/jadx/gitImpl.dex */
 public class ZeroAicyExternalGitService extends ExternalGitService {
 
 	private GitServiceImpl gitServiceImpl;
@@ -60,6 +59,7 @@ public class ZeroAicyExternalGitService extends ExternalGitService {
 	@Override
 	public IBinder onBind(Intent intent) {
 		AppLog.i("ZeroAicyExternalGitService bound - pid " + Process.myPid() + " id " + System.identityHashCode(this));
+		
 		FileSystem.init(this);
 
 		return this.gitServiceImpl;
@@ -574,23 +574,35 @@ public class ZeroAicyExternalGitService extends ExternalGitService {
 					PushCommand pushCommand = git.push();
 					pushCommand.setCredentialsProvider(getCredentialsProvider(externalGitServiceListener));
 					pushCommand.setProgressMonitor(new AideProgressMonitor(this, externalGitServiceListener));
-
+					
+					boolean everythingUpToDate = true;
 					for (PushResult pushResult : pushCommand.call()) {
 						for (RemoteRefUpdate remoteRefUpdate : pushResult.getRemoteUpdates()) {
-							if (remoteRefUpdate.getStatus() != RemoteRefUpdate.Status.OK
-								&& remoteRefUpdate.getStatus() != RemoteRefUpdate.Status.UP_TO_DATE) {
-
-								throw new Exception("Messages: " + pushResult.getMessages() + " Status: "
-													+ remoteRefUpdate.getStatus());
+							if( remoteRefUpdate.getStatus() == RemoteRefUpdate.Status.UP_TO_DATE ){
+								continue;
 							}
+							// 非UP_TO_DATE 有文件更新
+							everythingUpToDate = false;
+							
+							if (remoteRefUpdate.getStatus() == RemoteRefUpdate.Status.OK) {
+								continue;
+							}
+							
+							// push错误
+							throw new Exception("Messages: " + pushResult.getMessages() + " Status: "
+												+ remoteRefUpdate.getStatus());
 						}
+					}
+					
+					// 没有更新
+					if( everythingUpToDate ){
+						throw new Exception("Messages: Everything up-to-date [一切都是最新的] ");
 					}
 
 					// 保留SSH会话信息
 					if (!gitConfiguration.fY) {
 						SshSessionFactory.setInstance(null);
 					}
-
 					git.getRepository().close();
 
 					Bx(externalGitServiceListener);
