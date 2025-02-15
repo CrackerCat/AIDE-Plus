@@ -104,6 +104,10 @@ public class AppLog{
 	public static void println_e(String msg){
 		Log.println(msg);
     }
-
+	
+	
+	public static String getStackTraceString(Throwable th) {
+		return Log.getStackTraceString(th);
+	}
 }
 
