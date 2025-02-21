@@ -337,7 +337,9 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 
 				final int needDexingLibsSize = needDexingLibs.size();
 
-				long filterThreshold = 8 * 1024 * 1024;
+				// 单文件大小阈值
+				long filterThreshold = 6 * 1024 * 1024;
+				// 小而多的文件阈值
 				long filterThreshold2 = 8 * 1024 * 1024;
 
 				for (int index = 0; index < needDexingLibsSize; index++) {
@@ -427,7 +429,17 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 				}
 
 				//输入dexs
-				argsList.addAll(dependencyLibDexs);
+				for (String outputDexZipFilePath : dependencyLibDexs) {
+					File outputDexZipFile = new File(outputDexZipFilePath);
+
+					// 空 .dex.zip 文件
+					if (outputDexZipFile.length() <= 22) {
+						// 跳过空的dexing[dex.zip]缓存文件
+						continue;
+					}
+					// 添加需要合并的 dexing缓存
+					argsList.add(outputDexZipFilePath);
+				}
 
 				try {
 					// 将采用 子进程方式，防止oom
@@ -975,10 +987,10 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 					PackagingStream packagingZipOutput = new PackagingStream(new FileOutputStream(outTempFile));
 					//打包dex
 					packagingDexs(dexZipPathList, packagingZipOutput);
-					
+
 					// 打包自定义 assetsSrcDirs下资源
 					packagingAssetsSrcDirsResource(packagingZipOutput);
-					
+
 					packagingSourceDirsResource(packagingZipOutput);
 					//打包依赖库资源
 					packagingJarResources(packagingZipOutput);
@@ -986,7 +998,7 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 					packagingLibgdxNativesResources(packagingZipOutput);
 
 					packagingZipOutput.close();
-					
+
 					// Java项目签名
 					String signaturePath = getSignaturePath();
 					// if( signaturePath != null ) 
@@ -1035,7 +1047,7 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 				}
 				//打包dex
 				packagingDexs(dexZipPathList, packagingZipOutput);
-				
+
 				// 打包自定义 assetsSrcDirs下资源
 				packagingAssetsSrcDirsResource(packagingZipOutput);
 
@@ -1096,24 +1108,24 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 					// 没有设置 assets.srcDirs
 					return;
 				}
-				
+
 				String projectPath = FileSystem.getParent(zeroAicyBuildGradle.configurationPath);
-				
+
 				// 遍历添加
-				for( String assetsSrcDir : defaultAssetsSrcDirs){
-					
+				for (String assetsSrcDir : defaultAssetsSrcDirs) {
+
 					File sourceDirFile = new File(projectPath, assetsSrcDir);
 					if (!sourceDirFile.exists()) {
 						continue;
 					}
-					
+
 					// 相对路径
 					String relativeRootDirFilePath = sourceDirFile.getAbsolutePath();
-					
+
 					// 打包
 					ZipEntryTransformerService.packagingDirFile(relativeRootDirFilePath, "assets/", sourceDirFile,
-																zipResourceZipEntryTransformer, packagingZipOutput);
-					
+							zipResourceZipEntryTransformer, packagingZipOutput);
+
 				}
 			}
 
