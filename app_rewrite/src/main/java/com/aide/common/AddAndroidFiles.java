@@ -35,15 +35,18 @@ public class AddAndroidFiles {
 			MessageBox.XL(mainActivity, R.string.command_files_add_new_class, R.string.dialog_create_message, "", new ValueRunnable<String>(){
 					@Override
 					public void acceptValue(String className) {
+						
 						if (className.endsWith(".java")) {
-							className = className.substring(0, className.length() - 5);
+							className = className.substring(0, className.length() - ".java".length());
 						}
+						
 						try {
-
+							className = className.replace('.', '/');
 							String javaFilePath = dirPath + File.separator + className + ".java";
 							if( FileSystem.exists(javaFilePath)){
 								throw new IOException(javaFilePath + " already exists"); 
 							}
+							
 							// 如果类名中包含路径
 							int classNameStart = className.lastIndexOf('/');
 							if (classNameStart > 0) {
