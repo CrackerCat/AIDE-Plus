@@ -10,9 +10,9 @@ import com.aide.ui.AIDEApplication;
 import com.aide.ui.ServiceContainer;
 import io.github.zeroaicy.aide.highlight.CodeTheme;
 import io.github.zeroaicy.aide.preference.ZeroAicySetting;
+import io.github.zeroaicy.aide.shell.ShellEnvironmentUtils;
 import io.github.zeroaicy.aide.shizuku.ShizukuUtil;
 import io.github.zeroaicy.aide.utils.Logger;
-import io.github.zeroaicy.aide.utils.ZeroAicyTermuxShellEnvironment;
 import io.github.zeroaicy.aide.utils.jks.JksKeyStore;
 import io.github.zeroaicy.util.ContextUtil;
 import io.github.zeroaicy.util.DebugUtil;
@@ -70,7 +70,7 @@ public class ZeroAicyAIDEApplication extends AIDEApplication {
 		// 更改日志路径
 		DebugUtil.debug(this, false);
 		
-		ZeroAicyTermuxShellEnvironment.init(this);
+		ShellEnvironmentUtils.init(this);
 		
 		// method2();
 

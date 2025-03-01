@@ -15,6 +15,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.text.TextUtils;
 import androidx.annotation.Keep;
 import com.aide.common.AppLog;
 import com.aide.common.StreamUtilities;
@@ -30,10 +31,11 @@ import io.github.zeroaicy.aide.cmake.CmakeBuild;
 import io.github.zeroaicy.aide.cmake.ProcessExitInfo;
 import io.github.zeroaicy.aide.cmake.ProcessUtil;
 import io.github.zeroaicy.aide.extend.ZeroAicyExtensionInterface;
+import io.github.zeroaicy.aide.shell.ShellEnvironment;
+import io.github.zeroaicy.aide.shell.ShellEnvironmentUtils;
 import io.github.zeroaicy.aide.utils.PropertiesConfiguration;
 import io.github.zeroaicy.aide.utils.Utils;
 import io.github.zeroaicy.aide.utils.ZeroAicyBuildGradle;
-import io.github.zeroaicy.aide.utils.ZeroAicyTermuxShellEnvironment;
 import io.github.zeroaicy.util.ContextUtil;
 import io.github.zeroaicy.util.FileUtil;
 import java.io.ByteArrayInputStream;
@@ -50,12 +52,11 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
-import android.text.TextUtils;
 
 public class NdkBuildService {
 	public static final String TAG = "NdkBuildService";
 
-	static ZeroAicyTermuxShellEnvironment termuxShellEnvironment = ZeroAicyTermuxShellEnvironment.getInstance();
+	static ShellEnvironment shellEnvironment = ShellEnvironmentUtils.getShellEnvironment();
 
 	private RunNdkBuildFutureTask runNdkBuildFutureTask;
 
@@ -336,12 +337,12 @@ public class NdkBuildService {
 					List<String> ndkConfiguration = NdkConfiguration.VH(str, threadCount);
 					ndkConfiguration.remove(ndkConfiguration.size() - 2);
 
-					List<String> ndkBuildArgs = termuxShellEnvironment.setupShellCommandArguments(ndkConfiguration);
+					List<String> ndkBuildArgs = shellEnvironment.setupShellCommandArguments(ndkConfiguration);
 
 					//  只有PATH
 					Map<String, String> env = NdkConfiguration.gn();
 
-					Map<String, String> termuxEnvironment = termuxShellEnvironment.getEnvironment(false, env);
+					Map<String, String> termuxEnvironment = shellEnvironment.getEnvironment(false, env);
 					env = termuxEnvironment.isEmpty() ? env : termuxEnvironment;
 
 					Hw(ndkBuildArgs, module);
@@ -697,12 +698,12 @@ public class NdkBuildService {
 				};
 			}
 
-			Map<String, String> termuxEnvironment = termuxShellEnvironment.getEnvironment(false);
+			Map<String, String> termuxEnvironment = shellEnvironment.getEnvironment(false);
 
 			//进程信息
 			Map<String, String> env = termuxEnvironment.isEmpty() ? System.getenv() : termuxEnvironment;
 
-			List<String> cmakeCommandList = termuxShellEnvironment
+			List<String> cmakeCommandList = shellEnvironment
 				.setupShellCommandArguments(cmakeBuild.getCmakeCommandList());
 
 			// AppLog.d(TAG, cmakeCommandList);
@@ -714,7 +715,7 @@ public class NdkBuildService {
 			}
 
 			//ninja build.ninja
-			List<String> ninjaCommandList = termuxShellEnvironment
+			List<String> ninjaCommandList = shellEnvironment
 				.setupShellCommandArguments(cmakeBuild.getNinjaCommandList());
 
 			// AppLog.d(TAG, ninjaCommandList);

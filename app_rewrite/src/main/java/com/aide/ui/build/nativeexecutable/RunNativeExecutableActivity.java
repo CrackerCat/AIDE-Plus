@@ -12,13 +12,14 @@ import android.os.Handler;
 import com.aide.ui.build.OutputConsole;
 import com.aide.ui.build.OutputConsoleActivity;
 import com.aide.ui.rewrite.R;
-import io.github.zeroaicy.aide.utils.ZeroAicyTermuxShellEnvironment;
+import io.github.zeroaicy.aide.shell.ShellEnvironment;
+import io.github.zeroaicy.aide.shell.ShellEnvironmentUtils;
 import java.util.Arrays;
 import java.util.List;
 
 public class RunNativeExecutableActivity extends OutputConsoleActivity {
 
-	static ZeroAicyTermuxShellEnvironment termuxShellEnvironment = ZeroAicyTermuxShellEnvironment.getInstance();
+	static ShellEnvironment termuxShellEnvironment = ShellEnvironmentUtils.getShellEnvironment();
 	
 	private vf w9;
 	

@@ -122,7 +122,7 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 	 * 是否启用异步读取
 	 */
 	public static boolean isEnableAsynRead() {
-		return getDefaultSpBoolean("zero_aicy_enable_asyn_read", false); 
+		return getDefaultSpBoolean("zero_aicy_enable_asyn_read", true); 
 	}
 	
 	/*

@@ -2,7 +2,7 @@
  * @Author ZeroAicy
  * @AIDE AIDE+
 */
-package io.github.zeroaicy.aide.utils;
+package io.github.zeroaicy.aide.shell;
 import android.content.Context;
 import android.os.Build;
 import java.io.File;
@@ -14,53 +14,58 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * TermuxShellEnvironment封装
- * 
- */
-public class ZeroAicyTermuxShellEnvironment {
-
-	private static final ZeroAicyTermuxShellEnvironment environment = new ZeroAicyTermuxShellEnvironment();
-
-	public static ZeroAicyTermuxShellEnvironment getInstance() {
-		return ZeroAicyTermuxShellEnvironment.environment;
+public class ZeroAicyShellEnvironment implements ShellEnvironment {
+	
+	private static ZeroAicyShellEnvironment zeroAicyShellEnvironment;
+	public static ZeroAicyShellEnvironment getInstance(Context context){
+		if( zeroAicyShellEnvironment == null ){
+			zeroAicyShellEnvironment = new ZeroAicyShellEnvironment();
+			zeroAicyShellEnvironment.init(context);
+		}
+		return zeroAicyShellEnvironment;
 	}
-
-	private static Context applicationContext;
-
-	public static void init(Context context) {
+	
+	Context applicationContext;
+	
+	@Override
+	public void init(Context context) {
 		if (applicationContext != null) {
 			return;
 		}
-		ZeroAicyTermuxShellEnvironment.applicationContext = context.getApplicationContext();
-		initProotEnv(ZeroAicyTermuxShellEnvironment.applicationContext);
+		this.applicationContext = context.getApplicationContext();
+		initProotEnv(this.applicationContext);
+		
 	}
 
-	public ZeroAicyTermuxShellEnvironment() {
-	}
-
+	@Override
 	public Map<String, String> getEnvironment(boolean isFailSafe) {
 		HashMap<String, String> environment = new HashMap<>();
 		putCustomizeEnv(environment);
 		return environment;
 	}
 
+	@Override
 	public Map<String, String> getEnvironment(boolean isFailSafe, Map<String, String> env) {
-		HashMap<String, String> environment = new HashMap<>(env);
+		
+		HashMap<String, String> environment = new HashMap<>();
+		if( env != null ){
+			environment.putAll(env);
+		}
 		putCustomizeEnv(environment);
 		return environment;
 	}
-
+	
+	@Override
 	public List<String> setupShellCommandArguments(List<String> arguments) {
-		if (!ZeroAicyTermuxShellEnvironment.ProotMod) {
+		if (!ZeroAicyShellEnvironment.ProotMod) {
 			return arguments;
 		}
 		List<String> result = new ArrayList<>();
 
-		String PACKAGE_NAME_PATH = ZeroAicyTermuxShellEnvironment.PACKAGE_NAME_PATH;
+		String PACKAGE_NAME_PATH = ZeroAicyShellEnvironment.PACKAGE_NAME_PATH;
 		//以proot方式启动
-		result.add(ZeroAicyTermuxShellEnvironment.PROOT_PATH);
-		
+		result.add(ZeroAicyShellEnvironment.PROOT_PATH);
+
 		result.add("--rootfs=/");
 		result.add("--bind=" + PACKAGE_NAME_PATH + ":/data/data/com.termux");
 		result.add("--bind=" + PACKAGE_NAME_PATH + ":/data/user/0/com.termux");
@@ -71,7 +76,7 @@ public class ZeroAicyTermuxShellEnvironment {
 
 		return result;
 	}
-
+	
 	// proot模式
 	public static boolean ProotMod;
 
@@ -84,27 +89,27 @@ public class ZeroAicyTermuxShellEnvironment {
 
 	private static void initProotEnv(Context currentPackageContext) {
 
-		if (ZeroAicyTermuxShellEnvironment.PROOT_PATH != null) {
+		if (ZeroAicyShellEnvironment.PROOT_PATH != null) {
 			return;
 		}
 
 		try {
-			ZeroAicyTermuxShellEnvironment.ProotMod = currentPackageContext
-					.getApplicationInfo().targetSdkVersion > Build.VERSION_CODES.P;
+			ZeroAicyShellEnvironment.ProotMod = currentPackageContext
+				.getApplicationInfo().targetSdkVersion > Build.VERSION_CODES.P;
 		} catch (Throwable e) {
-			ZeroAicyTermuxShellEnvironment.ProotMod = true;
+			ZeroAicyShellEnvironment.ProotMod = true;
 		}
 
-		if (ZeroAicyTermuxShellEnvironment.PROOT_PATH == null) {
-			ZeroAicyTermuxShellEnvironment.PROOT_PATH = currentPackageContext.getApplicationInfo().nativeLibraryDir
-					+ "/libproot.so";
+		if (ZeroAicyShellEnvironment.PROOT_PATH == null) {
+			ZeroAicyShellEnvironment.PROOT_PATH = currentPackageContext.getApplicationInfo().nativeLibraryDir
+				+ "/libproot.so";
 		}
 
-		if (ZeroAicyTermuxShellEnvironment.PACKAGE_NAME_PATH == null) {
-			ZeroAicyTermuxShellEnvironment.PACKAGE_NAME_PATH = currentPackageContext.getDataDir().getAbsolutePath();
+		if (ZeroAicyShellEnvironment.PACKAGE_NAME_PATH == null) {
+			ZeroAicyShellEnvironment.PACKAGE_NAME_PATH = currentPackageContext.getDataDir().getAbsolutePath();
 		}
 
-		ZeroAicyTermuxShellEnvironment.PROOT_TMP_DIR = new File(ZeroAicyTermuxShellEnvironment.PROOT_PATH).getParent();
+		ZeroAicyShellEnvironment.PROOT_TMP_DIR = new File(ZeroAicyShellEnvironment.PROOT_PATH).getParent();
 
 		File cacheDirFile = new File(PACKAGE_NAME_PATH, "cache");
 		if (!cacheDirFile.exists()) {
@@ -114,7 +119,7 @@ public class ZeroAicyTermuxShellEnvironment {
 		if (!ld_config_txt_file.exists() || ld_config_txt_file.length() == 0) {
 			try {
 				Files.copy(Paths.get("/linkerconfig/ld.config.txt"), ld_config_txt_file.toPath(),
-						StandardCopyOption.REPLACE_EXISTING);
+						   StandardCopyOption.REPLACE_EXISTING);
 				ld_config_txt_file.setReadable(true, false);
 			} catch (Throwable e) {
 				e.printStackTrace();
