@@ -78,9 +78,9 @@
 			android:defaultValue="true" />
 		<SwitchPreference
 			android:title="编辑器启用异步读取"
-			android:summary="异步加载文件--偶尔会闪退"
+			android:summary="异步加载文件--偶尔会闪退[原因待排\n建议开启自动保存15s]"
 			android:key="zero_aicy_enable_asyn_read"
-			android:defaultValue="false" />
+			android:defaultValue="true" />
 		
 	</PreferenceScreen>
 
