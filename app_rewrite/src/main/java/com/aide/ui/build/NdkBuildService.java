@@ -67,9 +67,9 @@ public class NdkBuildService {
 	public NdkBuildService() {
 		this.executorService = ZeroAicyExtensionInterface.getProjectExecutorService();
 	}
-	public static PendingIntent j6(Context context, int i, Intent intent, int i2) {
-		i2 |= PendingIntent.FLAG_MUTABLE;
-		return PendingIntent.getActivity(context, i, intent, i2);
+	public static PendingIntent j6(Context context, int requestCode, Intent intent, int flags) {
+		flags |= PendingIntent.FLAG_MUTABLE;
+		return PendingIntent.getActivity(context, requestCode, intent, flags);
 	}
 	static void DW(NdkBuildService ndkBuildService, Map<String, List<SyntaxError>> map) {
 		ndkBuildService.we(map);
@@ -343,6 +343,7 @@ public class NdkBuildService {
 					Map<String, String> env = NdkConfiguration.gn();
 
 					Map<String, String> termuxEnvironment = shellEnvironment.getEnvironment(false, env);
+					
 					env = termuxEnvironment.isEmpty() ? env : termuxEnvironment;
 
 					Hw(ndkBuildArgs, module);
