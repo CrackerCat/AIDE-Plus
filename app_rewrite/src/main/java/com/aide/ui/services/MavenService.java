@@ -1,14 +1,10 @@
 package com.aide.ui.services;
 
+import androidx.annotation.Keep;
 import com.aide.ui.util.BuildGradle;
 import io.github.zeroaicy.aide.ui.services.ZeroAicyMavenService;
 import java.util.List;
 import java.util.Map;
-import com.aide.ui.util.BuildGradle.MavenDependency;
-import io.github.zeroaicy.aide.ui.services.ZeroAicyMavenService;
-import androidx.annotation.Keep;
-import io.github.zeroaicy.aide.ui.services.ThreadPoolService;
-import com.aide.ui.ServiceContainer;
 
 /**
  * @Keep为2.2未修的[不知道为啥漏了]

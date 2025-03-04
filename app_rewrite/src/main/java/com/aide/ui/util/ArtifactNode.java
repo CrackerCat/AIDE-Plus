@@ -161,9 +161,14 @@ public class ArtifactNode extends BuildGradle.MavenDependency{
 			this.exclusions = artifactNode.exclusions;
 			return;
 		}
-		this.exclusions = new ArrayList<Exclusion>(this.exclusions);
-		this.exclusions.addAll(artifactNode.exclusions);
+		
+		Set<Exclusion> exclusionSet = new HashSet<Exclusion>(this.exclusions);
+		exclusionSet.addAll(artifactNode.exclusions);
+		
+		this.exclusions = new ArrayList<Exclusion>(exclusionSet);
+		// this.exclusions.addAll(artifactNode.exclusions);
 	}
+	
 	public void setExclusions(List<Exclusion> exclusions){
 		this.exclusions = exclusions;
 	}
@@ -177,7 +182,13 @@ public class ArtifactNode extends BuildGradle.MavenDependency{
 	public Set<String> getExclusionSet(){
 		Set<String> exclusionSet = new HashSet<>();
 		for ( Exclusion exclusion : getExclusions() ){
-			exclusionSet.add(exclusion.getGroupId() + ":" + exclusion.getArtifactId());
+			String groupId = exclusion.getGroupId();
+			String artifactId = exclusion.getArtifactId();
+			
+			groupId = groupId == null ? "" :  groupId  + ":" ;
+			artifactId = artifactId == null ? "" : artifactId;
+			
+			exclusionSet.add(groupId + artifactId);
 		}
 		return exclusionSet;
 	}
