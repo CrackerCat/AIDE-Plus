@@ -35,7 +35,7 @@
 				android:summary="显示编译器的警告内容"
 				android:key="zero_aicy_enable_error_browser_show_warning"
 				android:defaultValue="true" />
-			
+
         </PreferenceCategory>
 
 		<CheckBoxPreference 
@@ -107,6 +107,13 @@
 				android:key="zero_aicy_apk_install_package_name"
 				android:summary="APK安装器(包名)"
 				android:dialogTitle="设置Apk打开方式(包名)" />
+
+			<CheckBoxPreference 
+				android:title="Java控制台宿主模式" 
+				android:key="zero_aicy_enable_java_console_host_mode" 
+				android:summary="启用后，Java控制台支持继承AIDE的类(请自己添加仅编译AIDE的依赖)" 
+				android:defaultValue="false" />
+
 		</PreferenceCategory>
 
         <PreferenceCategory android:title="构建">
@@ -134,7 +141,7 @@
 				android:key="zero_aicy_javaproject_min_sdk_level"
 				android:inputType="number"
 				android:dialogTitle="建议输入21及以上，一般为21 24 26 28等"  />
-			
+
         </PreferenceCategory>
 
         <PreferenceCategory android:title="新的Class解析库">
@@ -168,11 +175,11 @@
                 android:key="zero_aicy_enable_auto_class_comments"
                 android:summary="新建类时自动在开头添加一段注释\nAIDE 以及作者(git版本控制中编辑)"
                 android:defaultValue="true" />
-            
+
 		</PreferenceCategory>
-		
+
 	</PreferenceScreen>
-		
+
 	<PreferenceScreen
         android:title="实验室"
         android:summary="不稳定的功能">
@@ -222,9 +229,9 @@
 				android:summary="支持Java23[重启生效]，仅支持代码分析与编译，代码导航等仍是Java6"
 				android:key="test_zero_aicy_enable_eclipse_compiler_for_java"
 				android:defaultValue="false" />
-			
+
 		</PreferenceCategory>
-		
+
     </PreferenceScreen>
 
 </PreferenceScreen>
