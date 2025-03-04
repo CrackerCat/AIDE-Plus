@@ -14,6 +14,7 @@ import io.github.zeroaicy.aide.utils.Utils;
 import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import android.view.Display.Mode;
 
 public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -145,7 +146,16 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 		}
 		return defApkInstallValue;
 	}
-
+	
+	
+	/*
+	 * Java控制台宿主模式
+	 */
+	 public static boolean isEnableJavaConsoleHostMode(){
+		return getDefaultSpBoolean("zero_aicy_enable_java_console_host_mode", false); 
+	 }
+	 
+	/* 构建 */
 	public static boolean enableADRT() {
 		return getDefaultSpBoolean("zero_aicy_enable_adrt", false);
 	}
