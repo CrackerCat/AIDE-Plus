@@ -7,7 +7,7 @@
 > If you want to use Gradle, please visit the Gradle project
 
 
-- [README in Chinese](README_zh.md)
+- [中文](README_zh.md)
 - [Gradle Project](https://github.com/neu233/AIDE-Plus)
 
 # AIDE-Plus
@@ -45,7 +45,7 @@
 - [x] New UI implementation
 - [x] Fixed completion and highlighting loss issues
 - [x] Fixed signature creation issues
-- [x] ApkSign now supports v1-v4 signatures
+- [x] ApkSign now supports v1-v3 signatures
 - [x] Added some basic syntax completions
 - [x] Fixed git issues within the software
 - [x] APK resource alignment
@@ -53,6 +53,8 @@
 - [x] Lambda implementation (ecj) [fbf450d](https://github.com/AndroidIDE-CN/AIDE-Plus/commit/fbf450dba15ccaf51a7a6dd77db300d50551e98b)
 - [x] CMake build support [e702347](https://github.com/AndroidIDE-CN/AIDE-Plus/commit/e702347df0c10b718df5aeb4798402802334e310)
 - [x] Modified XML completion logic [0ecb637](https://github.com/AndroidIDE-CN/AIDE-Plus/commit/f7960418b9326231d55726514f10385396e9e8b6)
+- [x] Support exclude (exclude group: "xxx", module: "xxx")
+
 
 ### Planned Features
 - [ ] More completions (LSP)

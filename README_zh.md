@@ -45,7 +45,7 @@
 - [x] 新UI的实现
 - [x] 修复了补全和高亮丢失问题
 - [x] 修复了创建签名的问题
-- [x] ApkSign支持了的v1-v4签名
+- [x] ApkSign支持了的v1-v3签名
 - [x] 新增一些基础的语法补全
 - [x] 修复软件内的git问题
 - [x] apk资源对齐
@@ -53,6 +53,7 @@
 - [x] Lambda实现 (ecj) [fbf450d](https://github.com/AndroidIDE-CN/AIDE-Plus/commit/fbf450dba15ccaf51a7a6dd77db300d50551e98b)
 - [x] 支持cmake构建 [e702347](https://github.com/AndroidIDE-CN/AIDE-Plus/commit/e702347df0c10b718df5aeb4798402802334e310)
 - [x] Xml补全修改逻辑 [0ecb637](https://github.com/AndroidIDE-CN/AIDE-Plus/commit/f7960418b9326231d55726514f10385396e9e8b6)
+- [x] 支持 exclude (exclude group: "xxx", module: "xxx")
 
 ### 计划实现
 - [ ] 更多补全 (Lsp)
