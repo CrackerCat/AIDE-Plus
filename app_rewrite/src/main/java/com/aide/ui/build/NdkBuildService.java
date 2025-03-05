@@ -52,6 +52,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
+import java.util.Set;
 
 public class NdkBuildService {
 	public static final String TAG = "NdkBuildService";
@@ -492,6 +493,7 @@ public class NdkBuildService {
 					
 					// 待编译 abi
 					LinkedHashSet<String> cmakeAbiFilters = configuration.getCmakeAbiFilters();
+					Set<String> cmakeArguments = configuration.getCmakeArguments();
 
 					CmakeBuild.Builder builder = new CmakeBuild.Builder()
 
@@ -504,6 +506,8 @@ public class NdkBuildService {
 						.setCmakeVersion(cmakeVersion)
 						// 指定 cppFlags
 						.setCmakeCppFlags(cppFlags)
+						// 设置附加参数
+						.setCmakeArguments(cmakeArguments)
 						// 项目路径
 						.setProjectPath(projectPath)
 						// 指定安卓版本

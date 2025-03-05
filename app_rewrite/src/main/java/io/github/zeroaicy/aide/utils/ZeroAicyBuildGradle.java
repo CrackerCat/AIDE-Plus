@@ -130,7 +130,7 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 
 				if (gradlePropertiesFile.isFile()) {
 					this.gradlePropertiesConfiguration = PropertiesConfiguration.getSingleton()
-						.getConfiguration(gradlePropertiesFilePath);
+							.getConfiguration(gradlePropertiesFilePath);
 				}
 			}
 
@@ -328,6 +328,7 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 	private String ndkVersion;
 	private String cmakeCppFlags;
 	private LinkedHashSet<String> cmakeAbiFilters;
+	private LinkedHashSet<String> cmakeArguments;
 
 	public String getNdkVersion() {
 		return this.ndkVersion;
@@ -360,29 +361,37 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 
 	private static LinkedHashSet<String> defaultCmakeAbiFilters;
 	public LinkedHashSet<String> getCmakeAbiFilters() {
+		
 		if (this.cmakeAbiFilters == null || this.cmakeAbiFilters.isEmpty()) {
-
+			// abiFilters不能为空
+			
 			if (ZeroAicyBuildGradle.defaultCmakeAbiFilters == null) {
+				// 懒加载 初始化默认值
 				LinkedHashSet<String> linkedHashSet = new LinkedHashSet<>();
 				linkedHashSet.add("arm64-v8a");
-
+				
 				ZeroAicyBuildGradle.defaultCmakeAbiFilters = linkedHashSet;
 			}
-
+			
 			return ZeroAicyBuildGradle.defaultCmakeAbiFilters;
 		}
+		
 		return this.cmakeAbiFilters;
+	}
+	
+	public Set<String> getCmakeArguments(){
+		return this.cmakeArguments;
 	}
 
 	private void parsereEternalNativeBuildCmake(AST ast, String attributeName) {
 		switch (attributeName) {
-				// CMakeLists.txt路径
+			// CMakeLists.txt路径
 			case "path" :
 				this.cmakeListsTxtPath = getText(getFirstChild(getNextSibling(getFirstChild(getFirstChild(ast)))));
 
 				// AppLog.println_d("path -> %s", this.cmakeListsTxtPath);
 				break;
-				// cmake版本
+			// cmake版本
 
 			case "version" :
 
@@ -396,7 +405,7 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 				// AppLog.println_d("ndkVersion -> %s", this.ndkVersion);
 				break;
 
-				// 编译器参数
+			// 编译器参数
 			case "cppFlags" :
 
 				this.cmakeCppFlags = getText(getFirstChild(getNextSibling(getFirstChild(getFirstChild(ast)))));
@@ -404,23 +413,41 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 				// AppLog.println_d("cppFlags -> %s", this.cmakeCppFlags);
 				break;
 
-			case "abiFilters" :
+			case "abiFilters" : {
 
-				AST firstChild = getFirstChild(getNextSibling(getFirstChild(getFirstChild(ast))));
-				if (firstChild == null) {
+				AST elistNode = getNextSibling(getFirstChild(getFirstChild(ast)));
+				AST firstValueNode = getFirstChild(elistNode);
+				if (firstValueNode == null) {
 					break;
 				}
 				if (this.cmakeAbiFilters == null) {
 					this.cmakeAbiFilters = new LinkedHashSet<>();
 				}
-				this.cmakeAbiFilters.add(getText(firstChild));
+				this.cmakeAbiFilters.add(getText(firstValueNode));
 
-				while ((firstChild = firstChild.getNextSibling()) != null) {
-					this.cmakeAbiFilters.add(getText(firstChild));
+				while ((firstValueNode = firstValueNode.getNextSibling()) != null) {
+					this.cmakeAbiFilters.add(getText(firstValueNode));
 				}
 				// AppLog.println_d("abiFilters -> %s", this.cmakeAbiFilters);
+			}
 				break;
 
+			case "arguments" :
+				
+				AST elistNode = getNextSibling(getFirstChild(getFirstChild(ast)));
+				AST firstValueNode = getFirstChild(elistNode);
+				if (firstValueNode == null) {
+					break;
+				}
+				if (this.cmakeArguments == null) {
+					this.cmakeArguments = new LinkedHashSet<>();
+				}
+				this.cmakeArguments.add(getText(firstValueNode));
+
+				while ((firstValueNode = firstValueNode.getNextSibling()) != null) {
+					this.cmakeArguments.add(getText(firstValueNode));
+				}
+				break;
 		}
 	}
 
@@ -561,8 +588,8 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 		switch (type) {
 			case "compileOnly" :
 				return DependencyExt.CompileOnly;
-				// 仅打包 看看能不能
-				// 不在编译列表，仅在打包列表中
+			// 仅打包 看看能不能
+			// 不在编译列表，仅在打包列表中
 			case "runtimeOnly" :
 				return DependencyExt.RuntimeOnly;
 
@@ -574,7 +601,7 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 	}
 	private void ei(AST ast, String str, List<Dependency> dependencieList) {
 		switch (str) {
-				// 忽略 coreLibraryDesugaring 以后支持
+			// 忽略 coreLibraryDesugaring 以后支持
 			case "coreLibraryDesugaring" :
 				return;
 
@@ -597,9 +624,9 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 				dependencieList.add(new l(ast.getLine()));
 
 				break;
-				// 仅用于标记依赖
-				// 仅加入编译列表
-				// 不加入打包列表
+			// 仅用于标记依赖
+			// 仅加入编译列表
+			// 不加入打包列表
 			case "compileOnly" :
 				// 仅打包 看看能不能
 				// 不在编译列表，仅在打包列表中
@@ -614,81 +641,81 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 			case "api" :
 			case "compile" :
 				int dependencyExtType = getDependencyExtType(str); {
-					{
-						// xxx project(:"xx");
-						String projectPath = getExprNodeValue(ast, "project");
+				{
+					// xxx project(:"xx");
+					String projectPath = getExprNodeValue(ast, "project");
 
-						if (projectPath != null) {
-							ProjectDependency projectDependency = new ProjectDependency(ast.getLine());
-							projectDependency.projectName = projectPath;
+					if (projectPath != null) {
+						ProjectDependency projectDependency = new ProjectDependency(ast.getLine());
+						projectDependency.projectName = projectPath;
 
-							dependencieList.add(projectDependency);
-							// 添加项目依赖
-							this.projectDependencys.add(projectDependency);
-							return;
-						}
+						dependencieList.add(projectDependency);
+						// 添加项目依赖
+						this.projectDependencys.add(projectDependency);
+						return;
 					}
-
-					{
-						// xxx files("xx");
-						String getFilesValue = getExprNodeValue(ast, "files");
-
-						if (getFilesValue != null) {
-							FilesDependency filesDependency = new FilesDependency(ast.getLine());
-							filesDependency.filesPath = getFilesValue;
-
-							if (!DependencyExt.isRuntimeOnly(dependencyExtType)) {
-								// runtimeOnly files 依赖会在打包服务进程自动添加
-								// 在此处拦截可以使得编译器不知道这个依赖
-								dependencieList.add(filesDependency);
-							}
-
-							if (DependencyExt.isExt(dependencyExtType)) {
-								this.dependencyExts.add(new DependencyExt(dependencyExtType, filesDependency));
-							}
-
-							return;
-						}
-					}
-
-					{
-						// xxx fileTree(dir: "xx");
-						Map<String, String> getFileTree = we(ast, "fileTree");
-						if (getFileTree != null) {
-							FileTreeDependency fileTreeDependency = new FileTreeDependency(ast.getLine());
-							//getFileTree.get("include");
-							fileTreeDependency.dirPath = getFileTree.get("dir");
-							dependencieList.add(fileTreeDependency);
-
-							if (DependencyExt.isExt(dependencyExtType)) {
-								this.dependencyExts.add(new DependencyExt(dependencyExtType, fileTreeDependency));
-							}
-
-							return;
-						}
-					}
-
-					{
-						// xxx groupId:artifactId:version:classifier@extension
-						ArtifactNode artifactNode = parserMavenDependency(ast);
-						// AppLog.e("ZeroAicyBuildGradleTest", String.valueOf(artifactNode));
-
-						if (artifactNode != null) {
-							if (artifactNode.getVersion() == null) {
-								// AppLog.e("ZeroAicyBuildGradleTest" , "没有版本 " + artifactNode);
-								artifactNode.setVersion("+");
-							}
-
-							dependencieList.add(artifactNode);
-							if (DependencyExt.isExt(dependencyExtType)) {
-								this.dependencyExts.add(new DependencyExt(dependencyExtType, artifactNode));
-							}
-							return;
-						}
-					}
-
-					dependencieList.add(new l(ast.getLine()));
 				}
+
+				{
+					// xxx files("xx");
+					String getFilesValue = getExprNodeValue(ast, "files");
+
+					if (getFilesValue != null) {
+						FilesDependency filesDependency = new FilesDependency(ast.getLine());
+						filesDependency.filesPath = getFilesValue;
+
+						if (!DependencyExt.isRuntimeOnly(dependencyExtType)) {
+							// runtimeOnly files 依赖会在打包服务进程自动添加
+							// 在此处拦截可以使得编译器不知道这个依赖
+							dependencieList.add(filesDependency);
+						}
+
+						if (DependencyExt.isExt(dependencyExtType)) {
+							this.dependencyExts.add(new DependencyExt(dependencyExtType, filesDependency));
+						}
+
+						return;
+					}
+				}
+
+				{
+					// xxx fileTree(dir: "xx");
+					Map<String, String> getFileTree = we(ast, "fileTree");
+					if (getFileTree != null) {
+						FileTreeDependency fileTreeDependency = new FileTreeDependency(ast.getLine());
+						//getFileTree.get("include");
+						fileTreeDependency.dirPath = getFileTree.get("dir");
+						dependencieList.add(fileTreeDependency);
+
+						if (DependencyExt.isExt(dependencyExtType)) {
+							this.dependencyExts.add(new DependencyExt(dependencyExtType, fileTreeDependency));
+						}
+
+						return;
+					}
+				}
+
+				{
+					// xxx groupId:artifactId:version:classifier@extension
+					ArtifactNode artifactNode = parserMavenDependency(ast);
+					// AppLog.e("ZeroAicyBuildGradleTest", String.valueOf(artifactNode));
+
+					if (artifactNode != null) {
+						if (artifactNode.getVersion() == null) {
+							// AppLog.e("ZeroAicyBuildGradleTest" , "没有版本 " + artifactNode);
+							artifactNode.setVersion("+");
+						}
+
+						dependencieList.add(artifactNode);
+						if (DependencyExt.isExt(dependencyExtType)) {
+							this.dependencyExts.add(new DependencyExt(dependencyExtType, artifactNode));
+						}
+						return;
+					}
+				}
+
+				dependencieList.add(new l(ast.getLine()));
+			}
 
 				break;
 
@@ -716,7 +743,7 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 			// STRING_CONSTRUCTOR
 			// :classifier
 			AST stringConstructorAst = getFirstChild(getNextSibling(getFirstChild(getFirstChild(ast))));
-			if( getType(stringConstructorAst) == EXPR){
+			if (getType(stringConstructorAst) == EXPR) {
 				stringConstructorAst = getFirstChild(stringConstructorAst);
 			}
 			if (stringConstructorAst == null) {
@@ -753,7 +780,6 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 			List<Exclusion> exclusions = parserExclusions(ast);
 			// 设置排除选项
 			artifactNode.setExclusions(exclusions);
-
 
 			coords = groupId + ":" + artifactId + ":" + version;
 
@@ -860,8 +886,8 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 		List<Exclusion> exclusions = new ArrayList<>();
 
 		for (AST exclude_expr_node = getNextSibling(
-				 getFirstChild(exclude_boy)); exclude_expr_node != null; exclude_expr_node = getNextSibling(
-			exclude_expr_node)) {
+				getFirstChild(exclude_boy)); exclude_expr_node != null; exclude_expr_node = getNextSibling(
+						exclude_expr_node)) {
 			String exprNodeName = getExprNodeName(exclude_expr_node);
 
 			if (!"exclude".equals(exprNodeName)) {
@@ -874,8 +900,8 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 			boolean hasSetting = false;
 			// 遍历 labeled_arg_node
 			for (AST labeled_arg_node = getFirstChild(
-					 exclude_elist_node); labeled_arg_node != null; labeled_arg_node = getNextSibling(
-				labeled_arg_node)) {
+					exclude_elist_node); labeled_arg_node != null; labeled_arg_node = getNextSibling(
+							labeled_arg_node)) {
 				// group group_value
 				// group | module
 				AST type_node = getFirstChild(labeled_arg_node);
@@ -1112,8 +1138,8 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 		 *}
 		 */
 		String astValue =
-			// getText(getNextSibling(getFirstChild(getFirstChild(ast))));
-			getText(getFirstChild(getNextSibling(getFirstChild(getFirstChild(ast)))));
+				// getText(getNextSibling(getFirstChild(getFirstChild(ast))));
+				getText(getFirstChild(getNextSibling(getFirstChild(getFirstChild(ast)))));
 
 		if ("viewBinding".equals(nodeSimpleName)) {
 			this.viewBindingEnabled = "true".equals(astValue);
@@ -1147,10 +1173,10 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 			List<String> proguardFiles = new ArrayList<>();
 
 			for (AST firstChild1 = getFirstChild(nextSibling); firstChild1 != null; firstChild1 = getNextSibling(
-				firstChild1)) {
+					firstChild1)) {
 				if (getType(firstChild1) == 88) {
 					String proguardFilePath = FileSystem.resolveFilePath(FileSystem.getParent(this.configurationPath),
-																		 getText(firstChild1));
+							getText(firstChild1));
 					proguardFiles.add(proguardFilePath);
 					continue;
 				}
@@ -1270,11 +1296,11 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 	private List<AST> getExprNodes(AST ast) {
 		ArrayList<AST> arrayList = new ArrayList<>();
 		/*
-		 |
-		 |
+		  |
+		  |
 		 | |
-		 | ( firstChild )
-		 */
+		   | ( firstChild )
+		*/
 
 		AST firstChild = getFirstChild(getNextSibling(getFirstChild(getFirstChild(ast))));
 
@@ -1291,10 +1317,10 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 	private Map<String, String> we(AST ast, String str) {
 		AST XL = getNextSibling(getFirstChild(getFirstChild(ast)));
 		if (getType(XL) == 33 && getType(getFirstChild(XL)) == 27
-			&& str.equals(getText(getFirstChild(getFirstChild(XL))))) {
+				&& str.equals(getText(getFirstChild(getFirstChild(XL))))) {
 			HashMap<String, String> hashMap = new HashMap<>();
 			for (AST Ws = getFirstChild(
-					 getNextSibling(getFirstChild(getFirstChild(XL)))); Ws != null; Ws = getNextSibling(Ws)) {
+					getNextSibling(getFirstChild(getFirstChild(XL)))); Ws != null; Ws = getNextSibling(Ws)) {
 				if (getType(Ws) == 54) {
 					String lg = getText(getFirstChild(Ws));
 					AST Ws2 = getFirstChild(getNextSibling(getFirstChild(Ws)));
@@ -1344,7 +1370,7 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 	@Override
 	public String getFlavorApplicationId(String productFlavorName) {
 		if (productFlavorName != null && this.productFlavorMap.containsKey(productFlavorName)
-			&& this.productFlavorMap.get(productFlavorName).applicationId != null) {
+				&& this.productFlavorMap.get(productFlavorName).applicationId != null) {
 			return this.productFlavorMap.get(productFlavorName).applicationId;
 		}
 		return this.defaultConfigProductFlavor.applicationId;
@@ -1390,7 +1416,7 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 	@Override
 	public String getMinSdkVersion(String productFlavorName) {
 		if (productFlavorName != null && this.productFlavorMap.containsKey(productFlavorName)
-			&& this.productFlavorMap.get(productFlavorName).minSdkVersion != null) {
+				&& this.productFlavorMap.get(productFlavorName).minSdkVersion != null) {
 			return this.productFlavorMap.get(productFlavorName).minSdkVersion;
 		}
 		return this.defaultConfigProductFlavor.minSdkVersion;
@@ -1399,7 +1425,7 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 	@Override
 	public String getTargetSdkVersion(String productFlavorName) {
 		if (productFlavorName != null && this.productFlavorMap.containsKey(productFlavorName)
-			&& this.productFlavorMap.get(productFlavorName).targetSdkVersion != null) {
+				&& this.productFlavorMap.get(productFlavorName).targetSdkVersion != null) {
 			return this.productFlavorMap.get(productFlavorName).targetSdkVersion;
 		}
 		return this.defaultConfigProductFlavor.targetSdkVersion;
@@ -1409,7 +1435,7 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 	@Override
 	public String getVersionCode(String productFlavorName) {
 		if (productFlavorName != null && this.productFlavorMap.containsKey(productFlavorName)
-			&& this.productFlavorMap.get(productFlavorName).versionCode != null) {
+				&& this.productFlavorMap.get(productFlavorName).versionCode != null) {
 			return this.productFlavorMap.get(productFlavorName).versionCode;
 		}
 		return this.defaultConfigProductFlavor.versionCode;
@@ -1419,7 +1445,7 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 	@Override
 	public String getVersionName(String productFlavorName) {
 		if (productFlavorName != null && this.productFlavorMap.containsKey(productFlavorName)
-			&& this.productFlavorMap.get(productFlavorName).versionName != null) {
+				&& this.productFlavorMap.get(productFlavorName).versionName != null) {
 			return this.productFlavorMap.get(productFlavorName).versionName;
 		}
 		return this.defaultConfigProductFlavor.versionName;
@@ -1436,7 +1462,7 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 	@Override
 	public boolean isMultiDexEnabled(String productFlavorName) {
 		if (productFlavorName != null && this.productFlavorMap.containsKey(productFlavorName)
-			&& this.productFlavorMap.get(productFlavorName).multiDexEnabled != null) {
+				&& this.productFlavorMap.get(productFlavorName).multiDexEnabled != null) {
 			return "true".equals(this.productFlavorMap.get(productFlavorName).multiDexEnabled);
 		}
 		return "true".equals(this.defaultConfigProductFlavor.multiDexEnabled);
@@ -1447,11 +1473,11 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 	private static int TYPE = 12;
 
 	/**
-	 * EXPR
-	 * 	<command>
-	 * ELIST
-	 * 	(
-	 */
+	* EXPR
+	* 	<command>
+	* ELIST
+	* 	(
+	*/
 	// <command> 或者 (
 	public static final int METHOD_CALL = 27;
 
@@ -1479,7 +1505,7 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 	public static final int NUM_INT = 199;
 
 	/**
-	 * 
+	* 
 	 * api project(':xxxx')
 	 * wearApp project(':xxxx')
 	 * storeFile file("app-debug.jks")
@@ -1525,8 +1551,8 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 	 * 如果表达式是一个字符串字面量或整数字面量，直接返回值。
 	 * 如果表达式是一个列表（ELIST），从中提取第一个值。
 	 * 如果无法解析值（例如类型不匹配），返回 null。
-	 * 
-	 */
+	* 
+	*/
 	private String getExprNodeValue(AST exprNode) {
 
 		AST exprValueNode = getNextSibling(getFirstChild(getFirstChild(exprNode)));

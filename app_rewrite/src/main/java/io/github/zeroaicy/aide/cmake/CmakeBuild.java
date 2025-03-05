@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Arrays;
 import io.github.zeroaicy.aide.utils.Utils;
+import java.util.Set;
 
 public class CmakeBuild {
 	/* 
@@ -201,7 +202,12 @@ public class CmakeBuild {
 			this.CMAKE_CXX_FLAGS = cmakeCppFlags;
 			return this;
 		}
-
+		public Set<String> CMAKE_ARGUMENTS;
+		public CmakeBuild.Builder setCmakeArguments(Set<String> cmakeArguments) {
+			this.CMAKE_ARGUMENTS = cmakeArguments;
+			return this;
+		}
+		
 
 		private CmakeBuild cmakeBuild = new CmakeBuild();
 
@@ -345,9 +351,14 @@ public class CmakeBuild {
 			//缓存目录
 			cmakeCommandList.add("-B" + PROJECT_PATH + "/" + CMAKE_BUILD_CACHE_PATH + "/" + ANDROID_ABI);
 			
-			// 传入参数
+			// 传入编译器参数
 			if( !TextUtils.isEmpty(this.CMAKE_CXX_FLAGS)){
 				cmakeCommandList.add("--DCMAKE_CXX_FLAGS==" + this.CMAKE_CXX_FLAGS);	
+			}
+			
+			// 传入参数
+			if( this.CMAKE_ARGUMENTS != null && !this.CMAKE_ARGUMENTS.isEmpty()){
+				cmakeCommandList.addAll(this.CMAKE_ARGUMENTS);
 			}
 			
 			//生成ninja脚本
