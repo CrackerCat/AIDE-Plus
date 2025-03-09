@@ -5,9 +5,9 @@ import android.util.SparseArray;
 import com.aide.codemodel.api.ErrorTable;
 import com.aide.codemodel.api.FileEntry;
 import com.aide.codemodel.api.FileSpace;
-import com.aide.codemodel.api.HighlighterType;
 import com.aide.codemodel.api.Model;
 import com.aide.codemodel.api.SyntaxTree;
+import com.aide.codemodel.api.abstraction.Language;
 import com.aide.codemodel.api.callback.HighlighterCallback;
 import com.aide.codemodel.api.collections.FunctionOfIntInt;
 import com.aide.codemodel.api.collections.OrderedMapOfIntInt;
@@ -17,6 +17,7 @@ import com.aide.common.AppLog;
 import com.aide.engine.EngineSolution;
 import com.aide.engine.EngineSolutionProject;
 import com.aide.ui.services.AssetInstallationService;
+import io.github.zeroaicy.aide.utils.ZeroAicyBuildGradle;
 import io.github.zeroaicy.util.IOUtils;
 import io.github.zeroaicy.util.reflect.ReflectPie;
 import java.io.BufferedOutputStream;
@@ -28,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.eclipse.jdt.core.compiler.CategorizedProblem;
-import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ClassFile;
 import org.eclipse.jdt.internal.compiler.CompilationResult;
 import org.eclipse.jdt.internal.compiler.ICompilerRequestor;
@@ -43,9 +43,6 @@ import org.eclipse.jdt.internal.compiler.env.NameEnvironmentAnswer;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblem;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
-import com.aide.codemodel.api.FileSpace.Assembly;
-import io.github.zeroaicy.aide.utils.ZeroAicyBuildGradle;
-import com.aide.codemodel.api.abstraction.Language;
 
 /**
  * 使用 Eclipse JDT Compiler 进行增量语义分析
