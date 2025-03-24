@@ -86,7 +86,7 @@ public class ZeroAicyAndroidProjectSupport extends AndroidProjectSupport {
 			return true;			
 		}
 
-		return true;
+		return false;
 	}
 
 }
