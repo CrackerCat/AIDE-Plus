@@ -176,8 +176,19 @@ public class CmakeBuild {
 		private String CMAKE_OUTPUT_DIRECTORY_PATH;
 		public CmakeBuild.Builder setCmakeOutputDirectoryPath(String cmakeOutputDirectoryPath) {
 			this.CMAKE_OUTPUT_DIRECTORY_PATH = cmakeOutputDirectoryPath;
-			// 推算变量
-			setCmakeBuildCachePath(CMAKE_OUTPUT_DIRECTORY_PATH + "/../obj/cmake");
+			
+			// 推算变量 修复相对路径错误
+			String cmakeBuildCachePath = "/obj/cmake";
+			if( CMAKE_OUTPUT_DIRECTORY_PATH != null ){
+				int prefixEndInex = CMAKE_OUTPUT_DIRECTORY_PATH.lastIndexOf('/');
+				if( prefixEndInex > 0){
+					String prefixPath = CMAKE_OUTPUT_DIRECTORY_PATH.substring(0, prefixEndInex);
+					// 更新路径
+					cmakeBuildCachePath = prefixPath + cmakeBuildCachePath;
+				}
+			}
+			
+			setCmakeBuildCachePath(cmakeBuildCachePath);
 
 			return this;
 		}
