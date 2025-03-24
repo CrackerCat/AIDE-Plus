@@ -152,7 +152,8 @@ public class AddAndroidFiles {
 			return false;
 		}
 		if (dirPath.contains("/java")
-			|| dirPath.contains("/aidl")) {
+			||  dirPath.contains("/src")
+			||  dirPath.contains("/aidl")) {
 			return true;
 		}
 		return false;
