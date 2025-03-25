@@ -10,7 +10,7 @@ android {
         targetSdkVersion 34
         versionCode 2008210017
 		// [3.2.210316]
-        versionName "2.3.3.5-alpha02"
+        versionName "2.3.3.5-alpha03"
     }
 	signingConfigs{
 		release{
