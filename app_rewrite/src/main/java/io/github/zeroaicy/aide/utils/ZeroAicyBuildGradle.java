@@ -119,7 +119,10 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 		try {
 
 			File buildGradle = new File(this.configurationPath);
-
+			if( !buildGradle.isFile()){
+				return;
+			}
+			
 			File buildGradleParentFile = buildGradle.getParentFile();
 
 			File gradlePropertiesParentFile = buildGradleParentFile.getParentFile();
@@ -593,6 +596,7 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 			case "runtimeOnly" :
 				return DependencyExt.RuntimeOnly;
 
+			case "natives" :
 			case "libgdxNatives" :
 				return DependencyExt.LibgdxNatives;
 			default :
