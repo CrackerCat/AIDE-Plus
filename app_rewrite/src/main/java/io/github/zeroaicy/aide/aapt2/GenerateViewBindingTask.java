@@ -15,6 +15,7 @@ public class GenerateViewBindingTask{
 	public static void run(String mainProjectResPath, String mainProjectGenDir, String mainProjectPackageName, boolean isAndroidx) throws Exception{
 		if( viewbindingClassLoader == null ){
 			String viewbindingZipPath = getViewbindingZipPath();
+			
 			viewbindingClassLoader = new DexClassLoader(viewbindingZipPath, null, null, Application.class.getClassLoader());
 		}
 		if( viewbindingClassLoader == null  ){
@@ -34,9 +35,11 @@ public class GenerateViewBindingTask{
 		String viewbindingZipPath = AssetInstallationService.DW("viewbinding.zip", false);
 		
 		File viewbindingZipFile = new File(viewbindingZipPath);
-		if(!viewbindingZipFile.canExecute()){
+		if(!viewbindingZipFile.canExecute() || viewbindingZipFile.canWrite() ){
 			viewbindingZipFile.setReadable(true, false);
 			viewbindingZipFile.setExecutable(true, false);
+			viewbindingZipFile.setWritable(false, false);
+			
 		}
 		return viewbindingZipPath;
 	}

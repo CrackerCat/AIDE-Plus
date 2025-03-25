@@ -47,7 +47,7 @@
 		<EditTextPreference
 			android:title="数据压缩阈值"
 			android:key="data_compression_threshold"
-			android:defaultValue="20"
+			android:defaultValue="1"
 			android:inputType="number"
 			android:summary="单位KB"
 			android:dialogTitle="单位KB" />

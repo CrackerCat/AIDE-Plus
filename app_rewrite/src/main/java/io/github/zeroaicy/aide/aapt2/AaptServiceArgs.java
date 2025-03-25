@@ -87,19 +87,29 @@ public class AaptServiceArgs{
 
 	public AaptServiceArgs(AaptService$Task task){
 		this.task = task;
-
+		//resource.ap_
+		// argsRef.get("gn");
+		this.resourcesApPath = task.resourcesApPath;
+		// 构建缓存路径
+		this.buildBin = new File(this.resourcesApPath).getParent();
+		// 日志输出
+		this.aaptLog = new PrintStream(Log.AsyncOutputStreamHold.createOutStream(new File(buildBin, "intermediates/aapt_log.log")));
+		
 		String currentAppHome = getCurrentAppHome();
 
 		String buildGradlePath = currentAppHome + "/build.gradle";
 
 		ZeroAicyBuildGradle buildGradle = ZeroAicyBuildGradle.getSingleton();
+		
 		try{
 			if ( FileSystem.exists(buildGradlePath) ){
 				isGradleProject = true;
 				buildGradle = buildGradle.getConfiguration((buildGradlePath));
 			}
 		}
-		catch (Throwable e){}
+		catch (Throwable e){
+			e.printStackTrace(aaptLog);
+		}
 
 		if ( !buildGradle.isSingleton() ){
 			// 混淆代码
@@ -126,15 +136,6 @@ public class AaptServiceArgs{
 
 		// argsRef.get("Hw");
 		this.androidJar = task.androidSdkFilePath;
-
-		//resource.ap_
-		// argsRef.get("gn");
-		this.resourcesApPath = task.resourcesApPath;
-
-		// 构建缓存路径
-		this.buildBin = new File(this.resourcesApPath).getParent();
-		// 日志输出
-		this.aaptLog = new PrintStream(Log.AsyncOutputStreamHold.createOutStream(new File(buildBin, "intermediates/aapt_log.log")));
 
 		//gen查找packageName
 		// argsRef.get("EQ");
