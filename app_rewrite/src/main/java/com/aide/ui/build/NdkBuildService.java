@@ -675,7 +675,8 @@ public class NdkBuildService {
 							cmakeBuild.addErrorInfo(
 									"支持 cmake.version cmake.cppFlags android.ndkVersion android.minSdkVersion");
 
-							cmakeBuild.addErrorInfo(cmakeBuild.getCmakeCommandList().toString());
+							List<String> cmakeCommandList = cmakeBuild.getCmakeCommandList();
+							cmakeBuild.addErrorInfo(String.valueOf(cmakeCommandList));
 
 						}
 					}
