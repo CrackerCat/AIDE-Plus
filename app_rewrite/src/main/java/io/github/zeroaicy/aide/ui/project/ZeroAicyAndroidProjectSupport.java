@@ -57,14 +57,16 @@ public class ZeroAicyAndroidProjectSupport extends AndroidProjectSupport {
 
 	// has AndroidMk
 	@Override
-	public boolean vy(String string) {
-		if (GradleTools.isAndroidGradleProject(string) && !isCmakeGradleProject(string )) {
-			return FileSystem.isFileAndNotZip(string + "src/main/jni/Android.mk");
+	public boolean vy(String projectPath) {
+		// 安卓 Gradle 非 Cmake项目 
+		// isAndroidGradleProject只要是安卓项目(就是不管是否是 gradle)就返回true
+		if (GradleTools.isGradleProject(projectPath) && GradleTools.isAndroidGradleProject(projectPath)
+				&& !isCmakeGradleProject(projectPath)) {
+			return FileSystem.isFileAndNotZip(projectPath + "src/main/jni/Android.mk");
 		}
-		return super.vy(string);
+		return super.vy(projectPath);
 	}
-	
-	
+
 	public static boolean isCmakeGradleProject(String modulePath) {
 
 		String buildGradlePath = GradleTools.getBuildGradlePath(modulePath);
@@ -83,7 +85,7 @@ public class ZeroAicyAndroidProjectSupport extends AndroidProjectSupport {
 
 		if (new File(projectPath, cmakeListsTxtPath).exists()) {
 			// 文件不存在，不是cmake项目
-			return true;			
+			return true;
 		}
 
 		return false;
