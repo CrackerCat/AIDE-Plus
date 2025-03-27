@@ -348,10 +348,37 @@ public class NdkBuildService {
 					ndkConfiguration.remove(ndkConfiguration.size() - 2);
 
 					List<String> ndkBuildArgs = shellEnvironment.setupShellCommandArguments(ndkConfiguration);
+					// 安卓gradle android mk 工程
+					if (GradleTools.isGradleProject(module) && GradleTools.isAndroidGradleProject(module)) {
+						//安卓gradle工程
+						ndkBuildArgs.add("NDK_PROJECT_PATH=.");
+						ndkBuildArgs.add("APP_BUILD_SCRIPT=src/main/jni/Android.mk");
+						ndkBuildArgs.add("NDK_APP_OUT=build/bin/intermediates/obj");
+						ndkBuildArgs.add("NDK_LIBS_OUT=src/main/jniLibs");
 
+						File ApplicationFile = new File(module, "src/main/jni/Application.mk");
+						if (ApplicationFile.exists()) {
+							ndkBuildArgs.add("NDK_APPLICATION_MK=" + "src/main/jni/Application.mk");
+						}
+					}
+					
 					//  只有PATH
 					Map<String, String> env = NdkConfiguration.gn();
+					
+					// 安卓gradle android mk 工程
+					if (GradleTools.isGradleProject(module) && GradleTools.isAndroidGradleProject(module)) {
+						//安卓gradle工程
+						env.put("NDK_PROJECT_PATH", ".");
+						env.put("APP_BUILD_SCRIPT", "src/main/jni/Android.mk");
+						env.put("NDK_APP_OUT", "build/bin/intermediates/obj");
+						env.put("NDK_LIBS_OUT", "src/main/jniLibs");
 
+						File ApplicationFile = new File(module, "src/main/jni/Application.mk");
+						if (ApplicationFile.exists()) {
+							env.put("NDK_APPLICATION_MK", "src/main/jni/Application.mk");
+						}
+					}
+					
 					Map<String, String> termuxEnvironment = shellEnvironment.getEnvironment(false, env);
 
 					env = termuxEnvironment.isEmpty() ? env : termuxEnvironment;

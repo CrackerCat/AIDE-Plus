@@ -62,7 +62,7 @@ public class ZeroAicyAndroidProjectSupport extends AndroidProjectSupport {
 		// isAndroidGradleProject只要是安卓项目(就是不管是否是 gradle)就返回true
 		if (GradleTools.isGradleProject(projectPath) && GradleTools.isAndroidGradleProject(projectPath)
 				&& !isCmakeGradleProject(projectPath)) {
-			return FileSystem.isFileAndNotZip(projectPath + "src/main/jni/Android.mk");
+			return FileSystem.isFileAndNotZip(projectPath + "/src/main/jni/Android.mk");
 		}
 		return super.vy(projectPath);
 	}
