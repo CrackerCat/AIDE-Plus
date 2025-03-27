@@ -119,10 +119,10 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 		try {
 
 			File buildGradle = new File(this.configurationPath);
-			if( !buildGradle.isFile()){
+			if (!buildGradle.isFile()) {
 				return;
 			}
-			
+
 			File buildGradleParentFile = buildGradle.getParentFile();
 
 			File gradlePropertiesParentFile = buildGradleParentFile.getParentFile();
@@ -160,7 +160,12 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 				// ASTPrinter.printASTTree(ast);
 
 			}
-
+			String androidUseAndroidX = gradlePropertiesConfiguration.getProperty("android.useAndroidX");
+			if ("true".equals(androidUseAndroidX)) {
+				// 兼容 gradle.properties 中的 android.useAndroidX
+				this.useAndroidx = true;
+			}
+			
 			// 添加 viewBinding运行时库
 			if (this.viewBindingEnabled) {
 				String groupId;
@@ -364,25 +369,25 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 
 	private static LinkedHashSet<String> defaultCmakeAbiFilters;
 	public LinkedHashSet<String> getCmakeAbiFilters() {
-		
+
 		if (this.cmakeAbiFilters == null || this.cmakeAbiFilters.isEmpty()) {
 			// abiFilters不能为空
-			
+
 			if (ZeroAicyBuildGradle.defaultCmakeAbiFilters == null) {
 				// 懒加载 初始化默认值
 				LinkedHashSet<String> linkedHashSet = new LinkedHashSet<>();
 				linkedHashSet.add("arm64-v8a");
-				
+
 				ZeroAicyBuildGradle.defaultCmakeAbiFilters = linkedHashSet;
 			}
-			
+
 			return ZeroAicyBuildGradle.defaultCmakeAbiFilters;
 		}
-		
+
 		return this.cmakeAbiFilters;
 	}
-	
-	public Set<String> getCmakeArguments(){
+
+	public Set<String> getCmakeArguments() {
 		return this.cmakeArguments;
 	}
 
@@ -436,7 +441,7 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 				break;
 
 			case "arguments" :
-				
+
 				AST elistNode = getNextSibling(getFirstChild(getFirstChild(ast)));
 				AST firstValueNode = getFirstChild(elistNode);
 				if (firstValueNode == null) {
