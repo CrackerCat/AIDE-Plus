@@ -160,10 +160,12 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 				// ASTPrinter.printASTTree(ast);
 
 			}
-			String androidUseAndroidX = gradlePropertiesConfiguration.getProperty("android.useAndroidX");
-			if ("true".equals(androidUseAndroidX)) {
-				// 兼容 gradle.properties 中的 android.useAndroidX
-				this.useAndroidx = true;
+			if (this.gradlePropertiesConfiguration != null) {
+				String androidUseAndroidX = gradlePropertiesConfiguration.getProperty("android.useAndroidX");
+				if ("true".equals(androidUseAndroidX)) {
+					// 兼容 gradle.properties 中的 android.useAndroidX
+					this.useAndroidx = true;
+				}
 			}
 			
 			// 添加 viewBinding运行时库
