@@ -1,25 +1,24 @@
-<p align="center">
-  <img src=".idea/icon.svg" style="width: 30%;" />
-</p>
+![AIDEPlus](https://socialify.git.ci/AndroidIDE-CN/AIDE-Plus/image?description=1&font=KoHo&forks=1&issues=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2FAndroidIDE-CN%2FAIDE-Plus%2Frefs%2Fheads%2F2.3%2F.idea%2Ficon.svg&name=1&owner=1&pattern=Circuit+Board&pulls=1&stargazers=1&theme=Auto)
 
 > [!TIP]
 > This project can only be self-hosted on AIDE+
 > If you want to use Gradle, please visit the Gradle project
 
+**English** 👈 | 
+[**中文**](README_zh.md)
 
-- [中文](README_zh.md)
+# 🛠️ AIDE-Plus
+
 - [Gradle Project](https://github.com/neu233/AIDE-Plus)
 
-# AIDE-Plus
-
-## Repository Information
+## 🪪 Repository Information
 [![GitHub contributors](https://img.shields.io/github/contributors/AndroidIDE-CN/AIDE-Plus)](https://github.com/AndroidIDE-CN/AIDE-Plus/graphs/contributors)
 [![GitHub last commit](https://img.shields.io/github/last-commit/AndroidIDE-CN/AIDE-Plus)](https://github.com/AndroidIDE-CN/AIDE-Plus/commits/)
 [![Repository Size](https://img.shields.io/github/repo-size/AndroidIDE-CN/AIDE-Plus)](https://github.com/AndroidIDE-CN/AIDE-Plus)
 [![GitHub Release](https://img.shields.io/github/v/release/AndroidIDE-CN/AIDE-Plus)](https://github.com/AndroidIDE-CN/AIDE-Plus/releases)
 [![Total downloads](https://img.shields.io/github/downloads/AndroidIDE-CN/AIDE-Plus/total)](https://github.com/AndroidIDE-CN/AIDE-Plus/releases)
 
-## Implemented Features
+## 📝 Implemented Features
 - [x] Build service optimization and rewrite
 - [x] Replaced aapt with aapt2
 - [x] Replaced dx with D8
@@ -56,29 +55,29 @@
 - [x] Support exclude (exclude group: "xxx", module: "xxx")
 
 
-### Planned Features
+### 🏗️ Planned Features
 - [ ] More completions (LSP)
 - [ ] Apks/AAB generation (not added)
 - [ ] Manifest file editing
 - [ ] Vector graphics acquisition
 - [ ] Layout visualization rewrite
 
-## Related Resources
+## 🌠 Related Resources
 - [AIDE-Ndk-Install](https://github.com/ZeroAicy/AIDE-Ndk-Install) NDK Installer
 - [AIDE-Repair](https://github.com/ZeroAicy/AIDE-Repair) Deobfuscation
 
-# Related Information
+# 📬️ Related Information
 - QQ Groups
   * [487145957](https://qm.qq.com/q/W0WJq5qne2)
   * [1002980489](https://qm.qq.com/q/W0WJq5qne2)
 - [QQ Channel](https://pd.qq.com/s/auq589py2)
 - [Website](https://plus.androidide.cn)
 
-# Special Thanks
+# 🏅 Special Thanks
 > [!TIP]
 > If you or your project is not listed, please contact us to add it
 
-### Project Related
+### 😎 Project Related
 - [@墨凡尘轩](https://github.com/ZeroAicy) Project Founder
 - [@烂泥扶上墙](https://github.com/eirv) Project Collaborator
 - [@原罪](https://github.com/neu233) Project Collaborator
@@ -86,7 +85,7 @@
 - [@hujiayucc](https://github.com/hujiayucc) Project Collaborator
 - [@dev-bz](https://github.com/dev-bz) (不知者来此) Provided assistance
 
-### Open Source Integration
+### 🐱 Open Source Integration
 - [Gradle Project](https://github.com/neu233/AIDE-Plus) Android Studio version
 - [AndroidIDE](https://github.com/AndroidIDEOfficial/AndroidIDE) Referenced some code
 - [CodeAssist](https://github.com/tyron12233/CodeAssist) Referenced some code
