@@ -1,25 +1,24 @@
-<p align="center">
-  <img src=".idea/icon.svg" style="width: 30%;" />
-</p>
+![AIDEPlus](https://socialify.git.ci/AndroidIDE-CN/AIDE-Plus/image?description=1&font=KoHo&forks=1&issues=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2FAndroidIDE-CN%2FAIDE-Plus%2Frefs%2Fheads%2F2.3%2F.idea%2Ficon.svg&name=1&owner=1&pattern=Circuit+Board&pulls=1&stargazers=1&theme=Auto)
 
 > [!TIP]
 > 本项目仅能在AIDE+上自举
 > 如若想要Gradle请前往Gradle项目
 
+[**English**](README.md)  | 
+**中文** 👈
 
-- [README of English](README.md)
+# 🛠️ AIDE-Plus
+
 - [Gradle项目](https://github.com/neu233/AIDE-Plus)
 
-# AIDE-Plus
-
-## 仓库信息
+## 🪪 仓库信息
 [![GitHub contributors](https://img.shields.io/github/contributors/AndroidIDE-CN/AIDE-Plus)](https://github.com/AndroidIDE-CN/AIDE-Plus/graphs/contributors)
 [![GitHub last commit](https://img.shields.io/github/last-commit/AndroidIDE-CN/AIDE-Plus)](https://github.com/AndroidIDE-CN/AIDE-Plus/commits/)
 [![Repository Size](https://img.shields.io/github/repo-size/AndroidIDE-CN/AIDE-Plus)](https://github.com/AndroidIDE-CN/AIDE-Plus)
 [![GitHub Release](https://img.shields.io/github/v/release/AndroidIDE-CN/AIDE-Plus)](https://github.com/AndroidIDE-CN/AIDE-Plus/releases)
 [![Total downloads](https://img.shields.io/github/downloads/AndroidIDE-CN/AIDE-Plus/total)](https://github.com/AndroidIDE-CN/AIDE-Plus/releases)
 
-## 已实现功能
+## 📝 已实现功能
 - [x] 构建服务优化和重写
 - [x] aapt更替为aapt2
 - [x] dx更替为D8
@@ -55,7 +54,7 @@
 - [x] Xml补全修改逻辑 [0ecb637](https://github.com/AndroidIDE-CN/AIDE-Plus/commit/f7960418b9326231d55726514f10385396e9e8b6)
 - [x] 支持 exclude (exclude group: "xxx", module: "xxx")
 
-### 计划实现
+### 🏗️ 计划实现
 - [ ] 更多补全 (Lsp)
 - [ ] Apks/AAB的生成(未添加)
 - [ ] 清单文件编辑
@@ -63,28 +62,28 @@
 - [ ] 重写布局可视化
 
 
-## 相关资源
+## 🌠 相关资源
 - [AIDE-Ndk-Install](https://github.com/ZeroAicy/AIDE-Ndk-Install) NDK安装器
 - [AIDE-Repair](https://github.com/ZeroAicy/AIDE-Repair) 反混淆
 
-# 相关信息
+# 📬️ 相关信息
 - QQ群
   * [487145957](https://qm.qq.com/q/W0WJq5qne2)
   * [1002980489](https://qm.qq.com/q/W0WJq5qne2) 
 - [QQ频道](https://pd.qq.com/s/auq589py2)
 - [网站](https://plus.androidide.cn)
 
-# 特别感谢
+# 🏅 特别感谢
 > [!TIP]
 > 如果没有看到您或者您的项目可以联系我们添加上去
-### 项目相关
+### 😎 项目相关
 - [@墨凡尘轩](https://github.com/ZeroAicy) 项目创始人
 - [@烂泥扶上墙](https://github.com/eirv) 项目合作者
 - [@原罪](https://github.com/neu233) 项目合作者
 - [@0047ol](https://github.com/0047ol) 项目合作者
 - [@hujiayucc](https://github.com/hujiayucc) 项目合作者
 - [@dev-bz](https://github.com/dev-bz) (不知者来此) 提供了帮助
-### 开源集成
+### 🐱 开源集成
 - [Gradle项目](https://github.com/neu233/AIDE-Plus) AS版本
 - [AndroidIDE](https://github.com/AndroidIDEOfficial/AndroidIDE) 借鉴了部分代码
 - [CodeAssist](https://github.com/tyron12233/CodeAssist) 借鉴了部分代码
