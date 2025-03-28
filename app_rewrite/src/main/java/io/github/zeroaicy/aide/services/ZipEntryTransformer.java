@@ -56,20 +56,17 @@ public interface ZipEntryTransformer {
 	 * 不过滤任何资源，即都会添加
 	 * 但是会重命名classes%d.dex式文件
 	 */
-	public class DexZipTransformer implements ZipEntryTransformer {
+	public class DexZipTransformer extends ZipResourceTransformer implements ZipEntryTransformer {
 		protected int classesCountDex = 1;
 		@Override
 		public ZipEntry transformer(ZipEntry zipEntry, PackagingStream packagingStream) {
 			String zipEntryFileName = zipEntry.getName();
 			//因为classes.dex会重名命，所以必须先判断
 			if (isNotClassesDex(zipEntry, zipEntryFileName)) {
-				//过滤已存在的
-				if (packagingStream.contains(zipEntryFileName)) {
-					return null;
-				}
-				return zipEntry;
+				// 交给 ZipResourceTransformer处理
+				return super.transformer(zipEntry, packagingStream);
 			}
-
+			// 处理 "classes%d.dex"
 			String dexEntryName = classesCountDex > 1 ? String.format("classes%d.dex", classesCountDex) : "classes.dex";
 
 			//查询 dexEntryName是否已添加
@@ -97,7 +94,8 @@ public interface ZipEntryTransformer {
 
 
 	/**
-	 * zip资源，因为是从jar库添加资源，所以 class与java文件都不能添加
+	 * zip资源转换器 所有一般资源转换器的父类
+	 * 因为是从jar库添加资源，所以 class与java文件都不能添加
 	 */
 	public class ZipResourceTransformer implements ZipEntryTransformer {
 		@Override
@@ -107,11 +105,21 @@ public interface ZipEntryTransformer {
 			if (packagingStream.contains(zipEntryName)) {
 				return null;
 			}
-			zipEntryName = zipEntryName.toLowerCase();
-			if (zipEntryName.endsWith(".class")
-				|| zipEntryName.endsWith(".java")) {
+			
+			// 处理 assets资源目录(因为AIDE+的自举，所以不过滤 assets/ 下的 .class .java 文件)
+			if( zipEntryName.startsWith("assets/") ){
+				ZipEntry newZipEntry = new ZipEntry(zipEntryName);
+				// assets/下资源必须无压缩
+				newZipEntry.setMethod(ZipEntry.STORED);
+				return newZipEntry;
+			}
+			
+			String zipEntryNameLowerCase = zipEntryName.toLowerCase();
+			if (zipEntryNameLowerCase.endsWith(".class")
+				|| zipEntryNameLowerCase.endsWith(".java")) {
 				return null;
 			}
+			
 			return zipEntry;
 		}
 	}
