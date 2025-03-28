@@ -56,7 +56,7 @@ public class AIDEEditor extends com.aide.ui.AIDEEditor {
 			Context context = getContext();
 			Resources.Theme theme = context.getTheme();
 			Resources resources = getResources();
-
+			
 			// is Material主题
 			if (AndroidHelper.isMaterialTheme(getContext())) {
 				//this.selectionColor = new Color(getResources().getColor(isLight ? R.color.editor_selection_material_light : R.color.editor_selection_material));

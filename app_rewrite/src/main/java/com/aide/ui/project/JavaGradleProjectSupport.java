@@ -46,6 +46,7 @@ import java.util.Set;
 public class JavaGradleProjectSupport implements ProjectSupport {
 
 	private static final String TAG = JavaGradleProjectSupport.class.getSimpleName();
+	
 	public static String[] aj(Map<String, List<String>> map) {
 		ArrayList<String> arrayList = new ArrayList<String>();
 		for (String str2 : map.keySet()) {
@@ -1119,11 +1120,9 @@ public class JavaGradleProjectSupport implements ProjectSupport {
 				// 主项目相对路径
 				"console");
 
-				
-
 		int ndkAppTemplateGroupId = 4;
 		String ndkAppTemplateGroupName = "Native Android App";
-		
+
 		TemplateService.Template gradleNdkAppTemplate = new TemplateService.Template(
 				// 可以为null
 				JavaGradleProjectSupport.this,
@@ -1147,26 +1146,32 @@ public class JavaGradleProjectSupport implements ProjectSupport {
 
 		String ndkAppTemplateName = "Cmake Gradle App";
 		TemplateService.TemplateGroup gradleNdkAppTemplateGroup = new TemplateService.TemplateGroup(
-				
+
 				// 模板简述
 				ndkAppTemplateName,
-				
+
 				// 模板信息
 				gradleNdkAppTemplate,
 
 				// 模板图标
 				R.drawable.ic_launcher,
-				
+
 				// 模板资源相对路径
 				"GradleNdkApp.zip",
-				
+
 				// 需要打开的文件
 				new String[]{"MainActivity.java", "hello-jni.c", "build.gradle"},
-				
+
 				// 主项目相对路径
 				"app");
 
-		return new TemplateService.TemplateGroup[]{javaGradleApplicationTemplateGroup, gradleNdkAppTemplateGroup};
+		TemplateService.Template libgdxGradleAppTemplate = new TemplateService.Template(this, 2, "Mobile Game",
+				"libGDX/Java/Gradle", "MyGame", true, false, "com.aide.ui", "GAME", "course_game", true);
+		TemplateService.TemplateGroup libgdxGradleApp = new TemplateService.TemplateGroup("Mobile Game",
+				libgdxGradleAppTemplate, 0x7f07007a, "game_libgdx_project_aide+.zip", new String[]{"MyGdxGame.java"},
+				"gdx-game-android");
+
+		return new TemplateService.TemplateGroup[]{javaGradleApplicationTemplateGroup, gradleNdkAppTemplateGroup, libgdxGradleApp};
 	}
 
 	/*
