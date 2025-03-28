@@ -15,6 +15,7 @@ import io.github.zeroaicy.aide.preference.ZeroAicySetting;
 import io.github.zeroaicy.util.Log;
 import java.io.File;
 import java.io.IOException;
+import com.aide.ui.project.internal.*;
 
 /**
  * 安卓项目 添加xxx文件
@@ -23,102 +24,106 @@ import java.io.IOException;
 @Keep
 public class AddAndroidFiles {
 
-    public AddAndroidFiles() {
+	public AddAndroidFiles() {
 
-    }
+	}
 
 	@Keep
-    public static void DW(final String dirPath, final ValueRunnable<String> valueRunnable) {
+	public static void DW(final String dirPath, final ValueRunnable<String> valueRunnable) {
 		if (Zo(dirPath)) {
 			MainActivity mainActivity = ServiceContainer.getMainActivity();
-			
-			MessageBox.XL(mainActivity, R.string.command_files_add_new_class, R.string.dialog_create_message, "", new ValueRunnable<String>(){
-					@Override
-					public void acceptValue(String className) {
-						
-						if (className.endsWith(".java")) {
-							className = className.substring(0, className.length() - ".java".length());
-						}
-						
-						try {
-							className = className.replace('.', '/');
-							String javaFilePath = dirPath + File.separator + className + ".java";
-							if( FileSystem.exists(javaFilePath)){
-								throw new IOException(javaFilePath + " already exists"); 
-							}
-							
-							// 如果类名中包含路径
-							int classNameStart = className.lastIndexOf('/');
-							if (classNameStart > 0) {
-								className = className.substring(classNameStart + 1);
-							}
-							// 确保文件父目录存在
-							String javaFileParentPath = FileSystem.getParent(javaFilePath);
 
-							// mkdir
-							if (!FileSystem.exists(javaFileParentPath)){
-								FileSystem.mkdirs(javaFileParentPath);
-							}
-							
-							
-							ProjectService projectService = ServiceContainer.getProjectService();
-							// 内容
-							String sourceContent = 
-							!ZeroAicySetting.isEnableAutoClassComments() ? "" : String.format("/**\n * @Author %s\n * @AIDE AIDE+\n*/\n", ZeroAicySetting.getDefaultSpString("git_user_name", ""));
+			MessageBox.XL(mainActivity, R.string.command_files_add_new_class, R.string.dialog_create_message, "",
+					new ValueRunnable<String>() {
+						@Override
+						public void acceptValue(String className) {
 
-							// 包名
-							String packageName = AndroidProjectSupport.Ev(projectService.getLibraryMapping(), projectService.getFlavor(), javaFileParentPath);
-							if (!TextUtils.isEmpty(packageName)) {
-								sourceContent += "package " + packageName + ";\n\n";
+							if (className.endsWith(".java")) {
+								className = className.substring(0, className.length() - ".java".length());
 							}
 
-							FileSystem.writeStringToFile(javaFilePath, sourceContent + "public class " + className + "{\n\n}");
-							valueRunnable.acceptValue(javaFilePath);
+							try {
+								className = className.replace('.', '/');
+								String javaFilePath = dirPath + File.separator + className + ".java";
+								if (FileSystem.exists(javaFilePath)) {
+									throw new IOException(javaFilePath + " already exists");
+								}
+
+								// 如果类名中包含路径
+								int classNameStart = className.lastIndexOf('/');
+								if (classNameStart > 0) {
+									className = className.substring(classNameStart + 1);
+								}
+								// 确保文件父目录存在
+								String javaFileParentPath = FileSystem.getParent(javaFilePath);
+
+								// mkdir
+								if (!FileSystem.exists(javaFileParentPath)) {
+									FileSystem.mkdirs(javaFileParentPath);
+								}
+
+								ProjectService projectService = ServiceContainer.getProjectService();
+								// 内容
+								String sourceContent = !ZeroAicySetting.isEnableAutoClassComments()
+										? ""
+										: String.format("/**\n * @Author %s\n * @AIDE AIDE+\n*/\n",
+												ZeroAicySetting.getDefaultSpString("git_user_name", ""));
+
+								// 包名
+								String packageName = AndroidProjectSupport.Ev(projectService.getLibraryMapping(),
+										projectService.getFlavor(), javaFileParentPath);
+								if (!TextUtils.isEmpty(packageName)) {
+									sourceContent += "package " + packageName + ";\n\n";
+								}
+
+								FileSystem.writeStringToFile(javaFilePath,
+										sourceContent + "public class " + className + "{\n\n}");
+								valueRunnable.acceptValue(javaFilePath);
+							} catch (Throwable e) {
+								MessageBox.P8(ServiceContainer.getMainActivity(), "Create Java Class",
+										new Throwable(Log.getStackTraceString(e)));
+							}
 						}
-						catch (Throwable e) {
-							MessageBox.P8(ServiceContainer.getMainActivity(), "Create Java Class",  new Throwable(Log.getStackTraceString(e)));
-						}
-					}
-				});
+					});
 		} else if (v5(dirPath)) {
-			MessageBox.XL(ServiceContainer.getMainActivity(), R.string.command_files_add_new_xml, R.string.dialog_create_message, "", new ValueRunnable<String>(){
-					@Override
-					public void acceptValue(String name) {
-						if (name.endsWith(".xml")) {
-							name = name.substring(0, name.length() - 4);
-						}
-						String xmlPath = dirPath + File.separator + name + ".xml";
-						String content;
-						String parent = FileSystem.getParent(xmlPath);
-						String parentName = FileSystem.getName(parent);
-
-						if (parentName.startsWith("layout")) {
-							content = "<LinearLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    android:layout_width=\"fill_parent\"\n    android:layout_height=\"fill_parent\"\n    android:orientation=\"vertical\">\n    \n</LinearLayout>\n";
-						} else {
-							if (parentName.startsWith("menu")) {
-								content = "<menu xmlns:android=\"http://schemas.android.com/apk/res/android\">\n    \n    <item\n        android:id=\"@+id/item\"\n        android:title=\"Item\"/>\n    \n</menu>\n";
-							} else {
-								content = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+			MessageBox.XL(ServiceContainer.getMainActivity(), R.string.command_files_add_new_xml,
+					R.string.dialog_create_message, "", new ValueRunnable<String>() {
+						@Override
+						public void acceptValue(String name) {
+							if (name.endsWith(".xml")) {
+								name = name.substring(0, name.length() - 4);
 							}
+							String xmlPath = dirPath + File.separator + name + ".xml";
+							String content;
+							String parent = FileSystem.getParent(xmlPath);
+							String parentName = FileSystem.getName(parent);
+
+							if (parentName.startsWith("layout")) {
+								content = "<LinearLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    android:layout_width=\"fill_parent\"\n    android:layout_height=\"fill_parent\"\n    android:orientation=\"vertical\">\n    \n</LinearLayout>\n";
+							} else {
+								if (parentName.startsWith("menu")) {
+									content = "<menu xmlns:android=\"http://schemas.android.com/apk/res/android\">\n    \n    <item\n        android:id=\"@+id/item\"\n        android:title=\"Item\"/>\n    \n</menu>\n";
+								} else {
+									content = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+								}
+							}
+							FileSystem.writeStringToFile(xmlPath, content);
+							valueRunnable.acceptValue(xmlPath);
 						}
-						FileSystem.writeStringToFile(xmlPath, content);
-						valueRunnable.acceptValue(xmlPath);
-					}
-				});
+					});
 		}
-    }
+	}
 
 	/**
 	 * getDrawableId
 	 */
 	@Keep
-    public static int getDrawableId(String str) {
+	public static int getDrawableId(String str) {
 		return R.drawable.file_new;
-    }
-
+	}
 
 	// old method 
-    public static int getAddTypeName(String dirPath) {
+	public static int getAddTypeName(String dirPath) {
 		if (Zo(dirPath)) {
 			return R.string.command_files_add_new_class;
 		}
@@ -126,35 +131,37 @@ public class AddAndroidFiles {
 			return R.string.command_files_add_new_xml;
 		}
 		return 0;
-    }
+	}
 
 	/**
 	 * 是否显示 command_files_add按钮
 	 */
 	@Keep
-    public static boolean isVisible(String dirPath) {
+	public static boolean isVisible(String dirPath) {
 		return Zo(dirPath) || v5(dirPath);
 	}
 
 	private static boolean Zo(String dirPath) {
 		return isJavaSourceDir(dirPath); // || AndroidProjectSupport.Ev(ServiceContainer.getProjectService().getLibraryMapping(), ServiceContainer.getProjectService().getFlavor(), dirPath) != null;
-    }
+	}
 	/**
 	 * 是否是xml路径[layout，menu]等
 	 */
 	private static boolean v5(String dirPath) {
-		return isXmlSourceDir(dirPath) || ((FileSystem.parentFileNameContain(dirPath, "res") != null && FileSystem.isPrefix(ServiceContainer.getProjectService().getCurrentAppHome(), dirPath)));
-    }
-
+		return isXmlSourceDir(dirPath) || ((FileSystem.parentFileNameContain(dirPath, "res") != null
+				&& FileSystem.isPrefix(ServiceContainer.getProjectService().getCurrentAppHome(), dirPath)));
+	}
 
 	public static boolean isJavaSourceDir(String dirPath) {
 		if (TextUtils.isEmpty(dirPath)) {
 			return false;
 		}
-		if (dirPath.contains("/java")
-			||  dirPath.contains("/src")
-			||  dirPath.contains("/aidl")) {
+		if (dirPath.contains("/java") || dirPath.contains("/aidl")) {
 			return true;
+		}
+		String currentAppHome = ServiceContainer.getProjectService().getCurrentAppHome();
+		if (GradleTools.isAndroidProject(currentAppHome)) {
+			return dirPath.contains("/src");
 		}
 		return false;
 	}
@@ -162,14 +169,13 @@ public class AddAndroidFiles {
 		return !TextUtils.isEmpty(dirPath) && dirPath.lastIndexOf("res/") > 0;
 	}
 
-
-
 	/**
 	 * 是否是源码路径
 	 */
-     static boolean ZoOld(String dirPath) {
-		return AndroidProjectSupport.Ev(ServiceContainer.getProjectService().getLibraryMapping(), ServiceContainer.getProjectService().getFlavor(), dirPath) != null;
-    }
+	static boolean ZoOld(String dirPath) {
+		return AndroidProjectSupport.Ev(ServiceContainer.getProjectService().getLibraryMapping(),
+				ServiceContainer.getProjectService().getFlavor(), dirPath) != null;
+	}
 
 	/**
 	 * 返回 command_files_add具体名称
@@ -178,7 +184,7 @@ public class AddAndroidFiles {
 		// Java源码目录
 		// class
 		if (dirPath.contains("/java")) {
-			return R.string.command_files_add_new_class;				
+			return R.string.command_files_add_new_class;
 		}
 		// xml
 		if (v5(dirPath)) {
@@ -186,5 +192,6 @@ public class AddAndroidFiles {
 			return R.string.command_files_add_new_xml;
 		}
 		return 0;
-    }
+	}
 }
+
