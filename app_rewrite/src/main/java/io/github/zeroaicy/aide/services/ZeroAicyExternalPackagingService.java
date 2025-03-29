@@ -1,10 +1,12 @@
 package io.github.zeroaicy.aide.services;
 
 import android.content.Intent;
+import android.os.Build;
 import android.text.TextUtils;
 import com.aide.common.AppLog;
 import com.aide.ui.ServiceContainer;
 import com.aide.ui.build.packagingservice.ExternalPackagingService;
+import com.aide.ui.util.FileSystem;
 import io.github.zeroaicy.aide.preference.ZeroAicySetting;
 import io.github.zeroaicy.aide.ui.services.ThreadPoolService;
 import io.github.zeroaicy.aide.utils.AndroidManifestParser;
@@ -26,14 +28,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.LinkedHashSet;
-import com.aide.ui.util.FileSystem;
 
 public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 	@Override
@@ -118,7 +119,7 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 						getAndroidFxtractNativeLibs());
 				this.libgdxNativesTransformer = new ZipEntryTransformer.LibgdxNativesTransformer(
 						getAndroidFxtractNativeLibs());
-				if (ZeroAicySetting.isEnableEnsureCapacity()) {
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && ZeroAicySetting.isEnableEnsureCapacity()) {
 					this.environment.put("EnsureCapacity", getLibEnsureCapacityPathPath());
 				}
 				// 初始化

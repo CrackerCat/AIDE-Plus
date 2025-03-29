@@ -1,5 +1,7 @@
 package com.aide.codemodel.language.java;
 
+import android.os.Build;
+import com.aide.common.AppLog;
 import io.github.zeroaicy.aide.preference.ZeroAicySetting;
 import org.eclipse.jdt.internal.compiler.CompilationResult;
 import org.eclipse.jdt.internal.compiler.ICompilerRequestor;
@@ -12,7 +14,6 @@ import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
-import com.aide.common.AppLog;
 
 public class CompilationUnitDeclarationResolver2 extends org.eclipse.jdt.internal.compiler.Compiler {
 
@@ -22,8 +23,13 @@ public class CompilationUnitDeclarationResolver2 extends org.eclipse.jdt.interna
 	}
 
 	static{
-		if ( ZeroAicySetting.isEnableEnsureCapacity() ) 
-			System.loadLibrary("EnsureCapacity");
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && ZeroAicySetting.isEnableEnsureCapacity()) {
+			try{
+				System.loadLibrary("EnsureCapacity");
+			}catch(Throwable e){
+				AppLog.d("CompilationUnitDeclarationResolver2", e);
+			}
+		}
 	}
 
 	ProjectEnvironment projecttEnvironment;
