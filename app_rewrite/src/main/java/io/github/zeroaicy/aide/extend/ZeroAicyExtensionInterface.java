@@ -676,4 +676,39 @@ public class ZeroAicyExtensionInterface {
 	public static void startCommitActivity( Activity activity, GitStatus gitStatus, String gitBranch ) {
 		ZeroAicyCommitActivity.startCommitActivity(activity, gitStatus, gitBranch);
 	}
+	
+	/**
+	 * 包名前缀
+	 */
+	@Keep
+	public static String getProjectPackagePrefix() {
+		String projectPackagePrefix = ZeroAicySetting.getProjectPackagePrefix();
+		if( TextUtils.isEmpty( projectPackagePrefix )){
+			projectPackagePrefix = "io.github.";
+		}
+		
+		if( projectPackagePrefix.charAt(projectPackagePrefix.length() - 1) != '.'){
+			projectPackagePrefix += ".";
+		}
+		
+		return projectPackagePrefix;
+	}
+	
+	/**
+	 * 项目默认路径
+	 */
+	@Keep
+	public static String getProjectDefaultHome() {
+		String projectDefaultHome = ZeroAicySetting.getProjectDefaultHome();
+		
+		if( TextUtils.isEmpty( projectDefaultHome )){
+			projectDefaultHome = "/AppProjects";
+		}
+		
+		if( projectDefaultHome.charAt(0) != '/'){
+			projectDefaultHome = "/" + projectDefaultHome;
+		}
+		return projectDefaultHome;
+	}
+
 }

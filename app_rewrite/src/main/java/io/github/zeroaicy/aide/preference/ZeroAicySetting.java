@@ -35,7 +35,8 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 	private static SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener;
 	private static boolean isWatch;
 	public static void init(Context context) {
-		if (ZeroAicySetting.defaultSp != null) return;
+		if (ZeroAicySetting.defaultSp != null)
+			return;
 		ZeroAicySetting.onSharedPreferenceChangeListener = new ZeroAicySetting(context);
 		ZeroAicySetting.defaultSp = PreferenceManager.getDefaultSharedPreferences(context);
 		ZeroAicySetting.projectServiceSharedPreferences = context.getSharedPreferences("ProjectService", 0);
@@ -55,21 +56,21 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 	private static void updateApkInstallTimes(Context context) {
 		long lastInstallTime = ZeroAicySetting.defaultSp.getLong("apkInstallationTime", 0);
 		long apkInstallationTime = getApkInstallationTime(context);
-		if (lastInstallTime !=  apkInstallationTime) {
+		if (lastInstallTime != apkInstallationTime) {
 			isReinstall = true;
 			ZeroAicySetting.defaultSp.edit().putLong("apkInstallationTime", apkInstallationTime).apply();
 		}
 	}
 
 	private static long getApkInstallationTime(Context context) {
-        try {
-			String sourceDir = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).applicationInfo.sourceDir;
+		try {
+			String sourceDir = context.getPackageManager().getPackageInfo(context.getPackageName(),
+					0).applicationInfo.sourceDir;
 			return new File(sourceDir).lastModified();
-		}
-		catch (PackageManager.NameNotFoundException unused) {
+		} catch (PackageManager.NameNotFoundException unused) {
 			return -1L;
 		}
-    }
+	}
 	public static boolean isWatch() {
 		return isWatch;
 	}
@@ -84,7 +85,7 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 	}
 	public static boolean isNightMode(Context context) {
 		Configuration configuration = context.getResources().getConfiguration();
-		return (configuration.uiMode & Configuration.UI_MODE_NIGHT_YES)  != 0;
+		return (configuration.uiMode & Configuration.UI_MODE_NIGHT_YES) != 0;
 	}
 
 	//等效i.BT()
@@ -109,23 +110,24 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 		return getDefaultSpBoolean("zero_aicy_enable_follow_system", false);
 	}
 	public static boolean isEnableDetailedLog() {
-		if (ZeroAicySetting.defaultSp == null) return false;
-		return getDefaultSpBoolean("zero_aicy_enable_detailed_log", false);
+		if (ZeroAicySetting.defaultSp == null)
+			return false;
+		return getDefaultSpBoolean("zero_aicy_enable_detailed_log", true);
 	}
 	public static boolean isEnableShowWarning() {
-		return getDefaultSpBoolean("zero_aicy_enable_error_browser_show_warning", true); 
+		return getDefaultSpBoolean("zero_aicy_enable_error_browser_show_warning", true);
 	}
 
 	public static boolean isEnableEclipseJavaFormat() {
-		return getDefaultSpBoolean("zero_aicy_enable_eclipse_java_format", true); 
+		return getDefaultSpBoolean("zero_aicy_enable_eclipse_java_format", true);
 	}
 	/**
 	 * 是否启用异步读取
 	 */
 	public static boolean isEnableAsynRead() {
-		return getDefaultSpBoolean("zero_aicy_enable_asyn_read", true); 
+		return getDefaultSpBoolean("zero_aicy_enable_asyn_read", true);
 	}
-	
+
 	/*
 	 * 构建运行
 	 */
@@ -142,19 +144,19 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 	public static String getApkInstallPackageName() {
 		String defApkInstallValue = "com.android.packageinstaller";
 		if (isCustomInstaller()) {
-			defApkInstallValue = ZeroAicySetting.defaultSp.getString("zero_aicy_apk_install_package_name", defApkInstallValue);
+			defApkInstallValue = ZeroAicySetting.defaultSp.getString("zero_aicy_apk_install_package_name",
+					defApkInstallValue);
 		}
 		return defApkInstallValue;
 	}
-	
-	
+
 	/*
 	 * Java控制台宿主模式
 	 */
-	 public static boolean isEnableJavaConsoleHostMode(){
-		return getDefaultSpBoolean("zero_aicy_enable_java_console_host_mode", false); 
-	 }
-	 
+	public static boolean isEnableJavaConsoleHostMode() {
+		return getDefaultSpBoolean("zero_aicy_enable_java_console_host_mode", false);
+	}
+
 	/* 构建 */
 	public static boolean enableADRT() {
 		return getDefaultSpBoolean("zero_aicy_enable_adrt", false);
@@ -165,7 +167,6 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 		boolean defValue = true;
 		return getDefaultSpBoolean(key, defValue);
 	}
-
 
 	/*重定义Apk构建路径*/
 	public static boolean isEnableAdjustApkBuildPath() {
@@ -194,9 +195,21 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 	/**
 	 * 工程设置
 	 */
+
+	// 包名前缀
+	public static String getProjectPackagePrefix() {
+		return getDefaultSpString("zero_aicy_project_setting_package_prefix", "io.github.");
+	}
+	public static String getProjectDefaultHome() {
+		return getDefaultSpString("zero_aicy_project_default_home", "AppProjects");
+	}
+	
+	// 新建类
 	public static boolean isEnableAutoClassComments() {
 		return getDefaultSpBoolean("zero_aicy_enable_auto_class_comments", true);
 	}
+	
+	
 	/**
 	 * 实验室
 	 */
@@ -226,12 +239,11 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 		return getDefaultSpBoolean(JavaFormatOption.ADJUST_SPACES.getKey(), false);
 	}
 
-
 	public static String getCurrentAppHome() {
 		return getProjectService().getString("CurrentAppHome", null);
 	}
 	public static SharedPreferences getProjectService() {
-		return projectServiceSharedPreferences;	
+		return projectServiceSharedPreferences;
 	}
 
 	/*半成品*/
@@ -246,16 +258,14 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 		return getDefaultSpBoolean("test_zero_aicy_enable_build_aab_apks", false);
 	}
 
-
-
 	public static Map<String, String> getCommands() {
 		if (gradleCmdLineMap.isEmpty()) {
 			gradleCmdLineMap.put("clean", "gradle clean");
 			gradleCmdLineMap.put("assembleDebug", "gradle assembleDebug");
-			gradleCmdLineMap.put("assembleRelease", "gradle assembleRelease");			
+			gradleCmdLineMap.put("assembleRelease", "gradle assembleRelease");
 		}
-        return gradleCmdLineMap;
-    }
+		return gradleCmdLineMap;
+	}
 
 	/**
 	 * 没有界面的开关
@@ -271,8 +281,6 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 		return ZeroAicySetting.defaultSp.edit().putBoolean("test_zero_aicy_enable_ensure_capacity", false).commit();
 	}
 
-
-
 	private Context context;
 
 	public ZeroAicySetting(Context context) {
@@ -283,38 +291,38 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 		if ("light_theme".equals(key)) {
 			//如果没有启用主题跟随系统，则不处理
-			if (!enableFollowSystem()) return;
+			if (!enableFollowSystem())
+				return;
 
 			if (isNightMode(context)) {
 				//修改主题为暗主题
 				if (isLightTheme()) {
 					//是亮主题才修改防止循环调用
-					setLightTheme(false);						
+					setLightTheme(false);
 				}
 			} else {
 				//是暗主题才修改防止循环调用
 				//修改主题为亮主题
-				if (!isLightTheme()) setLightTheme(true);
+				if (!isLightTheme())
+					setLightTheme(true);
 			}
 		}
 
 		if ("test_zero_aicy_enable_eclipse_compiler_for_java".equals(key)) {
-			if( isEnableEclipseCompilerForJava() ){
+			if (isEnableEclipseCompilerForJava()) {
 				// ecj模式禁用 JavaFormatOption.ADJUST_SPACES
 				// 默认启用
-				ZeroAicySetting.defaultSp.edit()
-					.putBoolean(JavaFormatOption.ADJUST_SPACES.getKey(), false)
-					.putBoolean("zero_aicy_enable_eclipse_java_format", true).commit();
+				ZeroAicySetting.defaultSp.edit().putBoolean(JavaFormatOption.ADJUST_SPACES.getKey(), false)
+						.putBoolean("zero_aicy_enable_eclipse_java_format", true).commit();
 
 			}
 		} else if (JavaFormatOption.ADJUST_SPACES.getKey().equals(key)) {
-			if( isEnableEclipseCompilerForJava() && isEnableJavaAdjustSpaces()){
+			if (isEnableEclipseCompilerForJava() && isEnableJavaAdjustSpaces()) {
 				// ecj模式禁用 JavaFormatOption.ADJUST_SPACES
-				ZeroAicySetting.defaultSp.edit()
-					.putBoolean(JavaFormatOption.ADJUST_SPACES.getKey(), false).commit();				
+				ZeroAicySetting.defaultSp.edit().putBoolean(JavaFormatOption.ADJUST_SPACES.getKey(), false).commit();
 			}
 		}
 
-
 	}
 }
+

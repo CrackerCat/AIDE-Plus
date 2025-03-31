@@ -29,7 +29,7 @@
                 android:title="详细日志"
                 android:key="zero_aicy_enable_detailed_log"
                 android:summary="是否打印更详细的日志"
-                android:defaultValue="false" />
+                android:defaultValue="true" />
 			<SwitchPreference
 				android:title="启用警告⚠️显示"
 				android:summary="显示编译器的警告内容"
@@ -39,9 +39,9 @@
         </PreferenceCategory>
 
 		<CheckBoxPreference 
-			android:title="修复依赖过多错误" 
+			android:title="修复代码分析进程崩溃(AIDL)" 
 			android:key="data_compression_enable" 
-			android:summary="因依赖过多而没有高亮的，可以开启(半弃用)" 
+			android:summary="建议开启，例如大项目，没有高亮等" 
 			android:dependency="data_compression_threshold"
 			android:defaultValue="true" />
 		<EditTextPreference
@@ -81,7 +81,7 @@
 			android:summary="异步加载文件--偶尔会闪退[原因待排\n建议开启自动保存15s]"
 			android:key="zero_aicy_enable_asyn_read"
 			android:defaultValue="true" />
-		
+
 	</PreferenceScreen>
 
     <PreferenceScreen
@@ -166,20 +166,51 @@
         </PreferenceCategory>
 
     </PreferenceScreen>
+
+
+	<!-- 工程设置 -->
 	<PreferenceScreen
 		android:title="工程设置">
 		<PreferenceCategory
-			android:title="添加新类">
-			<SwitchPreference
+            android:title="工程设置">
+			<EditTextPreference
+				android:hint="io.github."
+				android:selectAllOnFocus="true"
+				android:title="包名前缀"
+				android:key="zero_aicy_project_setting_package_prefix"
+				android:summary="设置创建工程的包名前缀，留空则使用默认。包名规范：xxx.开发者名.应用名"
+				android:defaultValue="io.github." />
+			<EditTextPreference
+				android:hint="请填写内部存储(/storage/emulated/0)的相对路径"
+				android:selectAllOnFocus="true"
+				android:title="自定义工程路径"
+				android:key="zero_aicy_project_default_home"
+				android:summary="请填写内部存储(/storage/emulated/0)的相对路径。默认路径：'/内部存储/AppProject' "
+				android:defaultValue="AppProjects"/>
+        </PreferenceCategory>
+
+        <PreferenceCategory
+            android:title="添加新类">
+            <SwitchPreference
                 android:title="类头部注释"
                 android:key="zero_aicy_enable_auto_class_comments"
-                android:summary="新建类时自动在开头添加一段注释\nAIDE 以及作者(git版本控制中编辑)"
-                android:defaultValue="true" />
-
-		</PreferenceCategory>
+                android:summary="新建类时自动在开头添加一段注释"
+                android:defaultValue="false" />
+            <EditTextPreference
+                android:selectAllOnFocus="true"
+                android:title="配置作者名称"
+                android:key="zero_aicy_class_header_annotation_author_name" />
+            <EditTextPreference
+                android:hint="yyyy/MM/dd HH:mm"
+                android:selectAllOnFocus="true"
+                android:title="配置时间格式"
+                android:key="zero_aicy_class_header_annotation_date_format"
+                android:defaultValue="yyyy/MM/dd HH:mm" />
+        </PreferenceCategory>
 
 	</PreferenceScreen>
 
+	<!-- 实验室 -->
 	<PreferenceScreen
         android:title="实验室"
         android:summary="不稳定的功能">
