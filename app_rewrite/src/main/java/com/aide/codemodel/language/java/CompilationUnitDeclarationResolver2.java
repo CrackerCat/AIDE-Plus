@@ -17,57 +17,54 @@ import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 
 public class CompilationUnitDeclarationResolver2 extends org.eclipse.jdt.internal.compiler.Compiler {
 
-	public CompilationUnitDeclaration resolve9999( String pathString ) {
+	public CompilationUnitDeclaration resolve9999(String pathString) {
 		// TODO: Implement this method
 		return null;
 	}
 
-	static{
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && ZeroAicySetting.isEnableEnsureCapacity()) {
-			try{
-				System.loadLibrary("EnsureCapacity");
-			}catch(Throwable e){
-				AppLog.d("CompilationUnitDeclarationResolver2", e);
+	static {
+		try {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && ZeroAicySetting.isEnableEnsureCapacity()) {
+				try {
+					System.loadLibrary("EnsureCapacity");
+				} catch (Throwable e) {
+					AppLog.d("CompilationUnitDeclarationResolver2", "load EnsureCapacity", e);
+				}
 			}
+		} catch (Throwable e) {
+			AppLog.d("CompilationUnitDeclarationResolver2", "isEnableEnsureCapacity", e);
 		}
 	}
 
 	ProjectEnvironment projecttEnvironment;
-	public CompilationUnitDeclarationResolver2(
-		ProjectEnvironment projecttEnvironment,
-		INameEnvironment environment,
-		IErrorHandlingPolicy policy,
-		CompilerOptions compilerOptions,
-		ICompilerRequestor requestor,
-		IProblemFactory problemFactory ) {
+	public CompilationUnitDeclarationResolver2(ProjectEnvironment projecttEnvironment, INameEnvironment environment,
+			IErrorHandlingPolicy policy, CompilerOptions compilerOptions, ICompilerRequestor requestor,
+			IProblemFactory problemFactory) {
 		super(environment, policy, compilerOptions, requestor, problemFactory);
 
 		this.projecttEnvironment = projecttEnvironment;
 
 	}
 
-
-	public CompilationUnitDeclaration resolve3( ICompilationUnit compilationunit ) {
+	public CompilationUnitDeclaration resolve3(ICompilationUnit compilationunit) {
 		CompilationUnitDeclaration unit = dietParse2(compilationunit);
 		// binding resolution
 		this.lookupEnvironment.completeTypeBindings();
-		
-		try{
+
+		try {
 			// resolve
-			resolve2(unit);			
-		}catch(AbortCompilation e){
+			resolve2(unit);
+		} catch (AbortCompilation e) {
 			// AbortCompilation 忽略
-		}
-		catch(Throwable e){
+		} catch (Throwable e) {
 			AppLog.e("CompilationUnitDeclarationResolver2", "resolve", e);
 		}
-
 
 		return unit;
 	}
 
 	// 自动 buildTypeBindings
-	private CompilationUnitDeclaration dietParse2( ICompilationUnit sourceUnit ) throws AbortCompilation {
+	private CompilationUnitDeclaration dietParse2(ICompilationUnit sourceUnit) throws AbortCompilation {
 		CompilationResult unitResult = new CompilationResult(sourceUnit, 0, 1, this.options.maxProblemsPerUnit);
 		CompilationUnitDeclaration parsedUnit;
 		try {
@@ -79,50 +76,51 @@ public class CompilationUnitDeclarationResolver2 extends org.eclipse.jdt.interna
 			lookupEnvironment.buildTypeBindings(parsedUnit, null);
 
 			ImportReference currentPackage = parsedUnit.currentPackage;
-			if ( currentPackage != null ) {
+			if (currentPackage != null) {
 				unitResult.recordPackageName(currentPackage.tokens);
 			}
-		}
-		catch (AbortCompilation a) {
+		} catch (AbortCompilation a) {
 			// best effort to find a way for reporting this problem:
-			if ( a.compilationResult == null )
+			if (a.compilationResult == null)
 				a.compilationResult = unitResult;
 			throw a;
 		}
 		return parsedUnit;
 	}
 
-	private void resolve2( CompilationUnitDeclaration unit ) {
-		
+	private void resolve2(CompilationUnitDeclaration unit) {
+
 		boolean verifyMethods = true;
 		boolean analyzeCode = true;
-		
+
 		boolean generateCode = !true;
 
 		this.lookupEnvironment.unitBeingCompleted = unit;
 
 		// 解析
 		this.parser.getMethodBodies(unit);
-		
-		if ( unit.scope != null ) {
-			
+
+		if (unit.scope != null) {
+
 			// fault in fields & methods
 			unit.scope.faultInTypes();
-			
-			if ( unit.scope != null && verifyMethods ) {
+
+			if (unit.scope != null && verifyMethods) {
 				// http://dev.eclipse.org/bugs/show_bug.cgi?id=23117
 				// verify inherited methods
 				unit.scope.verifyMethods(this.lookupEnvironment.methodVerifier());
 			}
-			
+
 			// type checking
 			unit.resolve();
 
 			// flow analysis
-			if ( analyzeCode ) unit.analyseCode();
+			if (analyzeCode)
+				unit.analyseCode();
 
 			// code generation
-			if ( generateCode ) unit.generateCode();
+			if (generateCode)
+				unit.generateCode();
 
 			// finalize problems (suppressWarnings)
 			unit.finalizeProblems();
@@ -132,11 +130,11 @@ public class CompilationUnitDeclarationResolver2 extends org.eclipse.jdt.interna
 	}
 
 	@Override
-	public CompilationUnitDeclaration resolve( CompilationUnitDeclaration unit, ICompilationUnit sourceUnit, boolean verifyMethods, boolean analyzeCode, boolean generateCode ) {
+	public CompilationUnitDeclaration resolve(CompilationUnitDeclaration unit, ICompilationUnit sourceUnit,
+			boolean verifyMethods, boolean analyzeCode, boolean generateCode) {
 		// TODO: Implement this method
 		return super.resolve(unit, sourceUnit, verifyMethods, analyzeCode, generateCode);
 	}
-
 
 	/*
 	 @Override
@@ -147,10 +145,10 @@ public class CompilationUnitDeclarationResolver2 extends org.eclipse.jdt.interna
 	 public void duplicateTypes(CompilationUnitDeclaration compUnitDecl, TypeDeclaration typeDecl) {
 	 ICompilationUnit compilationUnit = compUnitDecl.compilationResult.compilationUnit;
 	 char[] fileName = compilationUnit.getFileName();
-
+	
 	 AppLog.println_d("filepath %s\n", String.valueOf(fileName));
 	 // AppLog.println_d("typeDecl %s\n", String.valueOf(typeDecl));
-
+	
 	 AppLog.println_e(Thread.currentThread().getStackTrace());
 	 AppLog.println_e("-------------------------------\n");
 	 super.duplicateTypes(compUnitDecl, typeDecl);
@@ -167,3 +165,4 @@ public class CompilationUnitDeclarationResolver2 extends org.eclipse.jdt.interna
 	 }*/
 
 }
+
