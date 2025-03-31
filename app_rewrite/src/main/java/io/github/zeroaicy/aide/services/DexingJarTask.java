@@ -1,13 +1,12 @@
 package io.github.zeroaicy.aide.services;
-import android.text.TextUtils;
 import android.util.Log;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
+import com.aide.common.AppLog;
 
 public class DexingJarTask implements Callable<DexingJarTask>{
 	
@@ -24,6 +23,8 @@ public class DexingJarTask implements Callable<DexingJarTask>{
 		public List<String> dependencyLibs;
 		// 进度
 		public AtomicInteger dexingingCount;
+		// 任务完成监听器
+		public DexingJarTask.TaskDoneLister taskDoneLister;
 	}
 
 	public static interface TaskDoneLister{
@@ -45,8 +46,9 @@ public class DexingJarTask implements Callable<DexingJarTask>{
 
 	public final Configuration configuration;
 
-	TaskDoneLister taskDoneLister;
 	final boolean isBatchMode;
+	
+	private boolean isDone = false;
 	
 	public DexingJarTask(String inputJarFiles, String outputDexZipFile, Configuration configuration){
 		this.isBatchMode = false;
@@ -73,28 +75,26 @@ public class DexingJarTask implements Callable<DexingJarTask>{
 		this.configuration = configuration;
 	}
 	
-
-	public void setTaskDoneLister(TaskDoneLister taskDoneLister){
-		this.taskDoneLister = taskDoneLister;
-	}
-
 	@Override
 	public DexingJarTask call() throws Exception{
 		try{
+			
+			// 批量模式
 			if( isBatchMode){
 				dexingJarLibFileBatch(this.inputJarFiles, this.outputDexZipFiles, configuration);
 				// 更改进度
 				configuration.dexingingCount.addAndGet(inputJarFiles.size());
 				
 			}else{
+				// 单文件模式
 				dexingJarLibFile(inputJarFile, outputDexZipFile, configuration);
 				
 				configuration.dexingingCount.incrementAndGet();
+				
 			}
 			// 就用一次
-			if ( this.taskDoneLister != null ){
-				this.taskDoneLister.done();
-				this.taskDoneLister = null;
+			if ( this.configuration.taskDoneLister != null ){
+				this.configuration.taskDoneLister.done();
 			}
 		}
 		catch (Throwable th){
@@ -102,7 +102,13 @@ public class DexingJarTask implements Callable<DexingJarTask>{
 			if ( th instanceof Exception ) throw (Exception)th; 
 			else throw new Error(th);
 		}
+		
+		this.isDone = true;
 		return this;
+	}
+	
+	public boolean isDone(){
+		return this.isDone;
 	}
 
 
@@ -142,7 +148,9 @@ public class DexingJarTask implements Callable<DexingJarTask>{
 			logDebug("dexing -> " + jarLibPath);
 			//dexing jar
 			// 大于10MB的将采用 子进程方式，防止oom
-			D8TaskWrapper.runD8Task(argsList, DexingJarTask.environment, new File(jarLibPath).length() > 10 * 1024 * 1024);
+			boolean processMode = new File(jarLibPath).length() > 10 * 1024 * 1024;
+			
+			D8TaskWrapper.runD8Task(argsList, DexingJarTask.environment, processMode);
 
 			//临时文件移动到实际输出文件
 			dexZipTempFile.renameTo(dexCacheFile);
@@ -200,9 +208,9 @@ public class DexingJarTask implements Callable<DexingJarTask>{
 		
 	}
 
-	private static final String TAG = "Worker";
+	private static final String TAG = "DexingJarTask";
 	private static void logDebug(String msg){
-		Log.i(TAG, msg);
+		AppLog.d(TAG, msg);
 	}
-
+	
 }
