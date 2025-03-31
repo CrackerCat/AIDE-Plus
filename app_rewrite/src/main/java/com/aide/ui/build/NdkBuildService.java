@@ -327,77 +327,85 @@ public class NdkBuildService {
 			AppLog.d(TAG, sb.toString());
 		}
 
+		// 是否有 ndk-build项目构建
 		private boolean hasAndroidMkModule;
+
 		private Map<String, List<SyntaxError>> runNdkBuild(String arg, boolean isNativeBuildParallel) {
 
 			ProjectService projectService = ServiceContainer.getProjectService();
 
 			for (String module : this.modules) {
+				if (!projectService.g3(module)) {
+					continue;
+				}
 
 				// isAndroidMkModule
-				if (projectService.g3(module)) {
+				hasAndroidMkModule = true;
 
-					hasAndroidMkModule = true;
-					// 并行构建
-					int threadCount = isNativeBuildParallel ? 8 : 1;
+				// 检查ndk是否安装
+				Map<String, List<SyntaxError>> checkInstalledNdk = checkInstalledNdk();
+				if (checkInstalledNdk != null) {
+					return checkInstalledNdk;
+				}
 
-					List<String> ndkConfiguration = NdkConfiguration.VH(arg, threadCount);
-					// 修改 HOST_ARCH=arm
-					if (!ServiceContainer.isX86()) {
-						// 为了防止影响Ndk安装包中的脚本
-						// 可以已经在 build/core/init.mk 中写死了
-						ndkConfiguration.set(ndkConfiguration.size() - 5, "HOST_ARCH=aarch64");
-					}
+				// 并行构建
+				int threadCount = isNativeBuildParallel ? 8 : 1;
 
-					// 移除 TARGET_AR=$(TOOLCHAIN_PREFIX)ar  倒数第二个
-					ndkConfiguration.remove(ndkConfiguration.size() - 2);
+				List<String> ndkConfiguration = NdkConfiguration.VH(arg, threadCount);
+				// 修改 HOST_ARCH=arm
+				if (!ServiceContainer.isX86()) {
+					// 为了防止影响Ndk安装包中的脚本
+					// 可以已经在 build/core/init.mk 中写死了
+					ndkConfiguration.set(ndkConfiguration.size() - 5, "HOST_ARCH=aarch64");
+				}
 
-					List<String> ndkBuildArgs = shellEnvironment.setupShellCommandArguments(ndkConfiguration);
-					// 安卓gradle android mk 工程
-					if (GradleTools.isGradleProject(module) && GradleTools.isAndroidGradleProject(module)) {
-						//安卓gradle工程
-						ndkBuildArgs.add("NDK_PROJECT_PATH=.");
-						ndkBuildArgs.add("APP_BUILD_SCRIPT=src/main/jni/Android.mk");
-						ndkBuildArgs.add("NDK_APP_OUT=build/bin/intermediates/obj");
-						ndkBuildArgs.add("NDK_LIBS_OUT=src/main/jniLibs");
+				// 移除 TARGET_AR=$(TOOLCHAIN_PREFIX)ar  倒数第二个
+				ndkConfiguration.remove(ndkConfiguration.size() - 2);
 
-						File ApplicationFile = new File(module, "src/main/jni/Application.mk");
-						if (ApplicationFile.exists()) {
-							ndkBuildArgs.add("NDK_APPLICATION_MK=" + "src/main/jni/Application.mk");
-						}
-					}
+				List<String> ndkBuildArgs = shellEnvironment.setupShellCommandArguments(ndkConfiguration);
+				// 安卓gradle android mk 工程
+				if (GradleTools.isGradleProject(module) && GradleTools.isAndroidGradleProject(module)) {
+					//安卓gradle工程
+					ndkBuildArgs.add("NDK_PROJECT_PATH=.");
+					ndkBuildArgs.add("APP_BUILD_SCRIPT=src/main/jni/Android.mk");
+					ndkBuildArgs.add("NDK_APP_OUT=build/bin/intermediates/obj");
+					ndkBuildArgs.add("NDK_LIBS_OUT=src/main/jniLibs");
 
-					//  只有PATH
-					Map<String, String> env = NdkConfiguration.gn();
-
-					// 安卓gradle android mk 工程
-					if (GradleTools.isGradleProject(module) && GradleTools.isAndroidGradleProject(module)) {
-						//安卓gradle工程
-						env.put("NDK_PROJECT_PATH", ".");
-						env.put("APP_BUILD_SCRIPT", "src/main/jni/Android.mk");
-						env.put("NDK_APP_OUT", "build/bin/intermediates/obj");
-						env.put("NDK_LIBS_OUT", "src/main/jniLibs");
-
-						File ApplicationFile = new File(module, "src/main/jni/Application.mk");
-						if (ApplicationFile.exists()) {
-							env.put("NDK_APPLICATION_MK", "src/main/jni/Application.mk");
-						}
-					}
-
-					Map<String, String> termuxEnvironment = shellEnvironment.getEnvironment(false, env);
-
-					env = termuxEnvironment.isEmpty() ? env : termuxEnvironment;
-
-					Hw(ndkBuildArgs, module);
-
-					// 运行ndk-build
-					wf j6 = xf.j6(ndkBuildArgs, module, env, true, (OutputStream) null, (byte[]) null);
-
-					if (j6.DW() != 0) {
-						return NdkBuildService.Zo(this.ndkBuildService, module, DW(j6.j6(), j6.DW()));
+					File ApplicationFile = new File(module, "src/main/jni/Application.mk");
+					if (ApplicationFile.exists()) {
+						ndkBuildArgs.add("NDK_APPLICATION_MK=" + "src/main/jni/Application.mk");
 					}
 				}
 
+				//  只有PATH
+				Map<String, String> env = NdkConfiguration.gn();
+
+				// 安卓gradle android mk 工程
+				if (GradleTools.isGradleProject(module) && GradleTools.isAndroidGradleProject(module)) {
+					//安卓gradle工程
+					env.put("NDK_PROJECT_PATH", ".");
+					env.put("APP_BUILD_SCRIPT", "src/main/jni/Android.mk");
+					env.put("NDK_APP_OUT", "build/bin/intermediates/obj");
+					env.put("NDK_LIBS_OUT", "src/main/jniLibs");
+
+					File ApplicationFile = new File(module, "src/main/jni/Application.mk");
+					if (ApplicationFile.exists()) {
+						env.put("NDK_APPLICATION_MK", "src/main/jni/Application.mk");
+					}
+				}
+
+				Map<String, String> termuxEnvironment = shellEnvironment.getEnvironment(false, env);
+
+				env = termuxEnvironment.isEmpty() ? env : termuxEnvironment;
+
+				Hw(ndkBuildArgs, module);
+
+				// 运行ndk-build
+				wf j6 = xf.j6(ndkBuildArgs, module, env, true, (OutputStream) null, (byte[]) null);
+
+				if (j6.DW() != 0) {
+					return NdkBuildService.Zo(this.ndkBuildService, module, DW(j6.j6(), j6.DW()));
+				}
 			}
 
 			return null;
@@ -413,38 +421,12 @@ public class NdkBuildService {
 				}
 
 			}
+
 			// 所有module没有 Android.mk项目
 			//			if (!hasAndroidMkModule()) {
 			//				return null;
 			//			}
 
-			// 没有安装Ndk
-			if (!NdkConfiguration.isInstalledNdk()) {
-
-				HashMap<String, List<SyntaxError>> hashMap = new HashMap<>();
-				String module = this.modules.get(0);
-
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && ServiceContainer.isX86()) {
-
-					hashMap.put(module, new ArrayList<SyntaxError>());
-
-					SyntaxError makeSyntaxError = NdkBuildService.makeSyntaxError(this.ndkBuildService, "NDK", 1, 1,
-							"Native development is not supported on X86 devices running Android 10 and above.");
-					SyntaxError syntaxError = makeSyntaxError;
-
-					hashMap.get(module).add(syntaxError);
-				} else {
-
-					hashMap.put(module, new ArrayList<SyntaxError>());
-
-					SyntaxError makeSyntaxError = NdkBuildService.makeSyntaxError(this.ndkBuildService, "NDK", 1, 1,
-							"NDK support not installed.");
-					hashMap.get(module).add(makeSyntaxError);
-				}
-				return hashMap;
-			}
-			
-			
 			hasAndroidMkModule = false;
 			// busybox适配 从com.aide.ndk29创建软连接到 PATH
 			// NdkConfiguration.U2();
@@ -466,6 +448,35 @@ public class NdkBuildService {
 				AppLog.d("NDK build elapsed " + (System.currentTimeMillis() - currentTimeMillis) + "ms");
 
 			return compileSyntaxErrors;
+
+		}
+
+		private Map<String, List<SyntaxError>> checkInstalledNdk() {
+			if (NdkConfiguration.isInstalledNdk()) {
+				return null;
+			}
+
+			HashMap<String, List<SyntaxError>> hashMap = new HashMap<>();
+			String module = this.modules.get(0);
+
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && ServiceContainer.isX86()) {
+
+				hashMap.put(module, new ArrayList<SyntaxError>());
+
+				SyntaxError makeSyntaxError = NdkBuildService.makeSyntaxError(this.ndkBuildService, "NDK", 1, 1,
+						"Native development is not supported on X86 devices running Android 10 and above.");
+				SyntaxError syntaxError = makeSyntaxError;
+
+				hashMap.get(module).add(syntaxError);
+			} else {
+
+				hashMap.put(module, new ArrayList<SyntaxError>());
+
+				SyntaxError makeSyntaxError = NdkBuildService.makeSyntaxError(this.ndkBuildService, "NDK", 1, 1,
+						"NDK support not installed.");
+				hashMap.get(module).add(makeSyntaxError);
+			}
+			return hashMap;
 
 		}
 
