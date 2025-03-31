@@ -54,6 +54,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
 import java.util.Set;
 import io.github.zeroaicy.aide.ui.project.ZeroAicyAndroidProjectSupport;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class NdkBuildService {
 	public static final String TAG = "NdkBuildService";
@@ -240,7 +241,7 @@ public class NdkBuildService {
 					isEnablePackaging = true;
 					break;
 				}
-				
+
 				if (ZeroAicyAndroidProjectSupport.isCmakeGradleProject(module)) {
 					isEnablePackaging = true;
 					break;
@@ -270,12 +271,12 @@ public class NdkBuildService {
 		@hy
 		final NdkBuildService ndkBuildService;
 
-		private final boolean isClean;
+		private final boolean isBuildRefresh;
 
 		public RunNdkBuildCallable(NdkBuildService ndkBuildService, boolean isClean, boolean isNativeBuildParallel,
 				List<String> modules) {
 			this.ndkBuildService = ndkBuildService;
-			this.isClean = isClean;
+			this.isBuildRefresh = isClean;
 
 			this.isNativeBuildParallel = isNativeBuildParallel;
 			this.modules = modules;
@@ -326,17 +327,21 @@ public class NdkBuildService {
 			AppLog.d(TAG, sb.toString());
 		}
 
-		private Map<String, List<SyntaxError>> runNdkBuild(String str, boolean isNativeBuildParallel) {
+		private boolean hasAndroidMkModule;
+		private Map<String, List<SyntaxError>> runNdkBuild(String arg, boolean isNativeBuildParallel) {
 
 			ProjectService projectService = ServiceContainer.getProjectService();
 
 			for (String module : this.modules) {
+
 				// isAndroidMkModule
 				if (projectService.g3(module)) {
 
-					int threadCount = isNativeBuildParallel ? 4 : 1;
+					hasAndroidMkModule = true;
+					// 并行构建
+					int threadCount = isNativeBuildParallel ? 8 : 1;
 
-					List<String> ndkConfiguration = NdkConfiguration.VH(str, threadCount);
+					List<String> ndkConfiguration = NdkConfiguration.VH(arg, threadCount);
 					// 修改 HOST_ARCH=arm
 					if (!ServiceContainer.isX86()) {
 						// 为了防止影响Ndk安装包中的脚本
@@ -361,10 +366,10 @@ public class NdkBuildService {
 							ndkBuildArgs.add("NDK_APPLICATION_MK=" + "src/main/jni/Application.mk");
 						}
 					}
-					
+
 					//  只有PATH
 					Map<String, String> env = NdkConfiguration.gn();
-					
+
 					// 安卓gradle android mk 工程
 					if (GradleTools.isGradleProject(module) && GradleTools.isAndroidGradleProject(module)) {
 						//安卓gradle工程
@@ -378,7 +383,7 @@ public class NdkBuildService {
 							env.put("NDK_APPLICATION_MK", "src/main/jni/Application.mk");
 						}
 					}
-					
+
 					Map<String, String> termuxEnvironment = shellEnvironment.getEnvironment(false, env);
 
 					env = termuxEnvironment.isEmpty() ? env : termuxEnvironment;
@@ -409,13 +414,13 @@ public class NdkBuildService {
 
 			}
 			// 所有module没有 Android.mk项目
-			if (!hasAndroidMkModule()) {
-				return null;
-			}
+			//			if (!hasAndroidMkModule()) {
+			//				return null;
+			//			}
 
 			// 没有安装Ndk
 			if (!NdkConfiguration.isInstalledNdk()) {
-				
+
 				HashMap<String, List<SyntaxError>> hashMap = new HashMap<>();
 				String module = this.modules.get(0);
 
@@ -438,12 +443,13 @@ public class NdkBuildService {
 				}
 				return hashMap;
 			}
-
+			
+			
+			hasAndroidMkModule = false;
 			// busybox适配 从com.aide.ndk29创建软连接到 PATH
 			// NdkConfiguration.U2();
-			
 			// 构建刷新
-			if (this.isClean) {
+			if (this.isBuildRefresh) {
 				// ndk-build clean
 				Map<String, List<SyntaxError>> syntaxErrors = runNdkBuild("clean", false);
 				if (syntaxErrors != null) {
@@ -452,11 +458,12 @@ public class NdkBuildService {
 			}
 
 			long currentTimeMillis = System.currentTimeMillis();
-			
+
 			// 构建 Android mk module
 			Map<String, List<SyntaxError>> compileSyntaxErrors = runNdkBuild(null, this.isNativeBuildParallel);
 
-			AppLog.d("NDK build elapsed " + (System.currentTimeMillis() - currentTimeMillis) + "ms");
+			if (hasAndroidMkModule)
+				AppLog.d("NDK build elapsed " + (System.currentTimeMillis() - currentTimeMillis) + "ms");
 
 			return compileSyntaxErrors;
 
@@ -559,7 +566,7 @@ public class NdkBuildService {
 							// 源码路径
 							.setCmakeListsTxtPath(cmakeListsTxtPath);
 
-					if (this.isClean) {
+					if (this.isBuildRefresh) {
 						// 清除
 						FileUtil.deleteFolder(new File(projectPath, builder.getCmakeBuildCachePath()));
 					}
@@ -673,7 +680,7 @@ public class NdkBuildService {
 							// 源码路径
 							.setCmakeListsTxtPath(cmakeListsTxtPath);
 
-					if (this.isClean) {
+					if (this.isBuildRefresh) {
 						// 清除
 						FileUtil.deleteFolder(new File(projectPath, builder.getCmakeBuildCachePath()));
 					}
