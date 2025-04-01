@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import android.content.res.Resources;
 import io.github.zeroaicy.aide.preference.ZeroAicySetting;
+import android.text.TextUtils;
 
 public class AIDEEditor extends com.aide.ui.AIDEEditor {
 
@@ -56,7 +57,7 @@ public class AIDEEditor extends com.aide.ui.AIDEEditor {
 			Context context = getContext();
 			Resources.Theme theme = context.getTheme();
 			Resources resources = getResources();
-			
+
 			// is Material主题
 			if (AndroidHelper.isMaterialTheme(getContext())) {
 				//this.selectionColor = new Color(getResources().getColor(isLight ? R.color.editor_selection_material_light : R.color.editor_selection_material));
@@ -159,31 +160,62 @@ public class AIDEEditor extends com.aide.ui.AIDEEditor {
 
 	@Override
 	public String getQuickKeys() {
-		String indentation = "";
+
+		StringBuilder indentationBuilder = new StringBuilder();
 		int indentationSize = getIndentationSize();
-		int i = 0;
 		if (indentationSize % getTabSize() == 0) {
-			while (i < indentationSize / getTabSize()) {
-				indentation = indentation + "\t";
-				i++;
+			int tabCount = indentationSize / getTabSize();
+			for (int count = 0; count < tabCount; count++) {
+				indentationBuilder.append("\t");
 			}
 		} else {
-			while (i < indentationSize) {
-				indentation = indentation + "s";
-				i++;
+			for (int count = 0; count < indentationSize; count++) {
+				// s 代表空格
+				indentationBuilder.append("s");
 			}
 		}
-		String lowerCase = getFilePath().toLowerCase();
+		String indentation = indentationBuilder.toString();
 
-		if (lowerCase.endsWith(".css")) {
-			return indentation + " { } - : . ; # % ( ) \" ' @ > = [ ] / * !";
+		String filePath = getFilePath();
+		String pathLowerCase = filePath.toLowerCase();
+
+		if (pathLowerCase.endsWith(".css")) {
+			String Punctuationcss = ZeroAicySetting.getProjectPunctuationcss();
+			if (TextUtils.isEmpty(Punctuationcss) || "null".equals(Punctuationcss)) {
+				return indentation + " { } - : . ; # % ( ) \\ &quot; ' @ > = [ ] / * !";
+			} else {
+				return indentation + " " + Punctuationcss;
+			}
 		}
-		if (lowerCase.endsWith(".xml") || lowerCase.endsWith(".html") || lowerCase.endsWith(".htm")) {
-			return indentation + " < > / = \" : @ + ( ) ; , . | & ! [ ] { } _ -";
+		if (pathLowerCase.endsWith(".xml") || pathLowerCase.endsWith(".html") || pathLowerCase.endsWith(".htm")) {
+			String Punctuationxml = ZeroAicySetting.getProjectPunctuationxml();
+			if (TextUtils.isEmpty(Punctuationxml) || "null".equals(Punctuationxml)) {
+				return indentation + " < > / = \\ &quot;  : @ + ( ) ; , . | & ! [ ] { } _ -";
+			} else {
+				return indentation + " " + Punctuationxml;
+			}
 		}
-		if (lowerCase.endsWith(".java") || lowerCase.endsWith(".js")) {
-			return indentation + " { } ( ) ; , . = \" | & ! [ ] < > + - / * ? : _";
+		
+		if (pathLowerCase.endsWith(".java") || pathLowerCase.endsWith(".js")) {
+			String Punctuationjava = ZeroAicySetting.getProjectPunctuationjava();
+			if (TextUtils.isEmpty(Punctuationjava) || "null".equals(Punctuationjava)) {
+
+				return indentation + " { } ( ) ; , . = \\ &quot; | & ! [ ] < > + - / * ? : _";
+			} else {
+				return indentation + " " + Punctuationjava;
+			}
 		}
+
+		//		if (lowerCase.endsWith(".css")) {
+		//			return indentation + " { } - : . ; # % ( ) \" ' @ > = [ ] / * !";
+		//		}
+		//		if (lowerCase.endsWith(".xml") || lowerCase.endsWith(".html") || lowerCase.endsWith(".htm")) {
+		//			return indentation + " < > / = \" : @ + ( ) ; , . | & ! [ ] { } _ -";
+		//		}
+		//		if (lowerCase.endsWith(".java") || lowerCase.endsWith(".js")) {
+		//			return indentation + " { } ( ) ; , . = \" | & ! [ ] < > + - / * ? : _";
+		//		}
+
 		// 比如gradle
 		return indentation + " { } ( ) ; , . = \" | & ! [ ] < > + - / * :";
 
@@ -342,48 +374,48 @@ public class AIDEEditor extends com.aide.ui.AIDEEditor {
 		private void initReader(Reader reader) {
 
 			// synchronized (this) {
-				// k1()
-				this.cb = com.aide.engine.service.CodeModelFactory.findCodeModel(filePath, ServiceContainer.Hw());
+			// k1()
+			this.cb = com.aide.engine.service.CodeModelFactory.findCodeModel(filePath, ServiceContainer.Hw());
 
-				Vector<TextBuffer> textBuffers = EditorModelKt.getTextBuffers(this);
-				// 需要对textBuffers操作，防止并发
-				// 重置
-				synchronized (textBuffers) {
-					textBuffers.clear();
+			Vector<TextBuffer> textBuffers = EditorModelKt.getTextBuffers(this);
+			// 需要对textBuffers操作，防止并发
+			// 重置
+			synchronized (textBuffers) {
+				textBuffers.clear();
 
-					char[] bufferPool = new char[0x8000];
-					com.aide.ui.views.editor.v.j6(reader,
-							new EditorModel.a(new StringBuffer(), false, getTabSize(), false), bufferPool);
-					IOUtils.close(reader);
-					// 没有内容
-					if (textBuffers.size() == 0) {
-						textBuffers.addElement(new TextBuffer());
-					}
-					textBuffers.trimToSize();
+				char[] bufferPool = new char[0x8000];
+				com.aide.ui.views.editor.v.j6(reader, new EditorModel.a(new StringBuffer(), false, getTabSize(), false),
+						bufferPool);
+				IOUtils.close(reader);
+				// 没有内容
+				if (textBuffers.size() == 0) {
+					textBuffers.addElement(new TextBuffer());
 				}
+				textBuffers.trimToSize();
+			}
 
-				this.initing.set(false);
+			this.initing.set(false);
 
-				synchronized (this.lock) {
-					// 通知代码分析进程
-					this.lock.notifyAll();
+			synchronized (this.lock) {
+				// 通知代码分析进程
+				this.lock.notifyAll();
 
-				}
+			}
 
-				// 通知代码分析进程 内容填充完毕
-				EngineService engineService = ServiceContainer.getEngineService();
-				// 解除代码分析进程阻塞
-				engineService.ef();
-				engineService.ei();
+			// 通知代码分析进程 内容填充完毕
+			EngineService engineService = ServiceContainer.getEngineService();
+			// 解除代码分析进程阻塞
+			engineService.ef();
+			engineService.ei();
 
-				synchronized (this.lock) {
-					this.lock.notifyAll();
-				}
+			synchronized (this.lock) {
+				this.lock.notifyAll();
+			}
 
-				// 同步刷新
-				final CodeEditText.EditorView oEditorView = getOEditorView();
-				oEditorView.invalidateLayoutTask.DW();
-				oEditorView.indexingLayoutTask.DW();
+			// 同步刷新
+			final CodeEditText.EditorView oEditorView = getOEditorView();
+			oEditorView.invalidateLayoutTask.DW();
+			oEditorView.indexingLayoutTask.DW();
 			// }
 
 			synchronized (this.lock) {
