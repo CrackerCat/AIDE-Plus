@@ -276,6 +276,7 @@ public class ZeroAicyProjectService extends ProjectService {
 
 	/*
 	 * 非ProjectService线程仅返回只读副本
+	 * @return libraryMapping key: 项目路径 -> value: 所有maven依赖
 	 */
 	@Override
 	public synchronized Map<String, List<String>> getLibraryMapping() {

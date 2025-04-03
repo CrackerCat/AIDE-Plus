@@ -352,7 +352,7 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 			/**
 			 * 创建 DexingJarTask.Configuration
 			 */
-			private DexingJarTask.Configuration makeConfiguration(AtomicInteger dexingingCount,
+			private DexingJarTask.Configuration makeConfiguration(final AtomicInteger dexingingCount,
 					final int needDexingLibsSize) {
 				DexingJarTask.Configuration configuration = new DexingJarTask.Configuration();
 				configuration.minSdkVersion = getMinSdk();
@@ -378,13 +378,13 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 			private AtomicBoolean runAuxiliaryNotification(final List<DexingJarTask> tasks,
 					final int needDexingLibsSize) {
 				// 中断信号
-				AtomicBoolean interruptAuxiliaryNotification = new AtomicBoolean(false);
+				final AtomicBoolean interruptAuxiliaryNotification = new AtomicBoolean(false);
 				// 默认线程池
 				ThreadPoolService defaultThreadPoolService = ThreadPoolService.getDefaultThreadPoolService();
 
 				Callable<Void> auxiliaryNotificationCallable = new Callable<Void>() {
 					Set<String> doneFiles = new HashSet<>();
-					List<DexingJarTask> tasksCopy = new ArrayList<>(tasks);
+					List<DexingJarTask> tasksCopy = new ArrayList<DexingJarTask>(tasks);
 					@Override
 					public Void call() throws Exception {
 
