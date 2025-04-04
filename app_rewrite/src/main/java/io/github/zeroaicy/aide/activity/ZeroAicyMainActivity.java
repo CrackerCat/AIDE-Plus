@@ -281,7 +281,7 @@ public class ZeroAicyMainActivity extends MainActivity {
 			zeroAicySplitView = (ZeroAicySplitView) splitView;
 			// closeSplit
 			zeroAicySplitView.closeSplit(false);
-
+			zeroAicySplitView.setSwipeEnabled(false);
 			// SplitView事件拦截器
 			zeroAicySplitView.setOnSplitInterceptListener(new ZeroAicySplitView.OnSplitInterceptListener() {
 				@Override
