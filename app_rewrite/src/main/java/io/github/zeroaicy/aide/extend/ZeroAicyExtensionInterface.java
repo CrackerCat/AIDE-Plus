@@ -97,6 +97,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.zip.Deflater;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+import com.aide.ui.services.DownloadService;
+import io.github.zeroaicy.aide.ui.services.ZeroAicyDownloadService;
 
 /**
  * 1.aapt2
@@ -710,5 +712,13 @@ public class ZeroAicyExtensionInterface {
 		}
 		return projectDefaultHome;
 	}
-
+	
+	
+	/**
+	 * 替换 DownloadService
+	 */
+	 public static DownloadService getDownloadService(){
+		 return new ZeroAicyDownloadService();
+	 }
+	 
 }
