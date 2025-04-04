@@ -519,6 +519,7 @@ public class ZeroAicyProjectService extends ProjectService {
 	/**
 	 * 与 super.kQ(projectDir, p); 不同的是 showProgressDialog
 	 * 其实还是在主线程运行
+	 * 切换项目 或者 先关闭项目在打开一个新项目
 	 */
 	private void kQAsync(final String projectDir, final boolean z) {
 		// 上一个项目路径
@@ -559,8 +560,10 @@ public class ZeroAicyProjectService extends ProjectService {
 			public void run() {
 				// 赋值 pojectSupport
 				ZeroAicyProjectService.this.init();
+				// 猜测 aapt2 aidl (必须在主线程)
+				ZeroAicyProjectService.this.et(null, false);
 				ZeroAicyProjectService.this.jJ(); // 切换项目
-
+				
 			}
 		};
 
@@ -571,7 +574,7 @@ public class ZeroAicyProjectService extends ProjectService {
 				ServiceContainer.getMainActivity().q7();
 				ServiceContainer.getFileBrowserService().v5();
 				ZeroAicyProjectService.this.verifyResourcesDownload();
-
+				
 			}
 		};
 		String title = lastProjectDir == null ? "" : "切换项目中[请等待]...";
@@ -626,6 +629,7 @@ public class ZeroAicyProjectService extends ProjectService {
 					// 打开项目
 					openProjectAsync(projectPath);
 					AppLog.d(TAG, "openProjectAsync(): %sms", Utils.nowTime() - nowTime);
+					
 				}
 			};
 
@@ -639,6 +643,7 @@ public class ZeroAicyProjectService extends ProjectService {
 
 					// 反正在主线程调用也是异步
 					ZeroAicyProjectService.this.verifyResourcesDownload();
+					
 				}
 			};
 			// 显示弹窗
@@ -679,7 +684,10 @@ public class ZeroAicyProjectService extends ProjectService {
 
 		// this.initAsync();
 		this.init();
+		// 猜测 aapt2 aidl
+		ZeroAicyProjectService.this.et(null, false);
 
+		
 		if (this.pojectSupport != null) {
 			ServiceContainer.getDebugger().P8(this.pojectSupport.getProjectPackageName(), true);
 		}
