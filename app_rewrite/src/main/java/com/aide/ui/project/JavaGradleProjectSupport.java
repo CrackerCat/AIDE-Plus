@@ -37,8 +37,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import com.aide.ui.services.MavenService;
-import com.aide.ui.services.MavenService;
 
 /**
  * Java项目使用Gradle作为依赖管理
@@ -249,10 +247,10 @@ public class JavaGradleProjectSupport implements ProjectSupport {
 
 		List<ClassPath.Entry> classPathEntrys = new ArrayList<>();
 		// 兼容AIDE+原版编译器
-		MavenService mavenService = (MavenService)(Object)ServiceContainer.getMavenService();
+		MavenService mavenService = (MavenService) (Object) ServiceContainer.getMavenService();
 
 		if (GradleTools.isAarEexplodedPath(projectDir)) {
-			
+
 			String aarEexplodedClassesJar = GradleTools.getAarEexplodedClassesJar(projectDir);
 			classPathEntrys.add(new ClassPath.Entry("lib", aarEexplodedClassesJar, false, true, true));
 			addLibFileTree(GradleTools.getLibsPath(projectDir), projectDir, classPathEntrys, true);
@@ -291,10 +289,9 @@ public class JavaGradleProjectSupport implements ProjectSupport {
 						(BuildGradle.MavenDependency) dependency)) {
 					if (mavenDependenciePath.endsWith(".jar")) {
 						classPathEntrys.add(new ClassPath.Entry("lib", mavenDependenciePath, false, true));
-					}
-					else{
+					} else {
 						// 处理 aar
-						classPathEntrys.addAll( getProjectClassPathEntrys( mavenDependenciePath ) );
+						classPathEntrys.addAll(getProjectClassPathEntrys(mavenDependenciePath));
 					}
 				}
 			} else if (dependency instanceof BuildGradle.FileTreeDependency) {
@@ -395,7 +392,7 @@ public class JavaGradleProjectSupport implements ProjectSupport {
 		resolvedProjects.add(projectPath);
 
 		// 兼容AIDE+原版编译器
-		MavenService mavenService = (MavenService)(Object)ServiceContainer.getMavenService();
+		MavenService mavenService = (MavenService) (Object) ServiceContainer.getMavenService();
 
 		if (isJavaGradleProject(projectPath)) {
 			// 这个项目的所有依赖，包括库项目依赖
@@ -625,9 +622,9 @@ public class JavaGradleProjectSupport implements ProjectSupport {
 		ArrayList<BuildGradle.MavenDependency> arrayList = new ArrayList<>();
 		ProjectService projectService = ServiceContainer.getProjectService();
 		Map<String, List<String>> libraryMapping = projectService.getLibraryMapping();
-		
+
 		// 兼容AIDE+原版编译器
-		MavenService mavenService = (MavenService)(Object)ServiceContainer.getMavenService();
+		MavenService mavenService = (MavenService) (Object) ServiceContainer.getMavenService();
 		for (String str : libraryMapping.keySet()) {
 			if (GradleTools.isGradleProject(str)) {
 				Iterator<BuildGradle.Dependency> it = getProjectDependencies(str).iterator();
@@ -898,6 +895,7 @@ public class JavaGradleProjectSupport implements ProjectSupport {
 		return false;
 	}
 
+	// -> onSaveFiles
 	@Override
 	public void cn(List<String> savedFilePaths, boolean p) {
 		// 新修改且保存的文件列表
@@ -972,7 +970,8 @@ public class JavaGradleProjectSupport implements ProjectSupport {
 	public boolean lg() {
 		return true;
 	}
-
+	
+	// addLibrary
 	@Override
 	public void nw(String string) {
 	}
@@ -997,8 +996,16 @@ public class JavaGradleProjectSupport implements ProjectSupport {
 	}
 
 	@Override
-	public boolean u7(String string) {
-		return false;
+	public boolean u7(String str) {
+		return ((ServiceContainer.isAggregateVersion() || ServiceContainer.appId.equals("com.aide.phonegap"))
+				&& str.toLowerCase().endsWith(".html"))
+						? FileSystem.parentFileNameContain(str, "www") != null
+						: (ServiceContainer.isAggregateVersion() || ServiceContainer.appId.equals("com.aide.ui"))
+								&& str.toLowerCase().endsWith(".xml")
+								&& FileSystem.getName(FileSystem.getParent(str)).startsWith("layout")
+								&& FileSystem.parentFileNameContain(str, "res") != null;
+
+		//return false;
 	}
 
 	/**
@@ -1010,6 +1017,7 @@ public class JavaGradleProjectSupport implements ProjectSupport {
 	 * 根据源码绝对路径找到相对路径 [全类名]
 	 * 从源码绝对路径计算 类名(.).java
 	 */
+	// getSourceFilePath
 	@Override
 	public String v5(String sourcesFilePath) {
 		ProjectService projectService = ServiceContainer.getProjectService();
@@ -1032,6 +1040,7 @@ public class JavaGradleProjectSupport implements ProjectSupport {
 	 * 与 v5 互为逆运算
 	 * 根据源码相对路径[全类名]找到 绝对路径
 	 */
+	// getSourceClassNamePath
 	@Override
 	public String sh(String classNamePath) {
 		ProjectService projectService = ServiceContainer.getProjectService();
@@ -1117,7 +1126,7 @@ public class JavaGradleProjectSupport implements ProjectSupport {
 	public int rN(String dirPath) {
 		return AddAndroidFiles.getAddTypeName(dirPath);
 	}
-	// 返回图片id
+	// 返回图片id -> getAddDrawableId
 	@Override
 	public int we(String dirPath) {
 		return AddAndroidFiles.getDrawableId(dirPath);
