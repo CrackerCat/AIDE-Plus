@@ -9,6 +9,7 @@ import com.aide.ui.util.FileSystem;
 import io.github.zeroaicy.aide.utils.ZeroAicyBuildGradle;
 import android.text.TextUtils;
 import java.io.File;
+import java.util.Arrays;
 
 public class ZeroAicyAndroidProjectSupport extends AndroidProjectSupport {
 	public ZeroAicyAndroidProjectSupport() {
@@ -51,7 +52,7 @@ public class ZeroAicyAndroidProjectSupport extends AndroidProjectSupport {
 			}
 
 			engineSolutionProject.fY
-					.add(new EngineSolution.File(projectPath + "/" + cmakeListsTxtPath, "C++", null, false, false));
+					.add(new EngineSolution.File(projectPath + "/" + cmakeListsTxtPath, "C++:+", null, false, false));
 		}
 	}
 
@@ -89,6 +90,50 @@ public class ZeroAicyAndroidProjectSupport extends AndroidProjectSupport {
 		}
 
 		return false;
+	}
+
+	private static List<String> advises = Arrays.asList(new String[]{"com.google.android.material:material::+",
+			"androidx.appcompat:appcompat:+", "androidx.arch.core:core-common:+", "androidx.arch.core:core:+",
+			"androidx.arch.core:core-runtime:+", "androidx.lifecycle:lifecycle-common:+",
+			"androidx.lifecycle:lifecycle-common-java8:+", "androidx.lifecycle:lifecycle-compiler:+",
+			"androidx.lifecycle:lifecycle-extensions:+", "androidx.lifecycle:lifecycle-livedata:+",
+			"androidx.lifecycle:lifecycle-livedata-core:+", "androidx.lifecycle:lifecycle-reactivestreams:+",
+			"androidx.lifecycle:lifecycle-runtime:+", "androidx.lifecycle:lifecycle-viewmodel:+",
+			"androidx.paging:paging-common:+", "androidx.paging:paging-runtime:+", "androidx.paging:paging-rxjava2:+",
+			"androidx.room:room-common:+", "androidx.room:room-compiler:+", "androidx.room:room-guava:+",
+			"androidx.room:room-migration:+", "androidx.room:room-runtime:+", "androidx.room:room-rxjava2:+",
+			"androidx.sqlite:sqlite:+", "androidx.sqlite:sqlite-framework:+",
+			"androidx.constraintlayout:constraintlayout:+", "androidx.constraintlayout:constraintlayout-solver:+",
+			"androidx.vectordrawable:vectordrawable-animated:+", "androidx.asynclayoutinflater:asynclayoutinflater:+",
+			"androidx.car:car:+", "androidx.cardview:cardview:+", "androidx.collection:collection:+",
+			"androidx.coordinatorlayout:coordinatorlayout:+", "androidx.cursoradapter:cursoradapter:+",
+			"androidx.browser:browser:+", "androidx.customview:customview:+", "com.google.android.material:material:+",
+			"androidx.documentfile:documentfile:+", "androidx.drawerlayout:drawerlayout:+",
+			"androidx.exifinterface:exifinterface:+", "androidx.gridlayout:gridlayout:+",
+			"androidx.heifwriter:heifwriter:+", "androidx.interpolator:interpolator:+", "androidx.leanback:leanback:+",
+			"androidx.loader:loader:+", "androidx.localbroadcastmanager:localbroadcastmanager:+",
+			"androidx.media2:media2:+", "androidx.media2:media2-exoplayer:+", "androidx.mediarouter:mediarouter:+",
+			"androidx.multidex:multidex:+", "androidx.multidex:multidex-instrumentation:+",
+			"androidx.palette:palette:+", "androidx.percentlayout:percentlayout:+",
+			"androidx.leanback:leanback-preference:+", "androidx.legacy:legacy-preference-v14:+",
+			"androidx.preference:preference:+", "androidx.print:print:+", "androidx.recommendation:recommendation:+",
+			"androidx.recyclerview:recyclerview-selection:+", "androidx.recyclerview:recyclerview:+",
+			"androidx.slice:slice-builders:+", "androidx.slice:slice-core:+", "androidx.slice:slice-view:+",
+			"androidx.slidingpanelayout:slidingpanelayout:+", "androidx.annotation:annotation:+",
+			"androidx.core:core:+", "androidx.contentpager:contentpager:+", "androidx.legacy:legacy-support-core-ui:+",
+			"androidx.legacy:legacy-support-core-utils:+", "androidx.dynamicanimation:dynamicanimation:+",
+			"androidx.emoji:emoji:+", "androidx.emoji:emoji-appcompat:+", "androidx.emoji:emoji-bundled:+",
+			"androidx.fragment:fragment:+", "androidx.media:media:+", "androidx.tvprovider:tvprovider:+",
+			"androidx.legacy:legacy-support-v13:+", "androidx.legacy:legacy-support-v4:+",
+			"androidx.vectordrawable:vectordrawable:+", "androidx.swiperefreshlayout:swiperefreshlayout:+",
+			"androidx.textclassifier:textclassifier:+", "androidx.transition:transition:+",
+			"androidx.versionedparcelable:versionedparcelable:+", "androidx.viewpager:viewpager:+",
+			"androidx.wear:wear:+", "androidx.webkit:webkit:+"});
+	@Override
+	public List<String> getAddToProjectAdvise(String string) {
+		List<String> addToProjectAdvise = super.getAddToProjectAdvise(string);
+		addToProjectAdvise.addAll(0, advises);
+		return addToProjectAdvise;
 	}
 
 }
