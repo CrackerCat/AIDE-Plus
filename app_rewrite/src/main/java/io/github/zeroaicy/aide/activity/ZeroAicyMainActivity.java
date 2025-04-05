@@ -56,6 +56,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import com.aide.ui.services.FileBrowserService;
+import android.widget.LinearLayout;
+import android.widget.EditText;
+import android.text.InputType;
 
 public class ZeroAicyMainActivity extends MainActivity {
 
@@ -85,6 +88,12 @@ public class ZeroAicyMainActivity extends MainActivity {
 		}
 		isOnCreated = true;
 		showRequestManageExternalStorage();
+		
+		// 修复 MainSearchBarNoTabs 与 符号栏重叠问题
+//		LinearLayout mainSearchBarNoTabsView = this.findViewById(R.id.mainSearchBarNoTabs);
+//		ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) mainSearchBarNoTabsView.getLayoutParams();
+//		layoutParams.setMargins(layoutParams.leftMargin, layoutParams.topMargin, layoutParams.rightMargin, 40);
+		
 	}
 
 	private boolean isExit = false;
@@ -110,7 +119,7 @@ public class ZeroAicyMainActivity extends MainActivity {
 	@Override
 	public void finish() {
 		super.finish();
-		exit();
+		// exit();
 	}
 
 	@Override
@@ -123,11 +132,12 @@ public class ZeroAicyMainActivity extends MainActivity {
 		//		engineService.lp();
 		//		
 		super.onDestroy();
-		exit();
+		
+		// exit();
 	}
 
 	private void exit() {
-		if (this.isExit) {
+		if (this.isExit && !this.isRecreate) {
 			this.isExit = false;
 			// 强制退出，防止ServiceContainer::shutdown()与异步导致的错误
 			System.exit(0);
@@ -315,7 +325,7 @@ public class ZeroAicyMainActivity extends MainActivity {
 	 * 显示授权请求弹窗
 	 */
 	public void showRequestManageExternalStorage() {
-		
+
 		// 已经在显示了
 		if (this.showRequestAlertDialog != null && this.showRequestAlertDialog.isShowing()) {
 			return;
@@ -345,8 +355,7 @@ public class ZeroAicyMainActivity extends MainActivity {
 		// Window window = this.showRequestAlertDialog.getWindow();
 		// 置顶
 		// window.setType(window.getAttributes().type  |= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW);
-		
-		
+
 		this.showRequestAlertDialog.show();
 		// System.out.println("this.showRequestAlertDialog -> " + this.showRequestAlertDialog);
 
@@ -512,6 +521,32 @@ public class ZeroAicyMainActivity extends MainActivity {
 
 	}
 
+	// isUseMenuSearchWidget
+	@Override
+	public boolean yO() {
+		// isUseMenuSearchWidget
+		boolean isUseEditorTabs = super.yO();
+		if (isUseEditorTabs) {
+			return !ZeroAicySetting.enableNoUseTabsSearchBar();
+		}
+		return isUseEditorTabs;
+	}
+	
+	// mainSearchBox
+	EditText mainSearchBoxEditText;
+	@Override
+	public void cT() {
+		super.cT();
+		if( yO() ) {
+			return;
+		}
+		if( this.mainSearchBoxEditText == null ){
+			this.mainSearchBoxEditText = findViewById(R.id.mainSearchBox);
+		}
+		this.mainSearchBoxEditText.setInputType(InputType.TYPE_CLASS_TEXT);
+	}
+	
+
 	private static void gn(Object obj, Intent intent) {
 		((MainActivity) obj).startActivity(intent);
 		Probelytics.BT(obj, intent);
@@ -573,8 +608,7 @@ public class ZeroAicyMainActivity extends MainActivity {
 						launchIntentForPackage = getPackageManager().getLaunchIntentForPackage("com.aide.termux");
 
 					}
-					
-					
+
 					if (launchIntentForPackage == null) {
 						com.aide.common.MessageBox.BT(ServiceContainer.getMainActivity(), "运行错误",
 								"AIDE-Termux未安装或找不到主Activity");
@@ -582,9 +616,9 @@ public class ZeroAicyMainActivity extends MainActivity {
 					}
 
 					String currentAppHome = ZeroAicySetting.getCurrentAppHome();
-					
+
 					if (currentAppHome == null) {
-						
+
 						{
 							FileBrowserService fileBrowserService = ServiceContainer.getFileBrowserService();
 							// CurrentDir
@@ -609,24 +643,24 @@ public class ZeroAicyMainActivity extends MainActivity {
 							// 设置工作目录
 							launchIntentForPackage.putExtra(work_dir_extra, currentFile.getAbsolutePath());
 						}
-//						com.aide.common.MessageBox.BT(ServiceContainer.getMainActivity(), "没有打开Gradle项目",
-//								"请保证项目目录下GradleWrapper(Gradle包装器)");
-						
-					}else{
-						
+						//						com.aide.common.MessageBox.BT(ServiceContainer.getMainActivity(), "没有打开Gradle项目",
+						//								"请保证项目目录下GradleWrapper(Gradle包装器)");
+
+					} else {
+
 						File gradleProjectRootDir = new File(currentAppHome).getParentFile();
-						
+
 						// 设置工作目录
 						launchIntentForPackage.putExtra(work_dir_extra, gradleProjectRootDir.getAbsolutePath());
-						
+
 						if (cmdline.contains("gradle")) {
 							if (!hasGradlew(currentAppHome)) {
 								com.aide.common.MessageBox.BT(ServiceContainer.getMainActivity(), "不是Gradle项目",
-															  "请保证项目目录下GradleWrapper(Gradle包装器)");
+										"请保证项目目录下GradleWrapper(Gradle包装器)");
 								return true;
 							}
 						}
-						
+
 						// gradle 命令
 						launchIntentForPackage.putExtra(gradle_cmd_line_extra, cmdline);
 					}

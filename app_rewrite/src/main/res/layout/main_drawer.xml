@@ -70,7 +70,8 @@
 							android:visibility="gone"
 							android:layout_width="fill_parent"
 							android:layout_height="wrap_content"
-							android:minHeight="?android:actionBarSize">
+							android:minHeight="?android:actionBarSize"
+							android:layout_marginBottom="40dp">
 
 							<TextView
 								android:id="@id/mainSearchLabel"

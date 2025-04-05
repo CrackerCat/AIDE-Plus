@@ -14,7 +14,6 @@ import io.github.zeroaicy.aide.utils.Utils;
 import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import android.view.Display.Mode;
 
 public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -106,6 +105,10 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 	public static boolean enableActionBarSpinner() {
 		return getDefaultSpBoolean("zero_aicy_enable_actionbar_tab_spinner", true);
 	}
+	public static boolean enableNoUseTabsSearchBar() {
+		return getDefaultSpBoolean("zero_aicy_enable_no_use_tabs_searchbar", true);
+	}
+	
 	public static boolean enableFollowSystem() {
 		return getDefaultSpBoolean("zero_aicy_enable_follow_system", false);
 	}
