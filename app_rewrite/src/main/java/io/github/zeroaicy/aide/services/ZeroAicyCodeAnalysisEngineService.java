@@ -9,6 +9,9 @@ import com.aide.common.AppLog;
 import com.aide.engine.service.CodeAnalysisEngineService;
 import com.aide.ui.MainActivity;
 import com.aide.ui.ServiceContainer;
+import java.util.Locale;
+import com.aide.ui.AppPreferences;
+import android.content.Context;
 
 public class ZeroAicyCodeAnalysisEngineService extends CodeAnalysisEngineService {
 
@@ -16,23 +19,44 @@ public class ZeroAicyCodeAnalysisEngineService extends CodeAnalysisEngineService
 
 	private static final String TAG = "ZeroAicyCodeAnalysisEngineService";
 
+	private static Locale defaultLocale = Locale.getDefault();
+
 	private NotificationManager notificationManager;
 
 	private Notification notification;
-
 
 	//*
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		// 初始化 App
-		ServiceContainer.setContext(getApplicationContext());
+		Context applicationContext = getApplicationContext();
+		ServiceContainer.setContext(applicationContext);
+		AppPreferences.init(applicationContext);
+		
+		setAppLocale();
 		
 		// setNotificationAndForeground();
 
 		AppLog.d(TAG, "onCreate");
 	}
 
+	private void setAppLocale() {
+		
+		String appLanguage = AppPreferences.getAppLanguage();
+		
+		Locale locale;
+		if (appLanguage == null || "default".equals(appLanguage)) {
+			// 使用默认
+			locale = defaultLocale;
+		} else {
+			locale = new Locale(appLanguage);
+		}
+		// 设置App语言
+		if (locale != null) {
+			Locale.setDefault(locale);
+		}
+	}
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -46,7 +70,6 @@ public class ZeroAicyCodeAnalysisEngineService extends CodeAnalysisEngineService
 
 		return super.onUnbind(intent);
 	}
-
 
 	@Override
 	public void onDestroy() {
@@ -63,12 +86,12 @@ public class ZeroAicyCodeAnalysisEngineService extends CodeAnalysisEngineService
 	private void setNotificationAndForeground() {
 		// String CHANNEL_ID = "engine";
 		String CHANNEL_ID = "other";
-		
+
 		try {
 			/*
 			if (this.notificationChannel == null) {
 				NotificationChannelCompat.Builder builder = new NotificationChannelCompat.Builder(CHANNEL_ID, NotificationManager.IMPORTANCE_HIGH);
-
+			
 				this.notificationChannel = builder.build();
 				NotificationManagerCompat from = NotificationManagerCompat.from(this);
 				from.createNotificationChannel(this.notificationChannel);	
@@ -87,14 +110,14 @@ public class ZeroAicyCodeAnalysisEngineService extends CodeAnalysisEngineService
 				this.notification = builder.build();
 
 				//startForeground服务前台化，要在5秒内调用成功，否则前台化失败
-				
+
 				startForeground(id, notification);
 
 			}
-		}
-		catch (Throwable e) {
+		} catch (Throwable e) {
 			AppLog.e(TAG, e);
 		}
 	}
 
 }
+
