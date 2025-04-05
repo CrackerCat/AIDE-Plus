@@ -94,26 +94,30 @@ public class ZeroAicyMavenService {
 	}
 
 	/**
-	 * 默认下载maven仓库路径
+	 * 默认下载maven仓库路径 只用 userM2Repositories 的第一个
 	 */
-	// DW() -> getDefaulRepositoriePath
 	public static String getDefaulRepositoriePath() {
 		String userM2Repositories = ZeroAicyExtensionInterface.getUserM2Repositories();
-		if (userM2Repositories != null) {
-			int indexOf = userM2Repositories.indexOf(':');
-			if (indexOf > 0) {
-				return userM2Repositories.substring(0, indexOf);
+
+		if (userM2Repositories.indexOf(';') > 0) {
+			// 取用户第一个仓库地址作为默认下载地址
+			for (String repositoriePath : userM2Repositories.split(";")) {
+				repositoriePath = repositoriePath.trim();
+				if (repositoriePath.isEmpty()) {
+					continue;
+				}
+				File repositorieFile = new File(repositoriePath);
+				if( repositorieFile.isDirectory()){
+					return repositoriePath;
+				}
 			}
-			return userM2Repositories;
+
+			//
+			return FileSystem.getExternalStorageDirectory() + "/.aide/maven";
 		}
-		try {
-			return FileSystem.getNoBackupFilesDirPath() + "/.aide/maven";
-		} catch (Throwable th) {
-			if (th instanceof Error)
-				throw (Error) th;
-			else
-				throw new Error(th);
-		}
+		return userM2Repositories;
+
+		// return FileSystem.getNoBackupFilesDirPath() + "/.aide/maven";
 	}
 
 	// 返回本地缓存不存在的依赖
@@ -177,7 +181,7 @@ public class ZeroAicyMavenService {
 					continue;
 				}
 				// 传递排除选项
-				
+
 				subArtifactNode = makeUpdateDep(subArtifactNode);
 				subArtifactNode.syncExclusions(curArtifactNode);
 				getNotExistsLocalCache(flatRepoPathMap, subArtifactNode, dependencyList, depth - 1);
@@ -663,8 +667,7 @@ public class ZeroAicyMavenService {
 				// subArtifactNode.syncExclusions(curArtifactNode);
 				subArtifactNode = makeUpdateDep(subArtifactNode);
 				subArtifactNode.syncExclusions(curArtifactNode);
-				
-				
+
 				// 计算dependency的地址
 				String depPath2 = resolveMavenDepPath(flatRepositoryPathMap, subArtifactNode);
 				if (depPath2 != null) {
@@ -791,9 +794,9 @@ public class ZeroAicyMavenService {
 	private List<String> getRepositoriePaths() {
 		try {
 			ArrayList<String> arrayList = new ArrayList<>();
-			for (String str : AppPreferences.getUserM2repositories().split(";")) {
-				if (!str.trim().isEmpty()) {
-					arrayList.add(str.trim());
+			for (String repositoriePath : AppPreferences.getUserM2repositories().split(";")) {
+				if (!repositoriePath.trim().isEmpty()) {
+					arrayList.add(repositoriePath.trim());
 				}
 			}
 			arrayList.add(getDefaulRepositoriePath());

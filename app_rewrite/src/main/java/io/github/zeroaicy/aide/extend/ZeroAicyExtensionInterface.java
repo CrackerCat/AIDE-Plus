@@ -496,12 +496,21 @@ public class ZeroAicyExtensionInterface {
 	public static boolean isEnableSplitScreenConsole( ) {
 		return false;
 	}
+	
 	/**
 	 * 修改maven默认下载路径
 	 */
 	@Keep
 	public static String getUserM2Repositories( ) {
-		return ZeroAicySetting.getDefaultSpString("user_m2repositories", null);
+		String externalStorageDirectory = FileSystem.getExternalStorageDirectory() + "/.aide/maven";
+		
+		// 用户本地仓库地址
+		String userM2Repositories = ZeroAicySetting.getDefaultSpString("user_m2repositories", externalStorageDirectory);
+		
+		if( TextUtils.isEmpty( userM2Repositories )){
+			return externalStorageDirectory;
+		}
+		return userM2Repositories;
 	}
 
 	/**
