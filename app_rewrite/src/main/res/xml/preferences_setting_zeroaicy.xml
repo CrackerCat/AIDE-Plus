@@ -19,7 +19,13 @@
                 android:key="zero_aicy_enable_actionbar_tab_spinner"
                 android:summary="重启生效"
                 android:defaultValue="true" />
-
+			
+            <SwitchPreference
+                android:title="启用非ActionBar搜索框模式"
+                android:key="zero_aicy_enable_no_use_tabs_searchbar"
+                android:summary="搜索框将悬浮在符号栏上面，重启生效"
+                android:defaultValue="true" />
+			
 			<SwitchPreference
                 android:title="主题跟随系统"
                 android:key="zero_aicy_enable_follow_system"
@@ -289,6 +295,37 @@
 		</PreferenceCategory>
 
 	</PreferenceScreen>
+
+	<PreferenceScreen
+        android:title="关于此版本"
+        android:summary="此版本简介">
+        <PreferenceCategory
+            android:title="联系与更新">
+            <Preference
+                android:title="官方网站"
+                android:key="zero_aicy_relationship_official_website"
+                android:summary="https://plus.androidide.cn" />
+			
+            <Preference
+                android:title="QQ群"
+                android:key="zero_aicy_relationship_qq_group"
+                android:summary="487145957" />
+			<Preference
+                android:title="QQ频道"
+                android:key="zero_aicy_relationship_qq_guild"
+                android:summary="r90h7p6zo6" />
+			<Preference
+                android:title="AIDE+开源地址-Github"
+                android:key="zero_aicy_relationship_open_source_github"
+                android:summary="https://github.com/ZeroAicy/AIDE-Plus" />
+			<Preference
+                android:title="AIDE+开源地址-Gitee"
+                android:key="zero_aicy_relationship_open_source_gitee"
+                android:summary="https://gitee.com/ZeroAicy/AIDE-Plus" />
+
+        </PreferenceCategory>
+    </PreferenceScreen>
+
 
 </PreferenceScreen>
 
