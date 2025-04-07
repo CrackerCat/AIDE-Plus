@@ -108,7 +108,7 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 	public static boolean enableNoUseTabsSearchBar() {
 		return getDefaultSpBoolean("zero_aicy_enable_no_use_tabs_searchbar", true);
 	}
-	
+
 	public static boolean enableFollowSystem() {
 		return getDefaultSpBoolean("zero_aicy_enable_follow_system", false);
 	}
@@ -142,8 +142,7 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 
 	}
 	public static String getProjectPunctuationxml() {
-		String XML = getDefaultSpString("Myfz_project_Punctuation_xml",
-				"< > / = \\ : @ + ( ) ; , . | & ! [ ] { } _ -");
+		String XML = getDefaultSpString("Myfz_project_Punctuation_xml", "< > / = \\ : @ + ( ) ; , . | & ! [ ] { } _ -");
 		String processed = replaceChar(XML);
 		processed = spaces(processed);
 		processed = space(processed);
@@ -398,6 +397,21 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 		return ZeroAicySetting.defaultSp.edit().putBoolean("test_zero_aicy_enable_ensure_capacity", false).commit();
 	}
 
+	/**
+	 * 上次编译器实现申请是否是 默认
+	 */
+	public static boolean isLastCompilerImplementForDefault() {
+		return "default".equals( getDefaultSpString("zero_aicy_compiler_implement", "default"));
+	}
+
+	/**
+	* 切换实现
+	*/
+	public static void switchLastCompilerImplement(boolean isEnableEclipseCompilerForJava) {
+		String lastCompilerImplement = isEnableEclipseCompilerForJava ? "ecj" : "default";
+		ZeroAicySetting.defaultSp.edit().putString("zero_aicy_compiler_implement", lastCompilerImplement).commit();
+	}
+
 	private Context context;
 
 	public ZeroAicySetting(Context context) {
@@ -426,7 +440,13 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 		}
 
 		if ("test_zero_aicy_enable_eclipse_compiler_for_java".equals(key)) {
-			if (isEnableEclipseCompilerForJava()) {
+
+			boolean isEnableEclipseCompilerForJava = isEnableEclipseCompilerForJava();
+
+			// 已切换编译器实现，记录上一次编译器实现
+			switchLastCompilerImplement(!isEnableEclipseCompilerForJava);
+
+			if (isEnableEclipseCompilerForJava) {
 				// ecj模式禁用 JavaFormatOption.ADJUST_SPACES
 				// 默认启用
 				ZeroAicySetting.defaultSp.edit().putBoolean(JavaFormatOption.ADJUST_SPACES.getKey(), false)
@@ -441,5 +461,6 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 		}
 
 	}
+
 }
 

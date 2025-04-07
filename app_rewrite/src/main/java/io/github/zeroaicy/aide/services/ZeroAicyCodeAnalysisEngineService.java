@@ -12,6 +12,9 @@ import com.aide.ui.ServiceContainer;
 import java.util.Locale;
 import com.aide.ui.AppPreferences;
 import android.content.Context;
+import io.github.zeroaicy.aide.preference.ZeroAicySetting;
+import io.github.zeroaicy.util.FileUtil;
+import java.io.File;
 
 public class ZeroAicyCodeAnalysisEngineService extends CodeAnalysisEngineService {
 
@@ -32,14 +35,18 @@ public class ZeroAicyCodeAnalysisEngineService extends CodeAnalysisEngineService
 		// 初始化 App
 		Context applicationContext = getApplicationContext();
 		ServiceContainer.setContext(applicationContext);
+		// 设置初始化
+		ZeroAicySetting.init(applicationContext);
 		AppPreferences.init(applicationContext);
 		
 		setAppLocale();
+		checkCompilerImplementation();
 		
 		// setNotificationAndForeground();
 
 		AppLog.d(TAG, "onCreate");
 	}
+
 
 	private void setAppLocale() {
 		
@@ -58,6 +65,25 @@ public class ZeroAicyCodeAnalysisEngineService extends CodeAnalysisEngineService
 		}
 	}
 
+	private void checkCompilerImplementation() {
+		// ecj false
+		boolean isLastCompilerImplementForDefault = ZeroAicySetting.isLastCompilerImplementForDefault();
+		boolean isEnableEclipseCompilerForJava = ZeroAicySetting.isEnableEclipseCompilerForJava();
+		
+		// 是否是默认编译器
+		boolean isDefaultCompilerForJava = !isEnableEclipseCompilerForJava;
+		// 上一次编译器 与  当前编译器实现一致
+		if( isLastCompilerImplementForDefault == isDefaultCompilerForJava){
+			return;
+		}
+		// 同步当前编译器实现
+		ZeroAicySetting.switchLastCompilerImplement(isEnableEclipseCompilerForJava);
+		// 删除编译器序列化
+		File enginecacheFile = new File(getCacheDir(), "enginecache");
+		FileUtil.deleteFolder(enginecacheFile);
+		enginecacheFile.mkdirs();
+	}
+	
 	@Override
 	public IBinder onBind(Intent intent) {
 		AppLog.d(TAG, "onBind");
