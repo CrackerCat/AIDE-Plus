@@ -18,7 +18,6 @@ import android.os.Build;
 import android.text.TextUtils;
 import androidx.annotation.Keep;
 import com.aide.common.AppLog;
-import com.aide.common.StreamUtilities;
 import com.aide.engine.SyntaxError;
 import com.aide.ui.AppPreferences;
 import com.aide.ui.ServiceContainer;
@@ -33,28 +32,26 @@ import io.github.zeroaicy.aide.cmake.ProcessUtil;
 import io.github.zeroaicy.aide.extend.ZeroAicyExtensionInterface;
 import io.github.zeroaicy.aide.shell.ShellEnvironment;
 import io.github.zeroaicy.aide.shell.ShellEnvironmentUtils;
+import io.github.zeroaicy.aide.ui.project.ZeroAicyAndroidProjectSupport;
 import io.github.zeroaicy.aide.utils.PropertiesConfiguration;
 import io.github.zeroaicy.aide.utils.Utils;
 import io.github.zeroaicy.aide.utils.ZeroAicyBuildGradle;
+import io.github.zeroaicy.prefab.Cli;
 import io.github.zeroaicy.util.ContextUtil;
 import io.github.zeroaicy.util.FileUtil;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
-import java.util.Set;
-import io.github.zeroaicy.aide.ui.project.ZeroAicyAndroidProjectSupport;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class NdkBuildService {
 	public static final String TAG = "NdkBuildService";
@@ -92,21 +89,110 @@ public class NdkBuildService {
 		ndkBuildService.tp(th);
 	}
 
-	private SyntaxError VH(String str, int i, int i2, String str2) {
+	private SyntaxError makeSyntaxError(String str, int line, int columnNumber, String errorInfo) {
 		SyntaxError syntaxError = new SyntaxError();
-		syntaxError.jw = i;
-		syntaxError.fY = i2;
-		syntaxError.qp = i;
+		syntaxError.jw = line;
+		syntaxError.fY = columnNumber;
+		syntaxError.qp = line;
 		syntaxError.k2 = 1000;
-		syntaxError.zh = str + ": " + str2;
+		syntaxError.zh = str + ": " + errorInfo;
 		return syntaxError;
 	}
 
-	static Map<String, List<SyntaxError>> Zo(NdkBuildService ndkBuildService, String str, String str2) {
-		return ndkBuildService.gn(str, str2);
+	static Map<String, List<SyntaxError>> parserSyntaxErrors(NdkBuildService ndkBuildService, String modulePath,
+			String ndkError) {
+		return ndkBuildService.parserSyntaxErrors(modulePath, ndkError);
+	}
+	private Map<String, List<SyntaxError>> parserSyntaxErrors(String modulePath, String ndkError) {
+		Map<String, List<SyntaxError>> syntaxErrorsMap = new HashMap<>();
+
+		String[] lineInfos = ndkError.split("\n");
+		int lineInfosSize = lineInfos.length;
+		for (int index = 0; index < lineInfosSize; index++) {
+
+			String lineInfo = lineInfos[index].trim();
+
+			if (lineInfo.length() == 0) {
+				continue;
+			}
+
+			try {
+				int filePathEndIndex = lineInfo.indexOf(':');
+
+				if (filePathEndIndex > 0) {
+					String path = new File(lineInfo.substring(0, filePathEndIndex)).getPath();
+
+					if (FileSystem.KD(path)) {
+
+						int lineNumberStartIndex = filePathEndIndex + 1;
+						int lineNumberEndIndex = lineInfo.indexOf(':', lineNumberStartIndex);
+
+						if (lineNumberEndIndex < 0) {
+							// 没有 ':' 就找空格
+							lineNumberEndIndex = lineInfo.indexOf(' ', lineNumberStartIndex);
+						}
+
+						if (lineNumberEndIndex > 0) {
+							int lineNumber = Utils
+									.parseInt(lineInfo.substring(lineNumberStartIndex, lineNumberEndIndex), 1);
+
+							int columnNumberStartIndex = lineNumberEndIndex + 1;
+							int columnNumberEndIndex = lineInfo.indexOf(':', columnNumberStartIndex);
+							int columnNumber = 1;
+
+							if (columnNumberEndIndex > 0) {
+								String columnNumberString = lineInfo.substring(columnNumberStartIndex,
+										columnNumberEndIndex);
+								columnNumber = Utils.parseInt(columnNumberString, 1);
+							}
+
+							String errorInfo = lineInfo.substring(columnNumberEndIndex + 1, lineInfo.length()).trim();
+
+							String errorPrefix = "error:";
+							if (errorInfo.startsWith(errorPrefix)) {
+								// 如果 包含error 就剔除
+								errorInfo = errorInfo.substring(errorPrefix.length(), errorInfo.length()).trim();
+							}
+
+							int lineInfosSize2 = lineInfosSize - 1;
+							while (index < lineInfosSize2) {
+								String nextLineInfo = lineInfos[index + 1];
+								if (!nextLineInfo.contains(" |    ")) {
+									break;
+								}
+
+								index++;
+								errorInfo += "\n";
+								errorInfo += nextLineInfo;
+							}
+
+							SyntaxError syntaxError = makeSyntaxError("NDK", lineNumber, columnNumber, errorInfo);
+
+							if (!syntaxErrorsMap.containsKey(path)) {
+								syntaxErrorsMap.put(path, new ArrayList<SyntaxError>());
+							}
+							syntaxErrorsMap.get(path).add(syntaxError);
+
+							continue;
+
+						}
+					}
+				}
+			} catch (Exception e) {
+				AppLog.e(e);
+			}
+
+			if (!syntaxErrorsMap.containsKey(modulePath)) {
+				syntaxErrorsMap.put(modulePath, new ArrayList<>());
+			}
+			syntaxErrorsMap.get(modulePath).add(makeSyntaxError("NDK", 1, 1, lineInfo));
+		}
+
+		return syntaxErrorsMap;
+
 	}
 
-	private Map<String, List<SyntaxError>> gn(String str, String str2) {
+	private Map<String, List<SyntaxError>> parserSyntaxErrors2(String str, String str2) {
 		HashMap<String, List<SyntaxError>> hashMap = new HashMap<>();
 
 		for (String errorLine : str2.split("\n")) {
@@ -123,7 +209,7 @@ public class NdkBuildService {
 
 					if (FileSystem.KD(path)) {
 						int i2 = indexOf + 1;
-						int indexOf2 = errorLine.indexOf(58, i2);
+						int indexOf2 = errorLine.indexOf(':', i2);
 						if (indexOf2 < 0) {
 							indexOf2 = errorLine.indexOf(32, i2);
 						}
@@ -136,7 +222,7 @@ public class NdkBuildService {
 								i = 1;
 							}
 							int i3 = indexOf2 + 1;
-							int indexOf3 = errorLine.indexOf(58, i3);
+							int indexOf3 = errorLine.indexOf(':', i3);
 							if (indexOf3 > 0) {
 								try {
 									Integer.parseInt(errorLine.substring(i3, indexOf3));
@@ -145,7 +231,8 @@ public class NdkBuildService {
 							}
 							String trim2 = errorLine.substring(indexOf3 + 1, errorLine.length()).trim();
 							if (trim2.startsWith("error:")) {
-								SyntaxError VH = VH("NDK", i, 1, trim2.substring(6, trim2.length()).trim());
+								SyntaxError VH = makeSyntaxError("NDK", i, 1,
+										trim2.substring(6, trim2.length()).trim());
 								if (!hashMap.containsKey(path)) {
 									hashMap.put(path, new ArrayList<SyntaxError>());
 								}
@@ -161,7 +248,7 @@ public class NdkBuildService {
 			if (!hashMap.containsKey(str)) {
 				hashMap.put(str, new ArrayList<>());
 			}
-			hashMap.get(str).add(VH("NDK", 1, 1, errorLine));
+			hashMap.get(str).add(makeSyntaxError("NDK", 1, 1, errorLine));
 
 		}
 		return hashMap;
@@ -187,7 +274,7 @@ public class NdkBuildService {
 	}
 
 	static SyntaxError makeSyntaxError(NdkBuildService ndkBuildService, String str, int i, int i2, String str2) {
-		return ndkBuildService.VH(str, i, i2, str2);
+		return ndkBuildService.makeSyntaxError(str, i, i2, str2);
 	}
 
 	private void we(Map<String, List<SyntaxError>> map) {
@@ -282,18 +369,14 @@ public class NdkBuildService {
 			this.modules = modules;
 		}
 
-		private String DW(byte[] data, int i) {
-			String str = "";
-			try {
-				str = StreamUtilities.readTextReader(new InputStreamReader(new ByteArrayInputStream(data)));
-			} catch (Exception unused) {
-			}
+		private String DW(byte[] data, int exitCode) {
+			String str = new String(data);
 
 			String trim = str.trim();
 			if (trim.length() != 0) {
 				return trim;
 			}
-			return "ndk-build exited with code " + i;
+			return "ndk-build exited with code " + exitCode;
 
 		}
 
@@ -404,7 +487,7 @@ public class NdkBuildService {
 				wf j6 = xf.j6(ndkBuildArgs, module, env, true, (OutputStream) null, (byte[]) null);
 
 				if (j6.DW() != 0) {
-					return NdkBuildService.Zo(this.ndkBuildService, module, DW(j6.j6(), j6.DW()));
+					return NdkBuildService.parserSyntaxErrors(this.ndkBuildService, module, DW(j6.j6(), j6.DW()));
 				}
 			}
 
@@ -502,6 +585,9 @@ public class NdkBuildService {
 
 			ProjectService projectService = ServiceContainer.getProjectService();
 
+			// 记录 prefabPaths
+			Set<String> prefabPaths = null;
+
 			for (String modulePath : this.modules) {
 
 				// 是否是 cmake项目
@@ -527,7 +613,6 @@ public class NdkBuildService {
 						// 文件不存在，不是cmake项目
 						continue;
 					}
-
 					// 计算 CMakeLists.txt 父目录
 					if (cmakeListsTxtPath.endsWith("CMakeLists.txt")) {
 						cmakeListsTxtPath = FileSystem.getParent(cmakeListsTxtPath);
@@ -550,6 +635,7 @@ public class NdkBuildService {
 
 					// 待编译 abi
 					LinkedHashSet<String> cmakeAbiFilters = configuration.getCmakeAbiFilters();
+
 					Set<String> cmakeArguments = configuration.getCmakeArguments();
 
 					CmakeBuild.Builder builder = new CmakeBuild.Builder()
@@ -583,6 +669,32 @@ public class NdkBuildService {
 					}
 
 					boolean checkCmakeVersioned = false;
+					// prefab
+					boolean isPrefabEnabled = configuration.isPrefabEnabled();
+					if (isPrefabEnabled && prefabPaths == null) {
+						// 说明启用 prefab, 且 prefab 路径未初始化
+						prefabPaths = makePrefabPaths(this.modules);
+					}
+
+					Cli.Builder cliBuilder = null;
+					//  是 prefab prefabPaths没初始化 且也有 prefab
+					if (isPrefabEnabled && prefabPaths != null && !prefabPaths.isEmpty()) {
+						// 构建 算上 abi 避免冲突
+						cliBuilder = new Cli.Builder()
+								// out
+								// .setOutputFile(prefabCachePath)
+								// abi
+								//.setAbi("arm64-v8a");
+
+								// --build-system
+								.setBuildSystem("cmake")
+								//  prefab paths
+								.setPrefabPaths(prefabPaths)
+								// os
+								.setOsVersion(minSdkVersion);
+
+					}
+
 					for (String abi : cmakeAbiFilters) {
 
 						// 指定构建ABI
@@ -592,12 +704,39 @@ public class NdkBuildService {
 
 						CmakeBuild cmakeBuild = builder.build();
 
+						// configure
+						// isEmpty 说明已初始化 
+						// prefab输出路径
+						if (cliBuilder != null) {
+							String prefabCachePath = projectPath + "/" + cmakeBuildCachePath + "/prefab/" + abi;
+							cliBuilder
+									// 重新指定abi
+									.setAbi(abi)
+									// 重新指定 输出文件夹
+									.setOutputFile(prefabCachePath);
+							try {
+								// 运行 prefab
+								cliBuilder.build().run();
+							} catch (Throwable e) {
+								// 出现异常 返回错误信息
+								return NdkBuildService.parserSyntaxErrors(this.ndkBuildService, projectPath,
+										"prefab Error: " + e.getMessage());
+							}
+							if (!cmakeBuild.error()) {
+								// 添加 -DCMAKE_FIND_ROOT_PATH= 参数
+								List<String> cmakeCommandList = cmakeBuild.getCmakeCommandList();
+								cmakeCommandList.add("-DCMAKE_FIND_ROOT_PATH=" + prefabCachePath);
+
+							}
+
+						}
+
 						// 检查
 						{
 							// CmakeBuild cmakeBuild = builder.build();
 							if (!cmakeBuild.error() && !checkCmakeVersioned) {
 								// 标记已检查
-								checkCmakeVersioned = false;
+								checkCmakeVersioned = true;
 
 								String cmakeVersionString = builder.getCmakeVersion();
 
@@ -624,7 +763,7 @@ public class NdkBuildService {
 							continue;
 						}
 						// make
-						return NdkBuildService.Zo(
+						return NdkBuildService.parserSyntaxErrors(
 								// 
 								this.ndkBuildService, projectPath,
 								DW(runCmakeBuildInfo.getMessagen(), runCmakeBuildInfo.exit()));
@@ -735,7 +874,7 @@ public class NdkBuildService {
 						continue;
 					}
 					// make
-					return NdkBuildService.Zo(
+					return NdkBuildService.parserSyntaxErrors(
 							// 
 							this.ndkBuildService, projectPath,
 							DW(runCmakeBuildInfo.getMessagen(), runCmakeBuildInfo.exit()));
@@ -744,6 +883,17 @@ public class NdkBuildService {
 			}
 
 			return null;
+		}
+
+		private static Set<String> makePrefabPaths(List<String> modules) {
+			Set<String> prefabPaths = new HashSet<>();
+			for (String modulePath : modules) {
+				File prefabFile = new File(modulePath, "prefab");
+				if (prefabFile.isDirectory()) {
+					prefabPaths.add(prefabFile.getAbsolutePath());
+				}
+			}
+			return prefabPaths;
 		}
 
 		private static ProcessExitInfo runCmakeBuild(final CmakeBuild cmakeBuild, String projectPath) {
@@ -769,11 +919,19 @@ public class NdkBuildService {
 			List<String> cmakeCommandList = shellEnvironment
 					.setupShellCommandArguments(cmakeBuild.getCmakeCommandList());
 
-			// AppLog.d(TAG, cmakeCommandList);
+			// AppLog.println_d(String.join("\n \\", cmakeCommandList));
+			// AppLog.println_d();
 
-			ProcessExitInfo processInfo = ProcessUtil.j6(cmakeCommandList, projectPath, env, true, null, null);
+			ProcessExitInfo processInfo = ProcessUtil.exec(cmakeCommandList, projectPath, env, true, null, null);
+
+			// 再 cmake运行后 设置 build.ninja 文件的 时间戳试试
+			File buildNinjaFile = cmakeBuild.getBuildNinjaFile();
+			buildNinjaFile.setLastModified(System.currentTimeMillis());
 
 			if (processInfo.exit() != 0) {
+				// AppLog.d(TAG, "cmake cmd error: -> " + new String(processInfo.getMessagen()));
+				// AppLog.println_d();
+
 				return processInfo;
 			}
 
@@ -783,9 +941,13 @@ public class NdkBuildService {
 
 			// AppLog.d(TAG, ninjaCommandList);
 
-			processInfo = ProcessUtil.j6(ninjaCommandList, projectPath, env, true, null, null);
+			processInfo = ProcessUtil.exec(ninjaCommandList, projectPath, env, true, null, null);
 
 			if (processInfo.exit() != 0) {
+
+				// AppLog.d(TAG, "ninja cmd error: -> " + new String(processInfo.getMessagen()));
+				// AppLog.println_d();
+
 				return processInfo;
 			}
 

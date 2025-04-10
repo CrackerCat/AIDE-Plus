@@ -17,106 +17,103 @@ import io.github.zeroaicy.util.IOUtils;
 
 public class ProcessUtil {
 
-    public static ProcessExitInfo j6(List<String> commandList, String workDir, Map<String, String> env, 
-                                     boolean z, OutputStream outputStream, byte[] bArr)  {
-        try {
+	public static ProcessExitInfo exec(List<String> commandList, String workDir, Map<String, String> env,
+			boolean redirectErrorStream, OutputStream outputStream, byte[] bArr) {
+		try {
 
-            ProcessUtil processUtil = new ProcessUtil(commandList, workDir, env, z);
-            return processUtil.start();
-        }  catch (final Throwable e) {
-            return new ProcessExitInfo(){
-                @Override
-                public int exit() {
-                    return -1;
-                }
+			ProcessUtil processUtil = new ProcessUtil(commandList, workDir, env, redirectErrorStream);
+			return processUtil.start();
+		} catch (final Throwable e) {
+			return new ProcessExitInfo() {
+				@Override
+				public int exit() {
+					return -1;
+				}
 
-                @Override
-                public byte[] getMessagen() {
-                    return Log.getStackTraceString(e).getBytes();
-                }
-            };
-        }
+				@Override
+				public byte[] getMessagen() {
+					return Log.getStackTraceString(e).getBytes();
+				}
+			};
+		}
 	}
 
-    List<String> commandList;
-    String workDir;
-    Map<String, String> env;
-    boolean redirectErrorStream;
+	List<String> commandList;
+	String workDir;
+	Map<String, String> env;
+	boolean redirectErrorStream;
 
-    public ProcessUtil(List<String> commandList, String workDir, Map<String, String> env, boolean redirectErrorStream) {
-        this.commandList = commandList;
-        this.workDir = workDir;
-        this.env = env;
+	public ProcessUtil(List<String> commandList, String workDir, Map<String, String> env, boolean redirectErrorStream) {
+		this.commandList = commandList;
+		this.workDir = workDir;
+		this.env = env;
 
-        if (this.commandList == null) {
-            this.commandList = Collections.emptyList();
-        }
-        this.redirectErrorStream = redirectErrorStream;
+		if (this.commandList == null) {
+			this.commandList = Collections.emptyList();
+		}
+		this.redirectErrorStream = redirectErrorStream;
 
-    }
-    public ProcessExitInfo start() throws Exception {
-        ProcessBuilder processBuilder = new ProcessBuilder();
+	}
+	public ProcessExitInfo start() throws Exception {
+		ProcessBuilder processBuilder = new ProcessBuilder();
 
-        processBuilder .command(commandList);
+		processBuilder.command(commandList);
 
-        if (this.workDir != null) {
-            processBuilder.directory(new File(this.workDir));
-        }
+		if (this.workDir != null) {
+			processBuilder.directory(new File(this.workDir));
+		}
 
-        if (this.env != null) {
-            processBuilder.environment().putAll(env);
-        }
+		if (this.env != null) {
+			processBuilder.environment().putAll(env);
+		}
 
-        processBuilder.redirectErrorStream(this.redirectErrorStream);
+		processBuilder.redirectErrorStream(this.redirectErrorStream);
 
-        // 运行命令
-        final Process process = processBuilder.start();
+		// 运行命令
+		final Process process = processBuilder.start();
 
-        //new Thread(new ReadRunnable(process.getInputStream(), new ByteArrayOutputStream())).start();
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        ProcessUtil.ReadRunnable readRunnable = new ReadRunnable(process.getInputStream(), byteArrayOutputStream);
-        // 读取输出流
-        readRunnable.run();
-        
-        process.waitFor();
-        
-        final int exitValue = process.exitValue();
-        final byte[] messagen = byteArrayOutputStream.toByteArray();
-        
-        return new ProcessExitInfo(){
-            @Override
-            public int exit() {
-                return exitValue;
-            }
+		//new Thread(new ReadRunnable(process.getInputStream(), new ByteArrayOutputStream())).start();
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		ProcessUtil.ReadRunnable readRunnable = new ReadRunnable(process.getInputStream(), byteArrayOutputStream);
+		// 读取输出流
+		readRunnable.run();
 
-            @Override
-            public byte[] getMessagen() {
-                return messagen;
-            }
-        };
-    }
+		process.waitFor();
 
+		final int exitValue = process.exitValue();
+		final byte[] messagen = byteArrayOutputStream.toByteArray();
 
+		return new ProcessExitInfo() {
+			@Override
+			public int exit() {
+				return exitValue;
+			}
 
-    public static class ReadRunnable implements Runnable {
-        private InputStream inputStream;
-        private OutputStream outputStream;
+			@Override
+			public byte[] getMessagen() {
+				return messagen;
+			}
+		};
+	}
 
-        public ReadRunnable(InputStream inputStream, OutputStream outputStream) {
-            this.inputStream = inputStream;
-            this.outputStream = outputStream;
-        }
+	public static class ReadRunnable implements Runnable {
+		private InputStream inputStream;
+		private OutputStream outputStream;
 
-        @Override
-        public void run() {
+		public ReadRunnable(InputStream inputStream, OutputStream outputStream) {
+			this.inputStream = inputStream;
+			this.outputStream = outputStream;
+		}
+
+		@Override
+		public void run() {
 			try {
 				IOUtils.streamTransfer(this.inputStream, this.outputStream);
+			} catch (IOException e) {
+
 			}
-			catch (IOException e) {
-				
-			}
-        }
-    }
+		}
+	}
 
 }
 

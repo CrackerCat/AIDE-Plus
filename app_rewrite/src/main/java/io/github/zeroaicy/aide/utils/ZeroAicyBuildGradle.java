@@ -1080,13 +1080,18 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 
 	boolean viewBindingEnabled = false;
 	boolean useAndroidx = true;
-
+	boolean prefabEnabled = false;
+	
 	public boolean isViewBindingEnabled() {
 		return this.viewBindingEnabled;
 	}
 	public boolean isUseAndroidx() {
 		return this.useAndroidx;
 	}
+	public boolean isPrefabEnabled() {
+		return this.prefabEnabled;
+	}
+	
 
 	String sourceCompatibility;
 	public String getSourceCompatibility() {
@@ -1160,6 +1165,12 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 			// 这样才是默认true
 			this.useAndroidx = !"false".equals(astValue);
 		}
+		
+		// prefab
+		if ("prefab".equals(nodeSimpleName)) {
+			this.prefabEnabled = "true".equals(astValue);
+		}
+		
 	}
 
 	private void parserBuildTypesRelease(String nodeName, AST ast) {

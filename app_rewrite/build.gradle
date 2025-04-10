@@ -94,4 +94,7 @@ dependencies {
 	
 	// apk签名
 	api "com.android.tools.build:apksig:8.5.0-alpha07"
+	
+	// com.google.prefab
+	api "com.google.prefab:api:2.1.0"
 }
