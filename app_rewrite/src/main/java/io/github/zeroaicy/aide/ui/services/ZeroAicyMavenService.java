@@ -107,7 +107,7 @@ public class ZeroAicyMavenService {
 					continue;
 				}
 				File repositorieFile = new File(repositoriePath);
-				if( repositorieFile.isDirectory()){
+				if (repositorieFile.isDirectory()) {
 					return repositoriePath;
 				}
 			}
@@ -601,29 +601,6 @@ public class ZeroAicyMavenService {
 		return artifactNodeCache;
 	}
 
-	private boolean P8(String str, String str2) {
-		try {
-			if (!new File(str2).isDirectory()) {
-				return false;
-			}
-			File[] listFiles = new File(str2).listFiles();
-			if (listFiles == null) {
-				return true;
-			}
-			long lastModified = new File(str).lastModified();
-			for (File file : listFiles) {
-				if (file.isFile() && file.lastModified() < lastModified) {
-					return false;
-				}
-			}
-			return true;
-		} catch (Error th) {
-			throw th;
-		} catch (Throwable th) {
-			throw new Error(th);
-		}
-	}
-
 	private void resolveFullDependencyTree(Map<String, String> flatRepositoryPathMap, String depPath,
 			List<String> depPaths, int depth) {
 		try {
@@ -683,37 +660,52 @@ public class ZeroAicyMavenService {
 
 	private static byte[] emptyZipBytes = new byte[]{0x50, 0x4B, 0x05, 0x06, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00,
 			00, 00, 00, 00, 00, 00, 00};
-	private void extractedAar(String aarPath, String outDir) {
+	private static boolean isUnAar(String aarFilePath, String outDir) {
 		try {
-			if (P8(aarPath, outDir)) {
-				return;
+			if (!new File(outDir).isDirectory()) {
+				return false;
 			}
-			try {
-				// GradleTools isAarEexplodedPath判断的条件是
-				// 必须有 AndroidManifest.xml 和 classes.jar
-				// 但 androidx.graphics:graphics-shapes:1.0.1没有
-				// 所以解压完成后检查一下
-				FileSystem.unZip(new FileInputStream(aarPath), outDir, true);
-				if (!GradleTools.isAarEexplodedPath(outDir)) {
-					// 写入一个空classes.jar，共22b
-					FileOutputStream classesJarOutputStream = null;
-					try {
-						classesJarOutputStream = new FileOutputStream(GradleTools.getAarEexplodedClassesJar(outDir));
-						classesJarOutputStream.write(emptyZipBytes);
-						classesJarOutputStream.close();
-					} finally {
-						IOUtils.close(classesJarOutputStream);
-					}
+			File[] listFiles = new File(outDir).listFiles();
+			if (listFiles == null) {
+				return true;
+			}
+			long lastModified = new File(aarFilePath).lastModified();
+			for (File file : listFiles) {
+				if (file.isFile() && file.lastModified() < lastModified) {
+					return false;
 				}
-				AppLog.d("Extracted AAR " + aarPath);
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
+			return true;
+		} catch (Error th) {
+			throw th;
 		} catch (Throwable th) {
-			if (th instanceof Error)
-				throw (Error) th;
-			else
-				throw new Error(th);
+			throw new Error(th);
+		}
+	}
+	public static void extractedAar(String aarPath, String outDir) {
+		if (isUnAar(aarPath, outDir)) {
+			return;
+		}
+		try {
+			// GradleTools isAarEexplodedPath判断的条件是
+			// 必须有 AndroidManifest.xml 和 classes.jar
+			// 但 androidx.graphics:graphics-shapes:1.0.1没有
+			// 所以解压完成后检查一下
+			FileSystem.unZip(new FileInputStream(aarPath), outDir, true);
+			if (!GradleTools.isAarEexplodedPath(outDir)) {
+				// 写入一个空classes.jar，共22b
+				FileOutputStream classesJarOutputStream = null;
+				try {
+					classesJarOutputStream = new FileOutputStream(GradleTools.getAarEexplodedClassesJar(outDir));
+					classesJarOutputStream.write(emptyZipBytes);
+					classesJarOutputStream.close();
+				} finally {
+					IOUtils.close(classesJarOutputStream);
+				}
+			}
+			AppLog.d("Extracted AAR " + aarPath);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
