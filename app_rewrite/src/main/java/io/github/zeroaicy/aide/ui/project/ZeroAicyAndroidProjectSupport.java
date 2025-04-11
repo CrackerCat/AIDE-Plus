@@ -1,15 +1,21 @@
 package io.github.zeroaicy.aide.ui.project;
 
+import android.text.TextUtils;
+import com.aide.common.AppLog;
 import com.aide.engine.EngineSolution;
 import com.aide.engine.EngineSolutionProject;
 import com.aide.ui.project.AndroidProjectSupport;
-import java.util.List;
 import com.aide.ui.project.internal.GradleTools;
+import com.aide.ui.util.BuildGradle;
 import com.aide.ui.util.FileSystem;
+import io.github.zeroaicy.aide.ui.services.ZeroAicyMavenService;
 import io.github.zeroaicy.aide.utils.ZeroAicyBuildGradle;
-import android.text.TextUtils;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 public class ZeroAicyAndroidProjectSupport extends AndroidProjectSupport {
 	public ZeroAicyAndroidProjectSupport() {
@@ -134,6 +140,91 @@ public class ZeroAicyAndroidProjectSupport extends AndroidProjectSupport {
 		List<String> addToProjectAdvise = super.getAddToProjectAdvise(string);
 		addToProjectAdvise.addAll(0, advises);
 		return addToProjectAdvise;
+	}
+
+	@Override
+	public void init(String projectPath, Map<String, List<String>> libraryMapping, List<String> mainAppWearApps) {
+		super.init(projectPath, libraryMapping, mainAppWearApps);
+
+		// libraryMapping -> key: [aar | gradle 路径] value -> 依赖路径 [必须在 key里 ]
+		// 支持 aar依赖, 遍历 主项目 项目依赖
+		for (String module : new HashSet<String>(libraryMapping.keySet())) {
+			if (!GradleTools.isGradleProject(module)) {
+				continue;
+			}
+
+			ZeroAicyBuildGradle singleton = ZeroAicyBuildGradle.getSingleton();
+
+			String buildGradlePath = GradleTools.getBuildGradlePath(module);
+			if (!FileSystem.isFileAndNotZip(buildGradlePath)) {
+				continue;
+			}
+
+			ZeroAicyBuildGradle configuration = singleton.getConfiguration(buildGradlePath);
+
+			for (BuildGradle.Dependency dependency : configuration.dependencies) {
+
+				String path;
+				// fileTree
+				if (dependency instanceof BuildGradle.FileTreeDependency) {
+					BuildGradle.FileTreeDependency fileTreeDependency = (BuildGradle.FileTreeDependency) dependency;
+					path = fileTreeDependency.getDirPath(module);
+				}
+				// files
+				else if (dependency instanceof BuildGradle.FilesDependency) {
+					BuildGradle.FilesDependency filesDependency = (BuildGradle.FilesDependency) dependency;
+					path = filesDependency.getFilesPath(module);
+				} else {
+					continue;
+				}
+
+				String explodedAarCacheDir = GradleTools.EQ(module);
+
+				// 获得当前项目的 子依赖
+				List<String> moduleDependencys = libraryMapping.get(module);
+				if (moduleDependencys == null) {
+					moduleDependencys = new ArrayList<>();
+					libraryMapping.put(module, moduleDependencys);
+				}
+
+				File dependencyFile = new File(path);
+				boolean isDirectory = dependencyFile.isDirectory();
+				if (isDirectory) {
+					for (String child : FileSystem.listFiles(path)) {
+						addAarFile(child, explodedAarCacheDir, moduleDependencys, libraryMapping);
+					}
+				} else {
+					addAarFile(path, explodedAarCacheDir, moduleDependencys, libraryMapping);
+				}
+			}
+		}
+
+		AppLog.println_d();
+		for (Map.Entry<String, List<String>> entry : libraryMapping.entrySet()) {
+			AppLog.println_d(entry.getKey());
+			AppLog.println_d("\t\t->" + String.join("\\\n\t\t", entry.getValue()));
+		}
+		AppLog.println_d();
+	}
+
+	private static void addAarFile(String aarFilePath, String explodedAarCacheDir, List<String> moduleDependencys,
+			Map<String, List<String>> libraryMapping) {
+		File aarFile = new File(aarFilePath);
+
+		String name = aarFile.getName();
+		if (name.toLowerCase().endsWith(".aar")) {
+			// 计算aar解压路径
+			String explodedAarPath = explodedAarCacheDir + "/" + name.substring(0, name.length() - 4) + ".exploded.aar";
+			// 在module依赖中添加
+			moduleDependencys.add(explodedAarPath);
+			if (!libraryMapping.containsKey(explodedAarPath)) {
+				libraryMapping.put(explodedAarPath, new ArrayList<>());
+			}
+			
+			//  解压 aar
+			ZeroAicyMavenService.extractedAar(aarFilePath, explodedAarPath);
+
+		}
 	}
 
 }
