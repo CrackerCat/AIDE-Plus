@@ -91,10 +91,17 @@ public class pd extends MessageBox implements DialogInterface.OnClickListener {
 
 		// int color = Utils.getThemeAttrColor(activity, android.R.attr.textColorTertiary);
 		while (matcher.find()) {
-			final String filePath = matcher.group().trim();
+			String filePath = matcher.group().trim();
 
 			if (!FileSystem.exists(filePath)) {
-				continue;
+				if (!filePath.endsWith(".aar")) {
+					continue;
+				}
+				String explodedAar = filePath.substring(0, filePath.length() - 4) + ".exploded.aar";
+				if (!FileSystem.exists(explodedAar)) {
+					continue;
+				}
+				filePath = explodedAar;
 			}
 			int start = matcher.start();
 
@@ -123,12 +130,12 @@ public class pd extends MessageBox implements DialogInterface.OnClickListener {
 
 		@Override
 		public void onClick(View widget) {
-			if (path.endsWith(".aar")) {
-				gotoFile(new File(this.path).getParent());
-
+			if (path.endsWith(".exploded.aar")
+				|| ! path.endsWith(".aar")) {
+				gotoFile(this.path);
 				return;
 			}
-			gotoFile(this.path);
+			gotoFile(new File(this.path).getParent());
 		}
 
 		private static void gotoFile(String filePath) {
