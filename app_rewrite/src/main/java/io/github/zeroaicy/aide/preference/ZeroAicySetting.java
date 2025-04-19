@@ -244,7 +244,14 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 		String trimmedResult = result.toString().trim();
 		return trimmedResult;
 	}
-
+	
+	/**
+	 * 自定义字体路径
+	 */
+	public static String getCustomizeEditorFontPath() {
+		return getDefaultSpString("zero_aicy_customize_editor_font_path", null);
+	}
+	 
 	/*
 	 * 构建运行
 	 */

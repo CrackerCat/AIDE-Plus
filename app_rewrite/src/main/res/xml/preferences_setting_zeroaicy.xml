@@ -113,7 +113,16 @@
 				android:summary="请填写css编辑框下方的标点符号"
 				android:defaultValue="{ \n} \n- \n: \n. \n; \n# \n% \n( \n) \n \\ \n&quot; \n' \n@ \n> \n= \n[ \n] \n/ \n* \n!"/>
 		</PreferenceCategory>
-
+		<PreferenceCategory
+            android:title="字体">
+            <EditTextPreference
+                android:hint="字体路径，加载失败会删除，请自行备份"
+                android:selectAllOnFocus="true"
+                android:title="编辑框字体"
+                android:key="zero_aicy_customize_editor_font_path"
+                android:summary="留空则使用默认，字体加载失败会删除，请自行备份" />
+        </PreferenceCategory>
+		
 	</PreferenceScreen>
 	<PreferenceScreen
 		android:title="@string/preference_head_title_build"

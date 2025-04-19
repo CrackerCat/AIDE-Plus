@@ -1,7 +1,6 @@
 package io.github.zeroaicy.aide.ui.project;
 
 import android.text.TextUtils;
-import com.aide.common.AppLog;
 import com.aide.engine.EngineSolution;
 import com.aide.engine.EngineSolutionProject;
 import com.aide.ui.project.AndroidProjectSupport;
@@ -199,12 +198,12 @@ public class ZeroAicyAndroidProjectSupport extends AndroidProjectSupport {
 			}
 		}
 
-		AppLog.println_d();
-		for (Map.Entry<String, List<String>> entry : libraryMapping.entrySet()) {
-			AppLog.println_d(entry.getKey());
-			AppLog.println_d("\t\t->" + String.join("\\\n\t\t", entry.getValue()));
-		}
-		AppLog.println_d();
+//		AppLog.println_d();
+//		for (Map.Entry<String, List<String>> entry : libraryMapping.entrySet()) {
+//			AppLog.println_d(entry.getKey());
+//			AppLog.println_d("\t\t->" + String.join("\\\n\t\t", entry.getValue()));
+//		}
+//		AppLog.println_d();
 	}
 
 	private static void addAarFile(String aarFilePath, String explodedAarCacheDir, List<String> moduleDependencys,

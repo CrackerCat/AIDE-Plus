@@ -100,7 +100,7 @@ public class D8TaskWrapper {
 		// 去除写入权限
 		File r8ZipFile = new File(r8Path);
 		if (r8ZipFile.canWrite()) {
-			r8ZipFile.setWritable(false);
+			r8ZipFile.setWritable(false, false);
 		}
 
 		if (!processMode && !R8Task.equals(className)) {
@@ -159,10 +159,7 @@ public class D8TaskWrapper {
 					cause = cause2;
 				}
 			}
-
 			throw cause;
-		} catch (Throwable e) {
-			throw e;
 		}
 		AppLog.d(TAG, "D8Task | D8BatchTask 退出正常");
 	}
