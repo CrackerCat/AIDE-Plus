@@ -99,13 +99,13 @@ public class EclipseJavaCodeAnalyzer2 extends JavaCodeAnalyzer {
 	/**
 	 * 强制获得resolveUnit
 	 */
-	private CompilationUnitDeclaration forceResolveUnit(FileEntry file) {
+	private CompilationUnitDeclaration forceResolveUnit(FileEntry file, boolean generateCode) {
 		ProjectEnvironment projectEnvironment = getProjectEnvironment(file);
 		if (projectEnvironment == null) {
 			return null;
 		}
 		// return resolve Unit
-		return projectEnvironment.resolve3(file);
+		return projectEnvironment.resolve3(file, generateCode);
 	}
 
 	// resolve
@@ -130,6 +130,11 @@ public class EclipseJavaCodeAnalyzer2 extends JavaCodeAnalyzer {
 	 * 可以强制语义分析
 	 */
 	public CompilationUnitDeclaration semanticAnalysis(SyntaxTree syntaxTree, boolean forceResolve) {
+		return semanticAnalysis(syntaxTree, forceResolve, false);
+	}
+
+	public CompilationUnitDeclaration semanticAnalysis(SyntaxTree syntaxTree, boolean forceResolve,
+			boolean generateCode) {
 		FileEntry fileEntry = syntaxTree.getFile();
 		Language language = syntaxTree.getLanguage();
 
@@ -160,14 +165,25 @@ public class EclipseJavaCodeAnalyzer2 extends JavaCodeAnalyzer {
 			addErrorInfo(aideSemanticAnalysis, fileEntry, language);
 			return null;
 		} else {
+			
+			// 更新 源码版本
+			this.semanticParserVersionMap.VH(fileId, nowVersion);
+
 			// 更新版本 put
-			return forceSemanticAnalysis(fileId, nowVersion, fileEntry, language, filePath, aideSemanticAnalysis);
+			CompilationUnitDeclaration resolveUnit = forceSemanticAnalysis(fileEntry, language, aideSemanticAnalysis,
+					generateCode);
+			return resolveUnit;
 		}
 	}
+	
+	
+	/**
+	 * 强制解析 源文件 并填充 分析结果
+	 */
+	private CompilationUnitDeclaration forceSemanticAnalysis(FileEntry fileEntry, Language language,
+			List<ErrorInfo> aideSemanticAnalysis, boolean generateCode) {
 
-	private CompilationUnitDeclaration forceSemanticAnalysis(int fileId, long nowVersion, FileEntry fileEntry,
-			Language language, String filePath, List<ErrorInfo> aideSemanticAnalysis) {
-		semanticParserVersionMap.VH(fileId, nowVersion);
+		String filePath = fileEntry.getPathString();
 
 		// 使用 ProjectEnvironment 增量分析
 		// 并保存结果以便复用
@@ -175,12 +191,12 @@ public class EclipseJavaCodeAnalyzer2 extends JavaCodeAnalyzer {
 		// 解析
 
 		// resolve 可能为null
-		CompilationUnitDeclaration resolveUnit = forceResolveUnit(fileEntry);
+		CompilationUnitDeclaration resolveUnit = forceResolveUnit(fileEntry, generateCode);
 
 		// 计算并缓存 ecj信息
 		ecjSemanticAnalysis(resolveUnit, fileEntry, language);
 
-		List<ErrorInfo> ecjSemanticAnalysis = ecjSemanticAnalysisMap.get(filePath);
+		List<ErrorInfo> ecjSemanticAnalysis = this.ecjSemanticAnalysisMap.get(filePath);
 
 		// 添加 ecjSemanticAnalysis 
 		addErrorInfo(ecjSemanticAnalysis, fileEntry, language);
@@ -269,12 +285,12 @@ public class EclipseJavaCodeAnalyzer2 extends JavaCodeAnalyzer {
 
 	// 计算AIDE 语义分析信息
 	private List<ErrorInfo> aideSemanticAnalysis(SyntaxTree syntaxTree) {
-		try{
+		try {
 			super.v5(syntaxTree);
-		}catch(Throwable e){
-			
+		} catch (Throwable e) {
+
 		}
-		
+
 		//  保存AIDE语义分析的结果
 		List<ErrorInfo> allErrorInfos = getAllErrors(syntaxTree);
 		// 清除AIDE语义分析器错误

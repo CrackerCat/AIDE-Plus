@@ -349,25 +349,17 @@ public class ProjectEnvironment {
 
 		Set<String> classpaths = new HashSet<>();
 
-		// 添加 bootclasspath
-		classpaths.add(this.bootclasspath);
-		// 添加 coreLambdaStubsJar
-		classpaths.add(ProjectEnvironment.coreLambdaStubsJarPath);
 
-		// 添加Jar依赖
 		Set<SolutionProject> handleProjects = new HashSet<SolutionProject>();
-		solutionProject.parserClassPath(handleProjects, classpaths);
-
 		// 添加Module依赖Id
-		handleProjects.clear();
-		solutionProject.parserReferenceIds(handleProjects, referenceIds);
+		solutionProject.parserReferenceIds(handleProjects, this.referenceIds);
 
 		// 添加源码路径
 		EngineSolution engineSolution = model.getEngineSolution();
 		if (engineSolution != null) {
 			List<EngineSolutionProject> engineSolutionProjects = (List<EngineSolutionProject>)engineSolution.engineSolutionProjects;
 
-			SetOfInt.Iterator default_Iterator = referenceIds.default_Iterator;
+			SetOfInt.Iterator default_Iterator = this.referenceIds.default_Iterator;
 			default_Iterator.init();
 			while (default_Iterator.hasMoreElements()) {
 				int referenceId = default_Iterator.nextKey();
@@ -389,7 +381,17 @@ public class ProjectEnvironment {
 				}
 			}
 		}
-
+		
+		// 添加 bootclasspath
+		classpaths.add(this.bootclasspath);
+		// 添加 coreLambdaStubsJar
+		classpaths.add(ProjectEnvironment.coreLambdaStubsJarPath);
+		
+		// 置空才能使用
+		handleProjects.clear();
+		// 添加Jar依赖
+		solutionProject.parserClassPath(handleProjects, classpaths);
+		
 		// 环境 
 		environment = new FileSystem(classpaths.toArray(new String[classpaths.size()]) , null, "UTF-8");
 		// 设置源码
@@ -411,6 +413,10 @@ public class ProjectEnvironment {
 	}
 
 	public CompilationUnitDeclaration resolve3(FileEntry fileEntry) {
+		return resolve3(fileEntry, false);
+	}
+	
+	public CompilationUnitDeclaration resolve3(FileEntry fileEntry, boolean generateCode) {
 		this.resolver.lookupEnvironment.reset();
 
 		String pathString = fileEntry.getPathString();
@@ -420,12 +426,11 @@ public class ProjectEnvironment {
 			data = IOUtils.readAllChars(fileEntry.getReader(), true);
 		}
 		catch ( Throwable e) {
-			if (e instanceof Error) {
-				throw (Error)e;
-			}
-			throw new Error(e);
+			AppLog.error(e);
+			return null;
 		}
-		CompilationUnitDeclaration result = this.resolver.resolve3(new CompilationUnit(data, pathString, "utf-8"));
+		CompilationUnitDeclaration result = this.resolver.resolve3(new CompilationUnit(data, pathString, "utf-8"), generateCode);
+		
 		// 检查错误
 		if (result == null || result.compilationResult == null) {
 			AppLog.println_d("没有解析 %s ", pathString);
@@ -434,6 +439,9 @@ public class ProjectEnvironment {
 		return result;
 	}
 	
+	/**
+	 * generateCode
+	 */
 	public void compile(SyntaxTree syntaxTree) throws Throwable {
 		
 		FileEntry fileEntry = syntaxTree.getFile();
@@ -451,11 +459,8 @@ public class ProjectEnvironment {
 		
 		// 强制语义分析
 		EclipseJavaCodeAnalyzer2 codeAnalyzer = ((JavaLanguagePro)language).getCodeAnalyzer();
-		CompilationUnitDeclaration result = codeAnalyzer.semanticAnalysis(syntaxTree, true);
+		CompilationUnitDeclaration result = codeAnalyzer.semanticAnalysis(syntaxTree, true, true);
 		
-		// 生成代码
-		result.generateCode();
-
 		// 检查错误
 		CompilationResult compilationResult = result.compilationResult;
 		
@@ -475,7 +480,8 @@ public class ProjectEnvironment {
 
 	}
 	
-	public void compile3(SyntaxTree syntaxTree) throws Throwable {
+	@Deprecated
+	private void compile3(SyntaxTree syntaxTree) throws Throwable {
 		
 		FileEntry fileEntry = syntaxTree.getFile();
 		if( this.fileSpace.isRJavaFileEntry(fileEntry) && !this.solutionProject.isMainModule){

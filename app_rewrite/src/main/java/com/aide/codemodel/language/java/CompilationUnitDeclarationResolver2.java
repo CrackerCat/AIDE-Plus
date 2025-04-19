@@ -45,15 +45,20 @@ public class CompilationUnitDeclarationResolver2 extends org.eclipse.jdt.interna
 		this.projecttEnvironment = projecttEnvironment;
 
 	}
-
+	
+	@Deprecated
 	public CompilationUnitDeclaration resolve3(ICompilationUnit compilationunit) {
+		return resolve3(compilationunit, false);
+	}
+	
+	public CompilationUnitDeclaration resolve3(ICompilationUnit compilationunit, boolean generateCode) {
 		CompilationUnitDeclaration unit = dietParse2(compilationunit);
 		// binding resolution
 		this.lookupEnvironment.completeTypeBindings();
 
 		try {
 			// resolve
-			resolve2(unit);
+			resolve2(unit, generateCode);
 		} catch (AbortCompilation e) {
 			// AbortCompilation 忽略
 		} catch (Throwable e) {
@@ -88,12 +93,10 @@ public class CompilationUnitDeclarationResolver2 extends org.eclipse.jdt.interna
 		return parsedUnit;
 	}
 
-	private void resolve2(CompilationUnitDeclaration unit) {
+	private void resolve2(CompilationUnitDeclaration unit, boolean generateCode) {
 
 		boolean verifyMethods = true;
 		boolean analyzeCode = true;
-
-		boolean generateCode = !true;
 
 		this.lookupEnvironment.unitBeingCompleted = unit;
 
