@@ -69,7 +69,7 @@ public class ZeroAicyAIDEApplication extends AIDEApplication {
 
 		// 更改日志路径
 		DebugUtil.debug(this, false);
-		
+		Log.setSystemOut(ZeroAicySetting.isEnableDetailedLog());
 		ShellEnvironmentUtils.init(this);
 		
 		// method2();
