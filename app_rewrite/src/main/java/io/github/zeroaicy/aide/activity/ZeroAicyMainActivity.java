@@ -13,6 +13,7 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.InputType;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
@@ -25,6 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.webkit.MimeTypeMap;
+import android.widget.EditText;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -35,6 +37,7 @@ import com.aide.common.AppLog;
 import com.aide.ui.MainActivity;
 import com.aide.ui.ServiceContainer;
 import com.aide.ui.rewrite.R;
+import com.aide.ui.services.FileBrowserService;
 import com.aide.ui.services.OpenFileService;
 import com.aide.ui.util.FileSpan;
 import com.aide.ui.util.FileSystem;
@@ -55,10 +58,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
-import com.aide.ui.services.FileBrowserService;
-import android.widget.LinearLayout;
-import android.widget.EditText;
-import android.text.InputType;
 
 public class ZeroAicyMainActivity extends MainActivity {
 
@@ -73,6 +72,7 @@ public class ZeroAicyMainActivity extends MainActivity {
 	boolean isRecreate = false;
 
 	boolean isOnCreated = false;
+
 	@Override
 	public void onCreate(Bundle bundle) {
 		if (isRecreate) {
@@ -88,12 +88,22 @@ public class ZeroAicyMainActivity extends MainActivity {
 		}
 		isOnCreated = true;
 		showRequestManageExternalStorage();
-		
+
 		// 修复 MainSearchBarNoTabs 与 符号栏重叠问题
-//		LinearLayout mainSearchBarNoTabsView = this.findViewById(R.id.mainSearchBarNoTabs);
-//		ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) mainSearchBarNoTabsView.getLayoutParams();
-//		layoutParams.setMargins(layoutParams.leftMargin, layoutParams.topMargin, layoutParams.rightMargin, 40);
-		
+		//		LinearLayout mainSearchBarNoTabsView = this.findViewById(R.id.mainSearchBarNoTabs);
+		//		ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) mainSearchBarNoTabsView.getLayoutParams();
+		//		layoutParams.setMargins(layoutParams.leftMargin, layoutParams.topMargin, layoutParams.rightMargin, 40);
+
+	}
+	
+	// 等待 代码分析进程
+	public void showCodeAnalysisProgress() {
+		runOnUiThread(new HighlightingProgressNotify());
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
 	}
 
 	private boolean isExit = false;
@@ -132,7 +142,7 @@ public class ZeroAicyMainActivity extends MainActivity {
 		//		engineService.lp();
 		//		
 		super.onDestroy();
-		
+
 		// exit();
 	}
 
@@ -332,10 +342,12 @@ public class ZeroAicyMainActivity extends MainActivity {
 		}
 
 		if (XXPermissions.isGranted(this, android.Manifest.permission.MANAGE_EXTERNAL_STORAGE)) {
+			AppLog.d(TAG, "已授权管理所有文件权限");
 			return;
 		}
 
 		// AppLog.println_e(Thread.currentThread().getStackTrace());
+		AppLog.d(TAG, "显示请求管理所有文件权限弹窗");
 
 		String app_name = getString(R.string.app_name);
 		String message = new StringBuilder("为了访问您设备上的文件，您需要手动为").append(app_name).append("授予「所有文件访问」权限，点击确认后进入设置界面，选择「")
@@ -345,16 +357,12 @@ public class ZeroAicyMainActivity extends MainActivity {
 				.setMessage(message).setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						// System.out.println("dialog -> " + dialog);
+						// 申请文件权限
 						requestManageExternalStorage();
 						dialog.dismiss();
+						ZeroAicyMainActivity.this.showRequestAlertDialog = null;
 					}
 				}).create();
-
-		// 获取当前窗口的LayoutParams
-		// Window window = this.showRequestAlertDialog.getWindow();
-		// 置顶
-		// window.setType(window.getAttributes().type  |= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW);
 
 		this.showRequestAlertDialog.show();
 		// System.out.println("this.showRequestAlertDialog -> " + this.showRequestAlertDialog);
@@ -381,19 +389,26 @@ public class ZeroAicyMainActivity extends MainActivity {
 	 */
 	@Override
 	public boolean isSelfPermission(String permission) {
+
+		// 适配 WRITE_EXTERNAL_STORAGE 与 MANAGE_EXTERNAL_STORAGE
 		if (android.Manifest.permission.WRITE_EXTERNAL_STORAGE.equals(permission)) {
 
 			// 适配 安卓低版本
 			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-				return super.isSelfPermission(permission);
+				boolean isGranted = super.isSelfPermission(permission);
+
+				AppLog.d(TAG, String.format("适配安卓11以下文件权限，申请: %s", isGranted));
+
+				return isGranted;
 			}
 
 			// 安卓11 
 			// android.permission.WRITE_EXTERNAL_STORAGE -> android.Manifest.permission.MANAGE_EXTERNAL_STORAGE
 
 			// 申请 MANAGE_EXTERNAL_STORAGE
-			if (ThreadPoolService.isUiThread() && this.isOnCreated)
+			if (ThreadPoolService.isUiThread() && this.isOnCreated) {
 				showRequestManageExternalStorage();
+			}
 			// 不申请 WRITE_EXTERNAL_STORAGE
 			return true;
 		}
@@ -531,21 +546,20 @@ public class ZeroAicyMainActivity extends MainActivity {
 		}
 		return isUseEditorTabs;
 	}
-	
+
 	// mainSearchBox
 	EditText mainSearchBoxEditText;
 	@Override
 	public void cT() {
 		super.cT();
-		if( yO() ) {
+		if (yO()) {
 			return;
 		}
-		if( this.mainSearchBoxEditText == null ){
+		if (this.mainSearchBoxEditText == null) {
 			this.mainSearchBoxEditText = findViewById(R.id.mainSearchBox);
 		}
 		this.mainSearchBoxEditText.setInputType(InputType.TYPE_CLASS_TEXT);
 	}
-	
 
 	private static void gn(Object obj, Intent intent) {
 		((MainActivity) obj).startActivity(intent);
