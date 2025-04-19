@@ -22,8 +22,17 @@ import net.margaritov.preference.colorpicker.ColorPickerView;
 import android.widget.RadioGroup;
 import android.graphics.Typeface;
 import android.view.inputmethod.EditorInfo;
+import android.graphics.Color;
+import android.text.InputType;
+import android.text.TextWatcher;
+import android.text.Editable;
 
-public class ColorKindEditDialog extends AlertDialog implements ColorPickerView.OnColorChangedListener, View.OnClickListener, ViewTreeObserver.OnGlobalLayoutListener, RadioGroup.OnCheckedChangeListener {
+public class ColorKindEditDialog extends AlertDialog
+		implements
+			ColorPickerView.OnColorChangedListener,
+			View.OnClickListener,
+			ViewTreeObserver.OnGlobalLayoutListener,
+			RadioGroup.OnCheckedChangeListener {
 
 	private ColorPickerView mColorPicker;
 	private ColorStateList mHexDefaultTextColor;
@@ -41,7 +50,6 @@ public class ColorKindEditDialog extends AlertDialog implements ColorPickerView.
 		super(context);
 
 		this.mHexValueEnabled = false;
-
 
 		init(color);
 
@@ -79,39 +87,83 @@ public class ColorKindEditDialog extends AlertDialog implements ColorPickerView.
 		this.mNewColor = this.mLayout.findViewById(R.id.new_color_panel);
 
 		this.mHexVal = this.mLayout.findViewById(R.id.hex_val);
-		this.mHexVal.setInputType(524288);
-
+		this.mHexVal.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
 
 		this.typefaceStyleEditView = this.mLayout.findViewById(R.id.typeface_style_edit_root_view);
 		this.typefaceStyleRadioGroup = this.mLayout.findViewById(R.id.typeface_style_radio_group);
 		typefaceStyleRadioGroup.setOnCheckedChangeListener(this);
 
 		this.mHexDefaultTextColor = this.mHexVal.getTextColors();
-		this.mHexVal.setOnEditorActionListener(new TextView.OnEditorActionListener(){
-				@Override
-				public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-					if (actionId !=  EditorInfo.IME_ACTION_DONE) {
-						return false;
-					}
-					InputMethodManager imm = (InputMethodManager) v.getContext().getSystemService("input_method");
-					imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-					String s = mHexVal.getText().toString();
-					if (s.length() > 5 || s.length() < 10) {
-						try {
-							int c = ColorPickerPreference.convertToColorInt(s.toString());
-							mColorPicker.setColor(c, true);
-							mHexVal.setTextColor(mHexDefaultTextColor);
-						}
-						catch (IllegalArgumentException e) {
-							mHexVal.setTextColor(-65536);
-						}
-					} else {
-						mHexVal.setTextColor(-65536);
-					}
-					return true;
+		this.mHexVal.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+			@Override
+			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+				if (actionId != EditorInfo.IME_ACTION_DONE) {
+					return false;
 				}
-			});
-		((LinearLayout) this.mOldColor.getParent()).setPadding(Math.round(this.mColorPicker.getDrawingOffset()), 0, Math.round(this.mColorPicker.getDrawingOffset()), 0);
+				InputMethodManager imm = (InputMethodManager) v.getContext()
+						.getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+				String colorText = mHexVal.getText().toString();
+				if (colorText.length() > 5 || colorText.length() < 10) {
+					try {
+						int c = ColorPickerPreference.convertToColorInt(colorText);
+						mColorPicker.setColor(c, true);
+						mHexVal.setTextColor(mHexDefaultTextColor);
+					} catch (IllegalArgumentException e) {
+						mHexVal.setTextColor(Color.RED);
+					}
+				} else {
+					mHexVal.setTextColor(Color.RED);
+				}
+				return true;
+			}
+		});
+		this.mHexVal.addTextChangedListener(new TextWatcher() {
+			String lastText;
+			@Override
+			public void afterTextChanged(Editable editable) {
+				
+				int length = editable.length();
+				int fit = getAlphaSliderVisible() ? 9 : 7;
+				
+				if (fit == length ) {
+					String text = editable.toString();
+					// 没有改变
+					if( text.equals(this.lastText)){
+						return;
+					}
+					// 记录 防止递归
+					this.lastText = text;
+					
+					try {
+						int color = ColorPickerPreference.convertToColorInt(text);
+						// 会再此触发 afterTextChanged
+						mColorPicker.setColor(color, true);
+						mHexVal.setTextColor(mHexDefaultTextColor);
+					} catch (IllegalArgumentException e) {
+						mHexVal.setTextColor(Color.RED);
+					}
+				} else {
+					mHexVal.setTextColor(Color.RED);
+					// 记录一下
+					this.lastText = editable.toString();
+				}
+			}
+
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+				// TODO: Implement this method
+			}
+
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+			}
+		});
+
+		ViewGroup parent = (ViewGroup) this.mOldColor.getParent();
+		parent.setPadding(Math.round(this.mColorPicker.getDrawingOffset()), 0,
+				Math.round(this.mColorPicker.getDrawingOffset()), 0);
 		this.mOldColor.setOnClickListener(this);
 		this.mNewColor.setOnClickListener(this);
 		this.mColorPicker.setOnColorChangedListener(this);
@@ -141,20 +193,20 @@ public class ColorKindEditDialog extends AlertDialog implements ColorPickerView.
 	int typefaceStyleValue;
 	public void setTypefaceStyleValue(int typefaceStyleValue) {
 		this.typefaceStyleValue = typefaceStyleValue;
-		
+
 		int checkedRadioButtonId;
 		switch (typefaceStyleValue) {
-			case Typeface.NORMAL:
-			default:
+			case Typeface.NORMAL :
+			default :
 				checkedRadioButtonId = R.id.typeface_style_radio_normal;
 				break;
-			case Typeface.BOLD:
+			case Typeface.BOLD :
 				checkedRadioButtonId = R.id.typeface_style_radio_bold;
 				break;
-			case Typeface.ITALIC:
+			case Typeface.ITALIC :
 				checkedRadioButtonId = R.id.typeface_style_radio_italic;
 				break;
-			case Typeface.BOLD_ITALIC:
+			case Typeface.BOLD_ITALIC :
 				checkedRadioButtonId = R.id.typeface_style_radio_bold_italic;
 				break;
 		}
@@ -169,16 +221,16 @@ public class ColorKindEditDialog extends AlertDialog implements ColorPickerView.
 	public void onCheckedChanged(RadioGroup group, int checkedId) {
 		if (checkedId == R.id.typeface_style_radio_normal) {
 			this.typefaceStyleValue = Typeface.NORMAL;
-			
+
 		} else if (checkedId == R.id.typeface_style_radio_bold) {
 			this.typefaceStyleValue = Typeface.BOLD;
-			
+
 		} else if (checkedId == R.id.typeface_style_radio_italic) {
 			this.typefaceStyleValue = Typeface.ITALIC;
-			
+
 		} else if (checkedId == R.id.typeface_style_radio_bold_italic) {
 			this.typefaceStyleValue = Typeface.BOLD_ITALIC;
-			
+
 		} else {
 			this.typefaceStyleValue = Typeface.NORMAL;
 		}
@@ -259,9 +311,9 @@ public class ColorKindEditDialog extends AlertDialog implements ColorPickerView.
 		this.mColorPicker.setColor(savedInstanceState.getInt("new_color"), true);
 	}
 
-
 	public interface OnColorChangedListener {
 		void onColorChanged(int color);
 	}
 
 }
+
