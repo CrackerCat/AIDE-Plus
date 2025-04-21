@@ -46,13 +46,8 @@ public class CompilationUnitDeclarationResolver2 extends org.eclipse.jdt.interna
 
 	}
 	
-	@Deprecated
-	public CompilationUnitDeclaration resolve3(ICompilationUnit compilationunit) {
-		return resolve3(compilationunit, false);
-	}
-	
-	public CompilationUnitDeclaration resolve3(ICompilationUnit compilationunit, boolean generateCode) {
-		CompilationUnitDeclaration unit = dietParse2(compilationunit);
+	public CompilationUnitDeclaration resolve(ICompilationUnit compilationunit, boolean generateCode) {
+		CompilationUnitDeclaration unit = dietParse(compilationunit);
 		// binding resolution
 		this.lookupEnvironment.completeTypeBindings();
 
@@ -69,7 +64,7 @@ public class CompilationUnitDeclarationResolver2 extends org.eclipse.jdt.interna
 	}
 
 	// 自动 buildTypeBindings
-	private CompilationUnitDeclaration dietParse2(ICompilationUnit sourceUnit) throws AbortCompilation {
+	private CompilationUnitDeclaration dietParse(ICompilationUnit sourceUnit) throws AbortCompilation {
 		CompilationResult unitResult = new CompilationResult(sourceUnit, 0, 1, this.options.maxProblemsPerUnit);
 		CompilationUnitDeclaration parsedUnit;
 		try {
@@ -167,5 +162,12 @@ public class CompilationUnitDeclarationResolver2 extends org.eclipse.jdt.interna
 	 super.initializeParser();
 	 }*/
 
+	 
+
+
+	@Deprecated
+	public CompilationUnitDeclaration resolve3(ICompilationUnit compilationunit) {
+		return resolve(compilationunit, false);
+	}
 }
 

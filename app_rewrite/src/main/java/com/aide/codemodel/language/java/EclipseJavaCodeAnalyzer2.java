@@ -111,12 +111,15 @@ public class EclipseJavaCodeAnalyzer2 extends JavaCodeAnalyzer {
 	// resolve
 	@Override
 	public void v5(SyntaxTree syntaxTree) {
+		// AppLog.println_d("analyzeErrors  %s", syntaxTree.getFile().getPathString());
+		analyzeErrors(syntaxTree);
+	}
 
-		// 当前文件error count
-
+	// v5 -> analyzeErrors
+	// @Override
+	public void analyzeErrors(SyntaxTree syntaxTree) {
 		// 语义分析
 		semanticAnalysis(syntaxTree);
-		// AIDE的语义分析
 	}
 
 	/**
@@ -165,9 +168,12 @@ public class EclipseJavaCodeAnalyzer2 extends JavaCodeAnalyzer {
 			addErrorInfo(aideSemanticAnalysis, fileEntry, language);
 			return null;
 		} else {
-			
-			// 更新 源码版本
-			this.semanticParserVersionMap.VH(fileId, nowVersion);
+			if (oldVersion != nowVersion) {
+				// 更新 源码版本
+				this.semanticParserVersionMap.VH(fileId, nowVersion);
+				
+				// addChachedFiles();
+			}
 
 			// 更新版本 put
 			CompilationUnitDeclaration resolveUnit = forceSemanticAnalysis(fileEntry, language, aideSemanticAnalysis,
@@ -175,8 +181,7 @@ public class EclipseJavaCodeAnalyzer2 extends JavaCodeAnalyzer {
 			return resolveUnit;
 		}
 	}
-	
-	
+
 	/**
 	 * 强制解析 源文件 并填充 分析结果
 	 */

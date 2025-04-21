@@ -18,6 +18,7 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import com.aide.common.AppLog;
 
 public class JavaCodeModelPro implements CodeModel {
 
@@ -59,11 +60,14 @@ public class JavaCodeModelPro implements CodeModel {
 	
     @Override
     public void fillSyntaxTree(FileEntry fileEntry, Reader reader, Map<Language, SyntaxTreeStyles> map) {
+		// AppLog.println_d("make Tree(词法分析器)  %s", fileEntry.getPathString());
+		
 		this.javaLexer.Zo(fileEntry, reader, false, false, false, false, map.get(this.javaLanguage), map.get(this.jsharpCommentsLanguage));
     }
 	
     @Override
     public void fillSyntaxTree(FileEntry fileEntry, Reader reader, Map<Language, SyntaxTree> map, boolean z) {
+		// AppLog.println_d("make Tree(语法分析器)  %s", fileEntry.getPathString());
 		
 		SyntaxTreeStyles makeSyntaxTreeStyles = this.model.U2.makeSyntaxTreeStyles();
 		SyntaxTreeStyles makeSyntaxTreeStyles2 = this.model.U2.makeSyntaxTreeStyles();

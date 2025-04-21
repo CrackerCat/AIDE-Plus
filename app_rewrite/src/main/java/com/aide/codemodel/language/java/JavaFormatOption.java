@@ -26,7 +26,8 @@ public enum JavaFormatOption implements FormatOption {
     PARAMETER_INDENT("Java indentation options", "Align parameters", "对齐形参", "void foo(int i,\n         int j)\n{\n}", "void foo(int i,\n    int j)\n{\n}"),
     ADJUST_NEWLINES("Java new line options", "Adjust lines on autoformat", "格式化时自动调整行", "", ""),
     TYPE_NEWLINE("Java new line options", "Place open brace on new line for types", "在类型声明时，左大括号换行", "public class C\n{\n    //...\n}", "public class C {\n    //...\n}"),
-    METHOD_NEWLINE("Java new line options", "Place open brace on new line for methods", "在方法声明时，左大括号换行", "public void f()\n{\n    //...\n}", "public void f() {\n    //...\n}"),
+  
+	METHOD_NEWLINE("Java new line options", "Place open brace on new line for methods", "在方法声明时，左大括号换行", "public void f()\n{\n    //...\n}", "public void f() {\n    //...\n}"),
     BLOCK_NEWLINE("Java new line options", "Place open brace on new line for control blocks", "在控制块声明时，左大括号换行", "public void f()\n{\n    if (a < b)\n    {\n    }\n}", "public void f()\n{\n    if (a < b) {\n    }\n}"),
     ELSE_NEWLINE("Java new line options", "Place \"else\" on new line", "将\"else\"放在新行", "if (i == 10) {\n    return 10;\n}\nelse {\n    return 0;\n}", "if (i == 10) {\n    return 10;\n} else {\n    return 0;\n}"),
     CATCH_NEWLINE("Java new line options", "Place \"catch\" on new line", "将\"catch\"放在新行", "\n}\ncatch {\n}", "\n} catch {\n}"),

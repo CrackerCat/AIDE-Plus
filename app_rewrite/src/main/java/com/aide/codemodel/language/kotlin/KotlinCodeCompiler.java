@@ -142,7 +142,7 @@ public class KotlinCodeCompiler implements com.aide.codemodel.api.abstraction.Co
 			if (referencedSet.contains(assemblyId)) {
 				continue;
 			}
-			AppLog.println_d("主项目AssemblyId: ", assemblyId);
+			AppLog.println_d("主项目AssemblyId: %s", assemblyId);
 
 			return assemblyId;
 		}
