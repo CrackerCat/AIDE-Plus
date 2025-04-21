@@ -371,7 +371,7 @@ public class CmakeBuild {
 
 			// 传入编译器参数
 			if (!TextUtils.isEmpty(this.CMAKE_CXX_FLAGS)) {
-				cmakeCommandList.add("--DCMAKE_CXX_FLAGS==" + this.CMAKE_CXX_FLAGS);
+				cmakeCommandList.add("-DCMAKE_CXX_FLAGS=" + this.CMAKE_CXX_FLAGS);
 			}
 
 			// 传入参数
