@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import com.aide.codemodel.api.SyntaxTreeSpace;
 
 public class EclipseJavaCodeCompiler implements CodeCompiler {
 
@@ -89,8 +90,6 @@ public class EclipseJavaCodeCompiler implements CodeCompiler {
 		}
 	}
 
-	private Set<String> completedFiles = new HashSet<>();
-
 	@Override
 	public void compile(List<SyntaxTree> syntaxTrees, boolean p) {
 		// AppLog.println_d(" compile() -> %s", javaCodeModelPro);
@@ -99,8 +98,8 @@ public class EclipseJavaCodeCompiler implements CodeCompiler {
 			return;
 		}
 
-		if (completed) {
-			completed = false;
+		if (this.completed) {
+			this.completed = false;
 			// AppLog.println_d("\n\n\n\n\n开始编译");
 		}
 
@@ -125,12 +124,12 @@ public class EclipseJavaCodeCompiler implements CodeCompiler {
 
 			FileEntry fileEntry = syntaxTree.getFile();
 			String pathString = fileEntry.getPathString();
-			
+
 			// 记录已编译的文件
 			this.completedFiles.add(pathString);
-			
+
 			// AppLog.println_d("编译 %s", pathString);
-			
+
 			int assemblyId = fileSpace.getAssembly(fileEntry);
 			ProjectEnvironment projectEnvironment = this.javaCodeModelPro.projectEnvironments.get(assemblyId);
 			projectEnvironment.compile(syntaxTree);
@@ -139,34 +138,40 @@ public class EclipseJavaCodeCompiler implements CodeCompiler {
 		}
 	}
 
-	boolean completed;
+	private final Set<String> completedFiles = new HashSet<>();
+	private boolean completed;
 	@Override
 	public void completed() {
 
-		// 首次编译
-		SetOfFileEntry chachedFiles = this.model.syntaxTreeSpace.getChachedFiles();
-		
+		SyntaxTreeSpace syntaxTreeSpace = this.model.syntaxTreeSpace;
+		SetOfFileEntry chachedFiles = syntaxTreeSpace.getChachedFiles();
 		SetOfFileEntry.Iterator default_Iterator = chachedFiles.default_Iterator;
 		default_Iterator.init();
 
-		Set<String> paths = new HashSet<>();
-		SyntaxTree syntaxTree = new SyntaxTree(this.model);
+		// Set<String> paths = new HashSet<>();
 		while (default_Iterator.hasMoreElements()) {
 			FileEntry fileEntry = default_Iterator.nextKey();
 			String pathString = fileEntry.getPathString();
-			paths.add(pathString);
-			
-			if( !this.completedFiles.contains(pathString)){
+			// paths.add(pathString);
+
+			if (!this.completedFiles.contains(pathString)) {
 				// 补充编译
 				// AppLog.println_d("补充编译 %s", pathString);
-				syntaxTree.lg(fileEntry, language);
-				compile(syntaxTree);
+				List<SyntaxTree> syntaxTrees = syntaxTreeSpace.QX(fileEntry);
+				for (SyntaxTree syntaxTree : syntaxTrees) {
+					Language syntaxTreeLanguage = syntaxTree.getLanguage();
+					if (syntaxTreeLanguage == this.language) {
+						compile(syntaxTree);
+						syntaxTreeSpace.releaseSyntaxTree(syntaxTree);
+						break;
+					}
+				}
 			}
 		}
 		// AppLog.println_d("[\n%s\n]", String.join("\n", paths));
 		// 清除已编译的文件
 		this.completedFiles.clear();
-		
+
 		// 编译结束
 		this.completed = true;
 		// AppLog.println_d("编译结束\n\n\n\n\n");
