@@ -108,7 +108,9 @@ public class NdkBuildService {
 		Map<String, List<SyntaxError>> syntaxErrorsMap = new HashMap<>();
 
 		String[] lineInfos = ndkError.split("\n");
+		
 		int lineInfosSize = lineInfos.length;
+		
 		for (int index = 0; index < lineInfosSize; index++) {
 
 			String lineInfo = lineInfos[index].trim();
@@ -154,7 +156,13 @@ public class NdkBuildService {
 								// 如果 包含error 就剔除
 								errorInfo = errorInfo.substring(errorPrefix.length(), errorInfo.length()).trim();
 							}
-
+							
+							errorPrefix = "note:";
+							if (errorInfo.startsWith(errorPrefix)) {
+								// 如果 包含error 就剔除
+								errorInfo = errorInfo.substring(errorPrefix.length(), errorInfo.length()).trim();
+							}
+							
 							int lineInfosSize2 = lineInfosSize - 1;
 							while (index < lineInfosSize2) {
 								String nextLineInfo = lineInfos[index + 1];
@@ -169,24 +177,28 @@ public class NdkBuildService {
 
 							SyntaxError syntaxError = makeSyntaxError("NDK", lineNumber, columnNumber, errorInfo);
 
-							if (!syntaxErrorsMap.containsKey(path)) {
-								syntaxErrorsMap.put(path, new ArrayList<SyntaxError>());
+							List<SyntaxError> syntaxErrors = syntaxErrorsMap.get(path);
+							if (syntaxErrors == null ) {
+								syntaxErrors = new ArrayList<SyntaxError>();
+								syntaxErrorsMap.put(path, syntaxErrors);
 							}
-							syntaxErrorsMap.get(path).add(syntaxError);
+							syntaxErrors.add(syntaxError);
 
 							continue;
 
 						}
 					}
 				}
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				AppLog.e(e);
 			}
 
-			if (!syntaxErrorsMap.containsKey(modulePath)) {
-				syntaxErrorsMap.put(modulePath, new ArrayList<>());
+			List<SyntaxError> syntaxErrors = syntaxErrorsMap.get(modulePath);
+			if (syntaxErrors == null ) {
+				syntaxErrors = new ArrayList<SyntaxError>();
+				syntaxErrorsMap.put(modulePath, syntaxErrors);
 			}
-			syntaxErrorsMap.get(modulePath).add(makeSyntaxError("NDK", 1, 1, lineInfo));
+			syntaxErrors.add(makeSyntaxError("NDK", 1, 1, lineInfo));
 		}
 
 		return syntaxErrorsMap;

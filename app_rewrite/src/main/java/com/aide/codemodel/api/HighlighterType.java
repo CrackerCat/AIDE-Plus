@@ -15,4 +15,7 @@ public class HighlighterType{
 	
 	
 	public static final int TextBlock = SyntaxStyleType.LITERAL.ordinal();
+	
+	public static final int TypeIdentifier = SyntaxStyleType.TYPE_IDENTIFIER.ordinal();
+	
 }
