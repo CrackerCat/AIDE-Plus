@@ -157,11 +157,11 @@ public class NdkBuildService {
 								errorInfo = errorInfo.substring(errorPrefix.length(), errorInfo.length()).trim();
 							}
 							
-							errorPrefix = "note:";
+							/*errorPrefix = "note:";
 							if (errorInfo.startsWith(errorPrefix)) {
 								// 如果 包含error 就剔除
 								errorInfo = errorInfo.substring(errorPrefix.length(), errorInfo.length()).trim();
-							}
+							}*/
 							
 							int lineInfosSize2 = lineInfosSize - 1;
 							while (index < lineInfosSize2) {

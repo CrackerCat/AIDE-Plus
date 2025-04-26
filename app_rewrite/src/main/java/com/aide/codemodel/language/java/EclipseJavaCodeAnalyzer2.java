@@ -376,7 +376,12 @@ public class EclipseJavaCodeAnalyzer2 extends JavaCodeAnalyzer {
 		if (fileEntryErrorPack != null)
 			fileEntryErrorPack.parseErrors.clear();
 	}
-
+	
+	
+	/**
+	 * 错误全部 转成 警告 (50 -> 112)
+	 * 然后由 AIDEEditor$AIDEEditorModel ef 过滤
+	 */
 	private List<ErrorInfo> getAllErrors(SyntaxTree syntaxTree) {
 
 		FileEntry fileEntry = syntaxTree.getFile();
@@ -408,7 +413,7 @@ public class EclipseJavaCodeAnalyzer2 extends JavaCodeAnalyzer {
 				errorInfos.add(errorInfo);
 			} else {
 				// kind == 50 会由Lcom/aide/engine/Engine$DaemonTask;::XL(I)
-				// 转为 112
+				// 转为 112 由 AIDEEditor$AIDEEditorModel ef过滤 警告
 				// 49 103
 				ErrorInfo errorInfo = new ErrorInfo(fileEntry, language, startLine, startColumn, endLine, endColumn,
 						msg, 50);
@@ -432,7 +437,10 @@ public class EclipseJavaCodeAnalyzer2 extends JavaCodeAnalyzer {
 		public int kind;
 
 		public Vector<ErrorTable.Fix> fixes;
-
+		
+		/**
+		 * 静态方法 Java项目入口类标记
+		 */
 		public ErrorInfo(FileEntry file, Language language, int startLine, int startColumn, int endLine, int endColumn,
 				String msg) {
 			this.file = file;
