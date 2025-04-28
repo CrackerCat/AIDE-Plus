@@ -122,6 +122,14 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && ZeroAicySetting.isEnableEnsureCapacity()) {
 					this.environment.put("EnsureCapacity", getLibEnsureCapacityPathPath());
 				}
+
+				LinkedHashSet<String> cmakeAbiFilters = getZeroAicyBuildGradle().getCmakeAbiFilters();
+
+				this.nativeLibZipEntryTransformer.setAbiFilters(cmakeAbiFilters);
+				this.libgdxNativesTransformer.setAbiFilters(cmakeAbiFilters);
+				this.dexZipEntryTransformer.setAbiFilters(cmakeAbiFilters);
+				this.zipResourceZipEntryTransformer.setAbiFilters(cmakeAbiFilters);
+
 				AppLog.d(TAG, this.environment);
 				// 初始化
 				DexingJarTask.init(this.environment);

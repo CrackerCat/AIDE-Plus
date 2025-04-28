@@ -1,6 +1,7 @@
 package io.github.zeroaicy.aide.services;
 
 import java.util.zip.ZipEntry;
+import java.util.Set;
 
 public interface ZipEntryTransformer {
 	/**
@@ -11,7 +12,7 @@ public interface ZipEntryTransformer {
 	/**
 	 * 处理libgdx库
 	 */
-	public class LibgdxNativesTransformer implements ZipEntryTransformer {
+	public class LibgdxNativesTransformer extends FilterTransformer implements ZipEntryTransformer {
 
 		private String curLibgdxNativesABI;
 		private boolean androidExtractNativeLibs;
@@ -38,12 +39,16 @@ public interface ZipEntryTransformer {
 		public ZipEntry transformer(ZipEntry zipEntry, PackagingStream packagingStream) {
 
 			String zipEntryName = zipEntry.getName();
-			if (curLibgdxNativesABI == null
-				|| zipEntry.isDirectory()
-				|| !zipEntryName.endsWith(".so")) {
-				return null;				
+			if (curLibgdxNativesABI == null || zipEntry.isDirectory() || !zipEntryName.endsWith(".so")) {
+				return null;
 			}
-			ZipEntry newZipEntry = new ZipEntry("lib/" + this.curLibgdxNativesABI + "/" + zipEntryName);
+			zipEntryName = "lib/" + this.curLibgdxNativesABI + "/" + zipEntryName;
+			if (isFilterAbi(zipEntryName)) {
+				// 过滤
+				return null;
+			}
+
+			ZipEntry newZipEntry = new ZipEntry(zipEntryName);
 			if (!androidExtractNativeLibs) {
 				//android:extractNativeLibs="false"时必须无压缩
 				newZipEntry.setMethod(ZipEntry.STORED);
@@ -66,16 +71,19 @@ public interface ZipEntryTransformer {
 				// 交给 ZipResourceTransformer处理
 				return super.transformer(zipEntry, packagingStream);
 			}
+
 			// 处理 "classes%d.dex"
-			String dexEntryName = classesCountDex > 1 ? String.format("classes%d.dex", classesCountDex) : "classes.dex";
+			String dexEntryName = this.classesCountDex > 1
+					? String.format("classes%d.dex", this.classesCountDex)
+					: "classes.dex";
 
 			//查询 dexEntryName是否已添加
-			while (packagingStream.contains(dexEntryName) 
-				   && classesCountDex < packagingStream.getZipEntryCount() + 1) {
-				classesCountDex++;
-				dexEntryName = String.format("classes%d.dex", classesCountDex);
+			while (isAdded(packagingStream, dexEntryName)
+					// classesCountDex 不可能大于已添加的文件数
+					&& this.classesCountDex < packagingStream.getZipEntryCount() + 1) {
+				this.classesCountDex++;
+				dexEntryName = String.format("classes%d.dex", this.classesCountDex);
 			}
-
 			return new ZipEntry(dexEntryName);
 		}
 
@@ -84,50 +92,52 @@ public interface ZipEntryTransformer {
 		 */
 		private boolean isNotClassesDex(ZipEntry zipEntry, String zipEntryFileName) {
 			zipEntryFileName = zipEntryFileName.toLowerCase();
-			boolean endsWith = zipEntry.isDirectory()
-				|| zipEntryFileName.contains("/")
-				|| ! zipEntryFileName.startsWith("classes") 
-				|| ! zipEntryFileName.endsWith(".dex");
+			boolean endsWith = zipEntry.isDirectory() || zipEntryFileName.contains("/")
+					|| !zipEntryFileName.startsWith("classes") || !zipEntryFileName.endsWith(".dex");
 			return endsWith;
 		}
 	}
-
 
 	/**
 	 * zip资源转换器 所有一般资源转换器的父类
 	 * 因为是从jar库添加资源，所以 class与java文件都不能添加
 	 */
-	public class ZipResourceTransformer implements ZipEntryTransformer {
+	public class ZipResourceTransformer extends FilterTransformer implements ZipEntryTransformer {
 		@Override
 		public ZipEntry transformer(ZipEntry zipEntry, PackagingStream packagingStream) {
 			String zipEntryName = zipEntry.getName();
 			//过滤已存在的
-			if (packagingStream.contains(zipEntryName)) {
+			if (isAdded(packagingStream, zipEntryName)) {
 				return null;
 			}
-			
+
 			// 处理 assets资源目录(因为AIDE+的自举，所以不过滤 assets/ 下的 .class .java 文件)
-			if( zipEntryName.startsWith("assets/") ){
+			if (zipEntryName.startsWith("assets/")) {
 				ZipEntry newZipEntry = new ZipEntry(zipEntryName);
 				// assets/下资源必须无压缩
 				newZipEntry.setMethod(ZipEntry.STORED);
 				return newZipEntry;
 			}
-			
-			String zipEntryNameLowerCase = zipEntryName.toLowerCase();
-			if (zipEntryNameLowerCase.endsWith(".class")
-				|| zipEntryNameLowerCase.endsWith(".java")) {
+
+			// 过滤lib/${abi}/xxx.so
+			if (zipEntryName.startsWith("lib/") && zipEntryName.endsWith(".so") && this.isFilterAbi(zipEntryName)) {
+				// 过滤此abi
 				return null;
 			}
-			
+
+			String zipEntryNameLowerCase = zipEntryName.toLowerCase();
+			if (zipEntryNameLowerCase.endsWith(".class") || zipEntryNameLowerCase.endsWith(".java")) {
+				return null;
+			}
+
 			return zipEntry;
 		}
 	}
-	
+
 	/**
 	 * 从文件夹添加的so转换器
 	 */
-	public class NativeLibFileTransformer implements ZipEntryTransformer {
+	public class NativeLibFileTransformer extends FilterTransformer implements ZipEntryTransformer {
 		private boolean androidExtractNativeLibs;
 		public NativeLibFileTransformer(boolean androidExtractNativeLibs) {
 			this.androidExtractNativeLibs = androidExtractNativeLibs;
@@ -139,16 +149,18 @@ public interface ZipEntryTransformer {
 			String[] split = zipEntryName.split("/");
 			if (split.length >= 2) {
 				//只取so父目录/so文件名
-				zipEntryName =  "lib/" + split[split.length - 2] + "/" + split[split.length - 1];
+				zipEntryName = "lib/" + split[split.length - 2] + "/" + split[split.length - 1];
 			}
 
 			//以包含过滤
-			if (packagingStream.contains(zipEntryName)) {
+			if (isAdded(packagingStream, zipEntryName)
+					// 过滤abi
+					|| isFilterAbi(zipEntryName)) {
 				return null;
 			}
 
-
 			ZipEntry newZipEntry = new ZipEntry(zipEntryName);
+
 			if (!androidExtractNativeLibs) {
 				//android:extractNativeLibs="false"时必须无压缩
 				newZipEntry.setMethod(ZipEntry.STORED);
@@ -156,4 +168,46 @@ public interface ZipEntryTransformer {
 			return newZipEntry;
 		}
 	}
+
+	public static abstract class FilterTransformer implements ZipEntryTransformer {
+		private Set<String> abiFilters;
+		public void setAbiFilters(Set<String> abiFilters) {
+			this.abiFilters = abiFilters;
+		}
+
+		public boolean isFilterAbi(ZipEntry zipEntry) {
+			if (this.abiFilters == null) {
+				// 没有 abiFilters 就必须都打包
+				return false;
+			}
+			if (zipEntry == null) {
+				return true;
+			}
+			return isFilterAbi(zipEntry.getName());
+		}
+
+		public boolean isFilterAbi(String zipEntryName) {
+			if (this.abiFilters == null) {
+				// 没有 abiFilters 就必须都打包
+				return false;
+			}
+
+			if (zipEntryName == null) {
+				return true;
+			}
+
+			if (!zipEntryName.startsWith("lib/") || zipEntryName.indexOf('/', "lib/".length()) < 0) {
+				return true;
+			}
+
+			String abi = zipEntryName.substring("lib/".length(), zipEntryName.indexOf('/', "lib/".length()));
+			// 没有就过滤
+			return !this.abiFilters.contains(abi);
+		}
+
+		public boolean isAdded(PackagingStream packagingStream, String zipEntryName) {
+			return packagingStream.contains(zipEntryName);
+		}
+	}
 }
+
