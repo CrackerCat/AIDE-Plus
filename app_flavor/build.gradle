@@ -11,6 +11,11 @@ android {
         versionCode 2008210017
 		// [3.2.210316]
         versionName "2.3.3.6-alpha08"
+		
+		ndk {
+			// 过滤 abi
+			abiFilters 'arm64-v8a' 
+		}
     }
 	signingConfigs{
 		release{
