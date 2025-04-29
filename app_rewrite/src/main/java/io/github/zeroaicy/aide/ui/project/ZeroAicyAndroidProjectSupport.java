@@ -57,7 +57,7 @@ public class ZeroAicyAndroidProjectSupport extends AndroidProjectSupport {
 			}
 
 			engineSolutionProject.fY
-					.add(new EngineSolution.File(projectPath + "/" + cmakeListsTxtPath, "C++:+", null, false, false));
+					.add(new EngineSolution.File(projectPath + "/" + cmakeListsTxtPath, "C++", null, false, false));
 		}
 	}
 
