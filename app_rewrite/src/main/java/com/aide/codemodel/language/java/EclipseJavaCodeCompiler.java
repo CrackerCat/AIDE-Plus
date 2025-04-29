@@ -162,9 +162,8 @@ public class EclipseJavaCodeCompiler implements CodeCompiler {
 					Language syntaxTreeLanguage = syntaxTree.getLanguage();
 					if (syntaxTreeLanguage == this.language) {
 						compile(syntaxTree);
-						syntaxTreeSpace.releaseSyntaxTree(syntaxTree);
-						break;
 					}
+					syntaxTreeSpace.releaseSyntaxTree(syntaxTree);
 				}
 			}
 		}
