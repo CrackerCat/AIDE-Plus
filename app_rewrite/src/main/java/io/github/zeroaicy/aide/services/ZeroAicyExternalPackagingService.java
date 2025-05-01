@@ -119,7 +119,7 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 						getAndroidFxtractNativeLibs());
 				this.libgdxNativesTransformer = new ZipEntryTransformer.LibgdxNativesTransformer(
 						getAndroidFxtractNativeLibs());
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && ZeroAicySetting.isEnableEnsureCapacity()) {
+				if (ZeroAicySetting.isEnableEnsureCapacity()) {
 					this.environment.put("EnsureCapacity", getLibEnsureCapacityPathPath());
 				}
 

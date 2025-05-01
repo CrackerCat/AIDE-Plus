@@ -2,25 +2,26 @@ package io.github.zeroaicy.aide.services;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.IBinder;
 import androidx.core.app.NotificationCompat;
 import com.aide.common.AppLog;
 import com.aide.engine.service.CodeAnalysisEngineService;
+import com.aide.ui.AppPreferences;
 import com.aide.ui.MainActivity;
 import com.aide.ui.ServiceContainer;
-import java.util.Locale;
-import com.aide.ui.AppPreferences;
-import android.content.Context;
 import io.github.zeroaicy.aide.preference.ZeroAicySetting;
 import io.github.zeroaicy.util.FileUtil;
 import java.io.File;
+import java.util.Locale;
 
 public class ZeroAicyCodeAnalysisEngineService extends CodeAnalysisEngineService {
 
 	private static int id = 0x26f5;
 
-	private static final String TAG = "ZeroAicyCodeAnalysisEngineService";
+	private static final String TAG = ZeroAicyCodeAnalysisEngineService.class.getSimpleName();
 
 	private static Locale defaultLocale = Locale.getDefault();
 
@@ -31,6 +32,7 @@ public class ZeroAicyCodeAnalysisEngineService extends CodeAnalysisEngineService
 	//*
 	@Override
 	public void onCreate() {
+		AppLog.d(TAG, "onCreate");
 		super.onCreate();
 		// 初始化 App
 		Context applicationContext = getApplicationContext();
@@ -38,20 +40,32 @@ public class ZeroAicyCodeAnalysisEngineService extends CodeAnalysisEngineService
 		// 设置初始化
 		ZeroAicySetting.init(applicationContext);
 		AppPreferences.init(applicationContext);
-		
+
 		setAppLocale();
 		checkCompilerImplementation();
-		
+
 		// setNotificationAndForeground();
 
-		AppLog.d(TAG, "onCreate");
+		try {
+			
+			if (ZeroAicySetting.isEnableEnsureCapacity(false)) {
+				try {
+					AppLog.d(TAG, "启用扩容库");
+					System.loadLibrary("EnsureCapacity");
+				} catch (Throwable e) {
+					AppLog.d("CompilationUnitDeclarationResolver2", "load EnsureCapacity", e);
+				}
+			}else{
+				AppLog.d(TAG, "未启用扩容库");				
+			}
+		} catch (Throwable e) {
+			AppLog.d("CompilationUnitDeclarationResolver2", "isEnableEnsureCapacity", e);
+
+		}
 	}
 
-
 	private void setAppLocale() {
-		
 		String appLanguage = AppPreferences.getAppLanguage();
-		
 		Locale locale;
 		if (appLanguage == null || "default".equals(appLanguage)) {
 			// 使用默认
@@ -69,11 +83,11 @@ public class ZeroAicyCodeAnalysisEngineService extends CodeAnalysisEngineService
 		// ecj false
 		boolean isLastCompilerImplementForDefault = ZeroAicySetting.isLastCompilerImplementForDefault();
 		boolean isEnableEclipseCompilerForJava = ZeroAicySetting.isEnableEclipseCompilerForJava();
-		
+
 		// 是否是默认编译器
 		boolean isDefaultCompilerForJava = !isEnableEclipseCompilerForJava;
 		// 上一次编译器 与  当前编译器实现一致
-		if( isLastCompilerImplementForDefault == isDefaultCompilerForJava){
+		if (isLastCompilerImplementForDefault == isDefaultCompilerForJava) {
 			return;
 		}
 		// 同步当前编译器实现
@@ -83,7 +97,7 @@ public class ZeroAicyCodeAnalysisEngineService extends CodeAnalysisEngineService
 		FileUtil.deleteFolder(enginecacheFile);
 		enginecacheFile.mkdirs();
 	}
-	
+
 	@Override
 	public IBinder onBind(Intent intent) {
 		AppLog.d(TAG, "onBind");
