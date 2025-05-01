@@ -4,8 +4,50 @@ import com.aide.codemodel.api.abstraction.Syntax;
 import com.aide.codemodel.api.SyntaxTree;
 import com.aide.codemodel.api.collections.ListOfInt;
 
-public class HighlighterSyntax implements Syntax {
+public class HighlighterSyntax extends BaseHighlighterSyntax implements Syntax {
 
+	@Override
+	public boolean isBooleanLiteral(int i) {
+		return i == Styles.LiteralStyle || isLiteral(i);
+	}
+
+	@Override
+	public boolean isSeparator(int i) {
+		return i == Styles.SeparatorStyle;
+	}
+
+	@Override
+	public boolean isToken(int i) {
+		return i == Styles.KeywordStyle;
+	}
+
+	@Override
+	public boolean isTypeIdentifier(int i) {
+		return i == Styles.TypeStyle;
+	}
+
+	@Override
+	public boolean isComment(int i) {
+		return i == Styles.PreprocessorStyle;
+	}
+
+	@Override
+	public boolean isDocComment(int i) {
+		return i == Styles.CommentStyle;
+	}
+
+	@Override
+	public boolean isLiteral(int i) {
+		return i == Styles.StringStyle || i == Styles.NumberStyle || i == Styles.LiteralStyle;
+	}
+	@Override
+	public boolean isOperator(int i) {
+		return i == Styles.OperatorStyle;
+	}
+	
+}
+
+abstract class BaseHighlighterSyntax implements Syntax {
 	@Override
 	public int EQ(SyntaxTree syntaxTree, int i) {
 		// TODO: Implement this method
@@ -179,7 +221,6 @@ public class HighlighterSyntax implements Syntax {
 		// TODO: Implement this method
 		return false;
 	}
-
 	@Override
 	public boolean hasAttrValue(int i) {
 		// TODO: Implement this method
@@ -205,11 +246,6 @@ public class HighlighterSyntax implements Syntax {
 	}
 
 	@Override
-	public boolean isBooleanLiteral(int i) {
-        return i == Styles.LiteralStyle || isLiteral(i);
-	}
-
-	@Override
 	public boolean isChangedExpressionNode(SyntaxTree syntaxTree, int i) {
 		// TODO: Implement this method
 		return false;
@@ -226,17 +262,7 @@ public class HighlighterSyntax implements Syntax {
 		// TODO: Implement this method
 		return false;
 	}
-
-	@Override
-	public boolean isComment(int i) {
-		return i == Styles.PreprocessorStyle;
-	}
-
-	@Override
-	public boolean isDocComment(int i) {
-        return i == Styles.CommentStyle;
-	}
-
+	
 	@Override
 	public boolean isExpression(int i) {
 		// TODO: Implement this method
@@ -255,13 +281,6 @@ public class HighlighterSyntax implements Syntax {
 	}
 
 	@Override
-	public boolean isLiteral(int i) {
-		return i == Styles.StringStyle 
-			|| i == Styles.NumberStyle
-			|| i == Styles.LiteralStyle;
-	}
-
-	@Override
 	public boolean isMemberDeclaration(int i) {
 		// TODO: Implement this method
 		return false;
@@ -274,28 +293,8 @@ public class HighlighterSyntax implements Syntax {
 	}
 
 	@Override
-	public boolean isOperator(int i) {
-        return i == Styles.OperatorStyle;
-	}
-
-	@Override
 	public boolean isParameters(int i) {
 		return false;
-	}
-
-	@Override
-	public boolean isSeparator(int i) {
-        return i == Styles.SeparatorStyle;
-	}
-
-	@Override
-	public boolean isToken(int i) {
-        return i == Styles.KeywordStyle;
-	}
-
-	@Override
-	public boolean isTypeIdentifier(int i) {
-        return i == Styles.TypeStyle;
 	}
 
 	@Override
@@ -347,3 +346,4 @@ public class HighlighterSyntax implements Syntax {
 	}
 
 }
+

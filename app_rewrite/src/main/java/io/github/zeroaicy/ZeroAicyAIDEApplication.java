@@ -70,6 +70,9 @@ public class ZeroAicyAIDEApplication extends AIDEApplication {
 		// 更改日志路径
 		DebugUtil.debug(this, false);
 		Log.setSystemOut(ZeroAicySetting.isEnableDetailedLog());
+		// 捕获异常后在Activity显示
+		CrashApphandler.getInstance().onCreated();
+		
 		ShellEnvironmentUtils.init(this);
 		
 		// method2();
@@ -85,9 +88,11 @@ public class ZeroAicyAIDEApplication extends AIDEApplication {
 		// ZeroAicy Log附加Android Log
 		// attachLogcat();
 
-		// 捕获异常后在Activity显示
-		CrashApphandler.getInstance().onCreated();
-
+		if (ContextUtil.isMainProcess()) {
+			// 防止App的context为null
+			ServiceContainer.setContext(this);
+		}
+		
 		//初始化ZeroAicy设置
 		ZeroAicySetting.init(this);
 
@@ -100,12 +105,6 @@ public class ZeroAicyAIDEApplication extends AIDEApplication {
 		// 更新加密库[ 原则上近主进程与打包进程需要]
 		JksKeyStore.initBouncyCastleProvider();
 
-		if (ContextUtil.isMainProcess()) {
-			// JavaConsole进程不需要
-
-			// 防止App的context为null
-			ServiceContainer.setContext(this);
-		}
 
 		// 是否显示AIDE-WhatsNewDialog
 		if (ZeroAicySetting.isReinstall()) {
@@ -222,7 +221,7 @@ public class ZeroAicyAIDEApplication extends AIDEApplication {
 			if (logHold == null) {
 				AppLog.d(TAG, "LogHold 为 null");
 				logHold = new Log.AsyncOutputStreamHold(logCatPath);
-				ReflectPie.on(Log.class).set("mLogHold", logHold);
+				ReflectPie.onClass(Log.class).set("mLogHold", logHold);
 			}
 			if (log = Log.getLog() == null) {
 				AppLog.d(TAG, "LogHold mLog null");
@@ -232,7 +231,7 @@ public class ZeroAicyAIDEApplication extends AIDEApplication {
 				ReflectPie.on(logHold).set("mLog", mLog);
 
 			}
-			ReflectPie.on(Log.class).call("printPreMsgList");
+			ReflectPie.onClass(Log.class).call("printPreMsgList");
 		}
 	}
 }
