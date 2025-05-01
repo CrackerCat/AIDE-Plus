@@ -42,9 +42,10 @@ public class FileUtil {
 		logCatPathBuilder.append(File.separator);
 
 		String logcatFileName = ContextUtil.getProcessName();
-
-		if (logcatFileName.contains(":")) {
-			logcatFileName = logcatFileName.replace(":", "--");
+		int colonIndex = logcatFileName.lastIndexOf(':');
+		if (colonIndex > 0) {
+			// 只用进程名
+			logcatFileName = logcatFileName.substring(colonIndex + 1, logcatFileName.length());
 		}
 		logCatPathBuilder.append(logcatFileName);
 		logCatPathBuilder.append(".txt");
