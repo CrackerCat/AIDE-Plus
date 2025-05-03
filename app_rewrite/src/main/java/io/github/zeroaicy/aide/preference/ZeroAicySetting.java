@@ -74,7 +74,7 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 					try {
 						// 闪退会自动 
 						AppLog.d(TAG, "开始测试扩容库");
-						D8TaskWrapper.runD8Task(singletonList, environment);
+						D8TaskWrapper.runD8Task(singletonList, environment, true);
 					} catch (Throwable e) {
 						AppLog.e(TAG, "测试 扩容库是否可用 ", e);
 					}
@@ -164,7 +164,7 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 	 * 是否启用异步读取
 	 */
 	public static boolean isEnableAsynRead() {
-		return getDefaultSpBoolean("zero_aicy_enable_asyn_read", true);
+		return getDefaultSpBoolean("zero_aicy_enable_asyn_read", false);
 	}
 	public static String getProjectPunctuationjava() {
 
