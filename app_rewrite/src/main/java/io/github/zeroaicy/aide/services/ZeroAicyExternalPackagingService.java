@@ -134,7 +134,7 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 				this.zipResourceZipEntryTransformer.setAndroidExtractNativeLibs(androidDebuggable);
 
 				// abiFilters
-				LinkedHashSet<String> cmakeAbiFilters = getZeroAicyBuildGradle().getCmakeAbiFilters();
+				LinkedHashSet<String> cmakeAbiFilters = getZeroAicyBuildGradle().getCmakeAbiFilters(false);
 				this.nativeLibZipEntryTransformer.setAbiFilters(cmakeAbiFilters);
 				// jar中资源
 				this.libgdxNativesTransformer.setAbiFilters(cmakeAbiFilters);

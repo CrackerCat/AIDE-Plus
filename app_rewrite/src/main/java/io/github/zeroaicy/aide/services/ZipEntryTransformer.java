@@ -187,7 +187,7 @@ public interface ZipEntryTransformer {
 		}
 
 		public boolean isFilterAbi(String zipEntryName) {
-			if (this.abiFilters == null) {
+			if (this.abiFilters == null || this.abiFilters.isEmpty()) {
 				// 没有 abiFilters 就必须都打包
 				return false;
 			}
