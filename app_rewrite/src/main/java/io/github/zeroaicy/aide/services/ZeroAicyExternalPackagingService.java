@@ -1,7 +1,6 @@
 package io.github.zeroaicy.aide.services;
 
 import android.content.Intent;
-import android.os.Build;
 import android.text.TextUtils;
 import com.aide.common.AppLog;
 import com.aide.ui.ServiceContainer;
@@ -114,18 +113,30 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 						aAptResourcePath, nativeLibDirs, outFilePath, signaturePath, signaturePassword, signatureAlias,
 						signatureAliasPassword, buildRefresh, Ws, QX);
 
-				// 从文件夹添加原生库文件，
-				this.nativeLibZipEntryTransformer = new ZipEntryTransformer.NativeLibFileTransformer(
-						getAndroidFxtractNativeLibs());
-				this.libgdxNativesTransformer = new ZipEntryTransformer.LibgdxNativesTransformer(
-						getAndroidFxtractNativeLibs());
 				if (ZeroAicySetting.isEnableEnsureCapacity()) {
 					this.environment.put("EnsureCapacity", getLibEnsureCapacityPathPath());
 				}
 
-				LinkedHashSet<String> cmakeAbiFilters = getZeroAicyBuildGradle().getCmakeAbiFilters();
+				// android:extractNativeLibs
+				boolean androidExtractNativeLibs = getAndroidExtractNativeLibs();
+				this.nativeLibZipEntryTransformer.setAndroidExtractNativeLibs(androidExtractNativeLibs);
+				// jar中资源
+				this.libgdxNativesTransformer.setAndroidExtractNativeLibs(androidExtractNativeLibs);
+				this.dexZipEntryTransformer.setAndroidExtractNativeLibs(androidExtractNativeLibs);
+				this.zipResourceZipEntryTransformer.setAndroidExtractNativeLibs(androidExtractNativeLibs);
 
+				// android:debuggable
+				boolean androidDebuggable = getAndroidDebuggable();
+				this.nativeLibZipEntryTransformer.setAndroidDebuggable(androidDebuggable);
+				// jar中资源
+				this.libgdxNativesTransformer.setAndroidExtractNativeLibs(androidDebuggable);
+				this.dexZipEntryTransformer.setAndroidExtractNativeLibs(androidDebuggable);
+				this.zipResourceZipEntryTransformer.setAndroidExtractNativeLibs(androidDebuggable);
+
+				// abiFilters
+				LinkedHashSet<String> cmakeAbiFilters = getZeroAicyBuildGradle().getCmakeAbiFilters();
 				this.nativeLibZipEntryTransformer.setAbiFilters(cmakeAbiFilters);
+				// jar中资源
 				this.libgdxNativesTransformer.setAbiFilters(cmakeAbiFilters);
 				this.dexZipEntryTransformer.setAbiFilters(cmakeAbiFilters);
 				this.zipResourceZipEntryTransformer.setAbiFilters(cmakeAbiFilters);
@@ -834,11 +845,11 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 
 			// dex.zip转换器，即根目录下有classes%d.dex的zip文件的转换器
 			final ZipEntryTransformer.DexZipTransformer dexZipEntryTransformer = new ZipEntryTransformer.DexZipTransformer();
-			// 从jar依赖添加资源的过滤器，
+			// 从 jar依赖 | 文件夹 添加资源的过滤器，
 			final ZipEntryTransformer.ZipResourceTransformer zipResourceZipEntryTransformer = new ZipEntryTransformer.ZipResourceTransformer();
 			// 从文件夹添加原生库文件，
-			final ZipEntryTransformer.NativeLibFileTransformer nativeLibZipEntryTransformer;
-			final ZipEntryTransformer.LibgdxNativesTransformer libgdxNativesTransformer;
+			final ZipEntryTransformer.NativeLibFileTransformer nativeLibZipEntryTransformer = new ZipEntryTransformer.NativeLibFileTransformer();
+			final ZipEntryTransformer.LibgdxNativesTransformer libgdxNativesTransformer = new ZipEntryTransformer.LibgdxNativesTransformer();
 
 			public void minify2() throws Exception, Throwable {
 				// proguardPaths
@@ -1050,13 +1061,8 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 				//resources_ap_file
 				String aAptResourceFilePath = getAAptResourceFilePath();
 				//打包resources.ap_ 文件
-				ZipEntryTransformerService.packagingZipFile(aAptResourceFilePath, zipResourceZipEntryTransformer,
+				ZipEntryTransformerService.packagingZipFile(aAptResourceFilePath, this.zipResourceZipEntryTransformer,
 						packagingZipOutput, true);
-
-				// 从文件夹添加原生库文件，
-				ZipEntryTransformer.NativeLibFileTransformer nativeLibZipEntryTransformer = new ZipEntryTransformer.NativeLibFileTransformer(
-						getAndroidFxtractNativeLibs());
-
 				//从原生库目录添加so
 				for (String nativeLibDirPath : this.getNativeLibDirs()) {
 					File nativeLibDirFile = new File(nativeLibDirPath);
@@ -1065,13 +1071,13 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 					}
 					AppLog.d(TAG, "从原生库添加" + nativeLibDirPath);
 					ZipEntryTransformerService.packagingDirFile(nativeLibDirPath, nativeLibDirFile,
-							nativeLibZipEntryTransformer, packagingZipOutput);
+							this.nativeLibZipEntryTransformer, packagingZipOutput);
 
 				}
 
 				//打包混淆后的dex
 				ZipEntryTransformerService.packagingZipFile(getMixUpDexZipFile(false).getAbsolutePath(),
-						dexZipEntryTransformer, packagingZipOutput, false);
+						this.dexZipEntryTransformer, packagingZipOutput, false);
 
 				// 打包自定义 assetsSrcDirs下资源
 				packagingAssetsSrcDirsResource(packagingZipOutput);
@@ -1394,7 +1400,12 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 			/**
 			 * android:extractNativeLibs="false"必须无压缩
 			 */
-			private boolean androidFxtractNativeLibs = true;
+			private boolean androidExtractNativeLibs = true;
+			/**
+			 * android:debuggable="true" 可以打包无.so后缀的文件
+			 */
+			private boolean androidDebuggable = false;
+
 			// 低于21时d8无法dexing AIDE产生的class文件
 			private int minSdk = 21;
 
@@ -1509,7 +1520,8 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 					if (androidManifestParser == null) {
 						projectMinSdk = defaultProjectMinSdk;
 					} else {
-						this.androidFxtractNativeLibs = androidManifestParser.getExtractNativeLibs();
+						this.androidExtractNativeLibs = androidManifestParser.getExtractNativeLibs();
+						this.androidDebuggable = androidManifestParser.getDebuggable();
 
 						String minSdkVersion = androidManifestParser.getMinSdkVersion();
 						projectMinSdk = Utils.parseInt(minSdkVersion, defaultProjectMinSdk);
@@ -1627,8 +1639,11 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 			/**
 			 * 返回android:extractNativeLibs="false"的值
 			 */
-			public boolean getAndroidFxtractNativeLibs() {
-				return this.androidFxtractNativeLibs;
+			public boolean getAndroidExtractNativeLibs() {
+				return this.androidExtractNativeLibs;
+			}
+			public boolean getAndroidDebuggable() {
+				return this.androidDebuggable;
 			}
 
 			/**********共用层，共用一些相同的代码逻辑***********************************/

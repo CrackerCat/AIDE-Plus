@@ -15,10 +15,6 @@ public interface ZipEntryTransformer {
 	public class LibgdxNativesTransformer extends FilterTransformer implements ZipEntryTransformer {
 
 		private String curLibgdxNativesABI;
-		private boolean androidExtractNativeLibs;
-		public LibgdxNativesTransformer(boolean androidExtractNativeLibs) {
-			this.androidExtractNativeLibs = androidExtractNativeLibs;
-		}
 		public void setCurLibgdxNativesLibsPath(String path) {
 			if (path.endsWith("natives-arm64-v8a.jar")) {
 				curLibgdxNativesABI = "arm64-v8a";
@@ -39,17 +35,20 @@ public interface ZipEntryTransformer {
 		public ZipEntry transformer(ZipEntry zipEntry, PackagingStream packagingStream) {
 
 			String zipEntryName = zipEntry.getName();
-			if (curLibgdxNativesABI == null || zipEntry.isDirectory() || !zipEntryName.endsWith(".so")) {
+			if (curLibgdxNativesABI == null || zipEntry.isDirectory()
+			// android:debuggable="true" 可以不是.so
+					|| (!isAndroidDebuggable() && !zipEntryName.endsWith(".so"))) {
 				return null;
 			}
 			zipEntryName = "lib/" + this.curLibgdxNativesABI + "/" + zipEntryName;
-			if (isFilterAbi(zipEntryName)) {
+			
+			if (isAdded(packagingStream, zipEntryName) || isFilterAbi(zipEntryName)) {
 				// 过滤
 				return null;
 			}
-
+			
 			ZipEntry newZipEntry = new ZipEntry(zipEntryName);
-			if (!androidExtractNativeLibs) {
+			if (!isAndroidExtractNativeLibs()) {
 				//android:extractNativeLibs="false"时必须无压缩
 				newZipEntry.setMethod(ZipEntry.STORED);
 			}
@@ -120,7 +119,11 @@ public interface ZipEntryTransformer {
 			}
 
 			// 过滤lib/${abi}/xxx.so
-			if (zipEntryName.startsWith("lib/") && zipEntryName.endsWith(".so") && this.isFilterAbi(zipEntryName)) {
+			if (zipEntryName.startsWith("lib/")
+					// android:debuggable="true" 可以不是so
+					&& (isAndroidDebuggable() || !zipEntryName.endsWith(".so"))
+					// 是否是 过滤abi
+					&& this.isFilterAbi(zipEntryName)) {
 				// 过滤此abi
 				return null;
 			}
@@ -138,10 +141,6 @@ public interface ZipEntryTransformer {
 	 * 从文件夹添加的so转换器
 	 */
 	public class NativeLibFileTransformer extends FilterTransformer implements ZipEntryTransformer {
-		private boolean androidExtractNativeLibs;
-		public NativeLibFileTransformer(boolean androidExtractNativeLibs) {
-			this.androidExtractNativeLibs = androidExtractNativeLibs;
-		}
 		@Override
 		public ZipEntry transformer(ZipEntry zipEntry, PackagingStream packagingStream) {
 			String zipEntryName = zipEntry.getName();
@@ -161,7 +160,7 @@ public interface ZipEntryTransformer {
 
 			ZipEntry newZipEntry = new ZipEntry(zipEntryName);
 
-			if (!androidExtractNativeLibs) {
+			if (!isAndroidExtractNativeLibs()) {
 				//android:extractNativeLibs="false"时必须无压缩
 				newZipEntry.setMethod(ZipEntry.STORED);
 			}
@@ -171,6 +170,7 @@ public interface ZipEntryTransformer {
 
 	public static abstract class FilterTransformer implements ZipEntryTransformer {
 		private Set<String> abiFilters;
+
 		public void setAbiFilters(Set<String> abiFilters) {
 			this.abiFilters = abiFilters;
 		}
@@ -207,6 +207,25 @@ public interface ZipEntryTransformer {
 
 		public boolean isAdded(PackagingStream packagingStream, String zipEntryName) {
 			return packagingStream.contains(zipEntryName);
+		}
+
+		private boolean androidExtractNativeLibs;
+		private boolean androidDebuggable;
+
+		public void setAndroidExtractNativeLibs(boolean androidExtractNativeLibs) {
+			this.androidExtractNativeLibs = androidExtractNativeLibs;
+		}
+
+		public boolean isAndroidExtractNativeLibs() {
+			return androidExtractNativeLibs;
+		}
+
+		public void setAndroidDebuggable(boolean androidDebuggable) {
+			this.androidDebuggable = androidDebuggable;
+		}
+
+		public boolean isAndroidDebuggable() {
+			return androidDebuggable;
 		}
 	}
 }
