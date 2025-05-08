@@ -29,115 +29,111 @@ public class ZeroAicyModel extends AIDEModel {
 	public static class HighlighterCallback2 implements HighlighterCallback {
 		HighlighterCallback highlighterCallback;
 
-		public HighlighterCallback2( HighlighterCallback highlighterCallback ) {
+		public HighlighterCallback2(HighlighterCallback highlighterCallback) {
 			this.highlighterCallback = highlighterCallback;
 		}
 
 		@Override
-		public void addSyntaxTreeStyles( Language language, SyntaxTreeStyles syntaxTreeStyles ) {
+		public void addSyntaxTreeStyles(Language language, SyntaxTreeStyles syntaxTreeStyles) {
 			this.highlighterCallback.addSyntaxTreeStyles(language, syntaxTreeStyles);
 			AppLog.e(new Throwable());
 
 		}
 
 		@Override
-		public void delegateFound( Language language, int startLine, int startColumn, int endLine, int endColumn ) {
+		public void delegateFound(Language language, int startLine, int startColumn, int endLine, int endColumn) {
 			this.highlighterCallback.delegateFound(language, startLine, startColumn, endLine, endColumn);
 			AppLog.e(new Throwable());
 
 		}
 
 		@Override
-		public void fileFinished( FileEntry fileEntry ) {
+		public void fileFinished(FileEntry fileEntry) {
 			this.highlighterCallback.fileFinished(fileEntry);
 
 			AppLog.e(new Throwable());
 		}
 
 		@Override
-		public void identifierFound( Language language, int startLine, int startColumn, int endLine, int endColumn ) {
+		public void identifierFound(Language language, int startLine, int startColumn, int endLine, int endColumn) {
 			AppLog.e(new Throwable());
 
 		}
 
 		@Override
-		public void j6( ) {
+		public void j6() {
 			this.highlighterCallback.j6();
 			AppLog.e(new Throwable());
 
 		}
 
 		@Override
-		public void keywordFound( Language language, int startLine, int startColumn, int endLine, int endColumn ) {
+		public void keywordFound(Language language, int startLine, int startColumn, int endLine, int endColumn) {
 			this.highlighterCallback.keywordFound(language, startLine, startColumn, endLine, endColumn);
 			AppLog.e(new Throwable());
 
 		}
 
 		@Override
-		public void namespaceFound( Language language, int startLine, int startColumn, int endLine, int endColumn ) {
+		public void namespaceFound(Language language, int startLine, int startColumn, int endLine, int endColumn) {
 			this.highlighterCallback.namespaceFound(language, startLine, startColumn, endLine, endColumn);
 			AppLog.e(new Throwable());
 
 		}
 
 		@Override
-		public void releaseSyntaxTree( ) {
+		public void releaseSyntaxTree() {
 			this.highlighterCallback.releaseSyntaxTree();
 			AppLog.e(new Throwable());
 
 		}
 
 		@Override
-		public void typeFound( Language language, int startLine, int startColumn, int endLine, int endColumn ) {
+		public void typeFound(Language language, int startLine, int startColumn, int endLine, int endColumn) {
 			this.highlighterCallback.typeFound(language, startLine, startColumn, endLine, endColumn);
 			AppLog.e(new Throwable());
 
 		}
 
 		@Override
-		public void unifedLineFound( FileEntry fileEntry, int p ) {
+		public void unifedLineFound(FileEntry fileEntry, int p) {
 			this.highlighterCallback.unifedLineFound(fileEntry, p);
 			AppLog.e(new Throwable());
 
 		}
 
 		@Override
-		public void found( int type, int startLine, int startColumn, int endLine, int endColumn ) {
+		public void found(int type, int startLine, int startColumn, int endLine, int endColumn) {
 			this.highlighterCallback.found(type, startLine, startColumn, endLine, endColumn);
 			AppLog.e(new Throwable());
-			
+
 		}
 
 	}
 
-	public ZeroAicyModel(
-		OpenFileCallback openFileCallback, 
-		StopCallback stopCallback, 
-		StructureCallback structureCallback, 
-		HighlighterCallback highlighterCallback, 
-		SymbolSearcherCallback symbolSearcherCallback, 
-		CodeCompleterCallback codeCompleterCallback, 
-		RefactoringCallback refactoringCallback, 
-		UsageSearcherCallback usageSearcherCallback, 
-		CodeMetricsCallback codeMetricsCallback, 
-		APISearcherCallback aPISearcherCallback, 
-		DebugMetadataCallback debugMetadataCallback, 
-		TemplateEvaluatorCallback templateEvaluatorCallback, y2 y2Var, q2 q2Var, x2 x2Var, BomReaderFactory bomReaderFactory ) {
+	public ZeroAicyModel(OpenFileCallback openFileCallback, StopCallback stopCallback,
+			StructureCallback structureCallback, HighlighterCallback highlighterCallback,
+			SymbolSearcherCallback symbolSearcherCallback, CodeCompleterCallback codeCompleterCallback,
+			RefactoringCallback refactoringCallback, UsageSearcherCallback usageSearcherCallback,
+			CodeMetricsCallback codeMetricsCallback, APISearcherCallback aPISearcherCallback,
+			DebugMetadataCallback debugMetadataCallback, TemplateEvaluatorCallback templateEvaluatorCallback, y2 y2Var,
+			q2 q2Var, x2 x2Var, BomReaderFactory bomReaderFactory) {
 		//super(structureCallback, highlighterCallback,);
 		// ReflectPie.on(this).set("errorTable", new ErrorTablePro(this));
 
-		super(openFileCallback, stopCallback, structureCallback, highlighterCallback, symbolSearcherCallback, codeCompleterCallback, refactoringCallback, usageSearcherCallback, codeMetricsCallback, aPISearcherCallback, debugMetadataCallback, templateEvaluatorCallback, y2Var, q2Var, x2Var, bomReaderFactory);
+		super(openFileCallback, stopCallback, structureCallback, highlighterCallback, symbolSearcherCallback,
+				codeCompleterCallback, refactoringCallback, usageSearcherCallback, codeMetricsCallback,
+				aPISearcherCallback, debugMetadataCallback, templateEvaluatorCallback, y2Var, q2Var, x2Var,
+				bomReaderFactory);
 
 	}
 
-
 	// configure
 	@Override
-	public void J0( ) {
-		for ( CodeModel codeModel : getCodeModels() ) {
-			if ( codeModel instanceof JavaCodeModelPro ) {
-				JavaCodeModelPro javaCodeModelPro = (JavaCodeModelPro)codeModel;
+	public void J0() {
+		for (CodeModel codeModel : getCodeModels()) {
+			if (codeModel instanceof JavaCodeModelPro) {
+				JavaCodeModelPro javaCodeModelPro = (JavaCodeModelPro) codeModel;
 				javaCodeModelPro.reset();
 			}
 		}
@@ -145,7 +141,19 @@ public class ZeroAicyModel extends AIDEModel {
 	}
 
 	@Override
-	public void setEngineSolution( EngineSolution engineSolution ) {
+	public void setEngineSolution(EngineSolution engineSolution) {
 		super.setEngineSolution(engineSolution);
 	}
+
+	@Override
+	public void DW(boolean p) {
+		try{
+			super.DW(p);
+		}catch(ArrayIndexOutOfBoundsException e){
+			// 过滤 数组越界 
+			AppLog.e("过滤已知bug", e);
+		}
+	}
+
 }
+
