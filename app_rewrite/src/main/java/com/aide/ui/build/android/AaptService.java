@@ -28,6 +28,7 @@ import java.util.Iterator;
 import com.aide.ui.project.WearAppProjectSupport;
 import com.aide.ui.util.BuildGradle;
 import io.github.zeroaicy.aide.extend.ZeroAicyExtensionInterface;
+import io.github.zeroaicy.aide.preference.ZeroAicySetting;
 
 public class AaptService {
 
@@ -56,6 +57,7 @@ public class AaptService {
     }
 
 	private Map<String, List<SyntaxError>> resolvingError(String mainProjectPath, Map<String, String> androidManifestMap, String errorInfo) {
+		String aaptType = ZeroAicySetting.isEnableAapt2() ? "aapt2" : "aapt";
 		HashMap<String, List<SyntaxError>> fileSyntaxErrorsMap = new HashMap<>();
 		try {
 			String[] lines = errorInfo.split("\n");
@@ -114,12 +116,12 @@ public class AaptService {
 					String error2 = "in generated file: " + error;
 					int errorLineNumber2 = 1;
 
-					SyntaxError syntaxError2 = makeSyntaxError("aapt2", errorLineNumber2, error2);
+					SyntaxError syntaxError2 = makeSyntaxError(aaptType, errorLineNumber2, error2);
 					putSyntaxError(fileSyntaxErrorsMap, errorFilePath2, syntaxError2);
 
 				}
 
-				SyntaxError syntaxError = makeSyntaxError("aapt2", errorLineNumber, error);
+				SyntaxError syntaxError = makeSyntaxError(aaptType, errorLineNumber, error);
 				putSyntaxError(fileSyntaxErrorsMap, errorFilePath, syntaxError);
 			}
 		}				
@@ -134,7 +136,7 @@ public class AaptService {
 			fileSyntaxErrorsMap.put(errorFilePath, new ArrayList<SyntaxError>());
 		}
 		List<SyntaxError> syntaxErrors = fileSyntaxErrorsMap.get(errorFilePath);
-		syntaxErrors.add(makeSyntaxError("aapt", 1, line));
+		syntaxErrors.add(makeSyntaxError("aapt2", 1, line));
 	}
 
 	public void putSyntaxError(Map<String, List<SyntaxError>> fileSyntaxErrorsMap, String errorFilePath, SyntaxError syntaxError) {

@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import io.github.zeroaicy.aide.preference.ZeroAicySetting;
 
 /**
  * 被AndroidProjectBuildService引用
@@ -52,6 +53,8 @@ public class a {
 
     @MethodMark(method = -7836100668456117327L)
     private Map<String, List<SyntaxError>> EQ(String str, String str2) {
+		String aaptType = ZeroAicySetting.isEnableAapt2() ? "aapt2" : "aapt";
+		
         int i;
         try {
             HashMap<String, List<SyntaxError>> syntaxErrorMap = new HashMap<>();
@@ -78,7 +81,7 @@ public class a {
                                     while (trim2.toLowerCase().startsWith("error:")) {
                                         trim2 = trim2.substring(6, trim2.length()).trim();
                                     }
-                                    SyntaxError syntaxError = gn("aapt", i, trim2);
+                                    SyntaxError syntaxError = gn(aaptType, i, trim2);
                                     if (!syntaxErrorMap.containsKey(substring)) {
                                         syntaxErrorMap.put(substring, new ArrayList<SyntaxError>());
                                     }
@@ -92,7 +95,7 @@ public class a {
                     if (!syntaxErrorMap.containsKey(str)) {
                         syntaxErrorMap.put(str, new ArrayList<SyntaxError>());
                     }
-					syntaxErrorMap.get(str).add(gn("aapt", 1, trim));
+					syntaxErrorMap.get(str).add(gn(aaptType, 1, trim));
                 }
             }
             return syntaxErrorMap;
