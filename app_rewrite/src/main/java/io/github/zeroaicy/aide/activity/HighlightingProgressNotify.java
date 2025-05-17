@@ -85,7 +85,7 @@ public class HighlightingProgressNotify implements Runnable, OpenFileService.Fil
 
 		curPoll++;
 		// 轮询
-		ThreadPoolService.postDelayedOfUi(this, 400);
+		ThreadPoolService.postDelayedOfUi(this, 500);
 	}
 
 	@Override
