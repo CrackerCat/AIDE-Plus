@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import com.aide.codemodel.api.SyntaxTreeSpace;
+import com.aide.common.AppLog;
 
 public class EclipseJavaCodeCompiler implements CodeCompiler {
 
@@ -92,28 +93,16 @@ public class EclipseJavaCodeCompiler implements CodeCompiler {
 
 	@Override
 	public void compile(List<SyntaxTree> syntaxTrees, boolean p) {
-		// AppLog.println_d(" compile() -> %s", javaCodeModelPro);
-
 		if (this.javaCodeModelPro == null) {
 			return;
 		}
-
-		if (this.completed) {
-			this.completed = false;
-			// AppLog.println_d("\n\n\n\n\n开始编译");
-		}
-
 		for (SyntaxTree syntaxTree : syntaxTrees) {
-
 			Language syntaxTreeLanguage = syntaxTree.getLanguage();
 			if (syntaxTreeLanguage == this.language) {
+				this.completed = false;
 				compile(syntaxTree);
-
 				break;
-			} else {
-				// AppLog.println_d("Language %s  %s\n", this.language, syntaxTreeLanguage);
 			}
-
 		}
 
 	}
@@ -139,10 +128,15 @@ public class EclipseJavaCodeCompiler implements CodeCompiler {
 	}
 
 	private final Set<String> completedFiles = new HashSet<>();
-	private boolean completed;
+	// 只有 compile 被调用才会进行补充调用， 不然高亮异常卡顿
+	private boolean completed = true;
 	@Override
 	public void completed() {
-
+		if( this.completed ){
+			return;
+		}
+		
+		// AppLog.println_d("开始 completed");
 		SyntaxTreeSpace syntaxTreeSpace = this.model.syntaxTreeSpace;
 		SetOfFileEntry chachedFiles = syntaxTreeSpace.getChachedFiles();
 		SetOfFileEntry.Iterator default_Iterator = chachedFiles.default_Iterator;
@@ -153,7 +147,6 @@ public class EclipseJavaCodeCompiler implements CodeCompiler {
 			FileEntry fileEntry = default_Iterator.nextKey();
 			String pathString = fileEntry.getPathString();
 			// paths.add(pathString);
-
 			if (!this.completedFiles.contains(pathString)) {
 				// 补充编译
 				// AppLog.println_d("补充编译 %s", pathString);
@@ -161,6 +154,7 @@ public class EclipseJavaCodeCompiler implements CodeCompiler {
 				for (SyntaxTree syntaxTree : syntaxTrees) {
 					Language syntaxTreeLanguage = syntaxTree.getLanguage();
 					if (syntaxTreeLanguage == this.language) {
+						// AppLog.println_d("补充编译 %s", pathString);
 						compile(syntaxTree);
 					}
 					syntaxTreeSpace.releaseSyntaxTree(syntaxTree);
@@ -173,7 +167,7 @@ public class EclipseJavaCodeCompiler implements CodeCompiler {
 
 		// 编译结束
 		this.completed = true;
-		// AppLog.println_d("编译结束\n\n\n\n\n");
+		// AppLog.println_d("\n补充编译结束\n\n\n\n\n");
 	}
 
 	public static Set<FileEntry> convert(SetOfFileEntry setOfFileEntry) {
