@@ -96,8 +96,8 @@ public class Logger implements Runnable {
 	@Override
     public void run() {
         try {
-			Runtime.getRuntime().exec("logcat -c");
-            Process exec = Runtime.getRuntime().exec("logcat -v threadtime");
+			// Runtime.getRuntime().exec("logcat -c");
+            Process exec = Runtime.getRuntime().exec("logcat -c && logcat -v threadtime");
 			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(exec.getInputStream()), 20);
 
 			while (true) {
