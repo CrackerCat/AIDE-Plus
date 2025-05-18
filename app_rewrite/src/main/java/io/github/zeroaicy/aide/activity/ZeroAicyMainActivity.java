@@ -88,6 +88,7 @@ public class ZeroAicyMainActivity extends MainActivity {
 			setUpDrawerLayout();
 		}
 		isOnCreated = true;
+		requestPostNotifications();
 		showRequestManageExternalStorage();
 
 		// 修复 MainSearchBarNoTabs 与 符号栏重叠问题
@@ -331,6 +332,22 @@ public class ZeroAicyMainActivity extends MainActivity {
 
 	}
 
+	public void requestPostNotifications() {
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+			return;
+		}
+			
+		XXPermissions.with(this).permission(android.Manifest.permission.POST_NOTIFICATIONS)
+			.request(new OnPermissionCallback() {
+				public void onDenied(List<String> permissions, boolean doNotAskAgain) {
+					// 不同意, 就一直申请
+					requestPostNotifications();
+				}
+				@Override
+				public void onGranted(List<String> list, boolean allGranted) {
+				}
+			});
+	}
 	AlertDialog showRequestAlertDialog;
 	/**
 	 * 显示授权请求弹窗
@@ -529,7 +546,7 @@ public class ZeroAicyMainActivity extends MainActivity {
 			return;
 		}
 
-		AppLog.d(TAG, "openFile this %s", this);
+		// AppLog.d(TAG, "openFile this %s", str);
 		AppLog.d(TAG, "ServiceContainer isShutdowned %s", String.valueOf(ServiceContainer.isShutdowned()));
 
 		aq(new FileSpan(str, 1, 1, 1, 1));

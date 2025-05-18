@@ -7,6 +7,10 @@
 	android:installLocation="auto">
 
 	<!-- 新增 -->
+	
+	<!-- 显示通知 -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+	
 	<!-- Termux RunCommandService 权限 -->
     <uses-permission android:name="com.termux.permission.RUN_COMMAND" />
     
