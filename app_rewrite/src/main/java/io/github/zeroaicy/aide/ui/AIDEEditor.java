@@ -318,7 +318,7 @@ public class AIDEEditor extends com.aide.ui.AIDEEditor {
 		// 而调用此方法也在子线程以及aidl线程不会阻塞Ui线程
 		@Override
 		public void J0(OpenFile openFile) {
-			if (initing.get()) {
+			if (this.isAsyn && initing.get()) {
 				try {
 					Object lock = this.lock;
 					synchronized (lock) {
@@ -334,8 +334,10 @@ public class AIDEEditor extends com.aide.ui.AIDEEditor {
 
 		@Override
 		public void close() {
-			synchronized (this.lock) {
-				this.lock.notifyAll();
+			if (this.isAsyn) {
+				synchronized (this.lock) {
+					this.lock.notifyAll();
+				}
 			}
 			super.close();
 		}
