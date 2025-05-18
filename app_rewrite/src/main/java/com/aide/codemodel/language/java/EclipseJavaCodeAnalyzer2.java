@@ -22,6 +22,8 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.CompilationResult;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblem;
+import com.aide.common.AppLog;
+import com.aide.codemodel.language.java.EclipseJavaCodeAnalyzer2.HighlighterInfo;
 
 public class EclipseJavaCodeAnalyzer2 extends JavaCodeAnalyzer {
 
@@ -111,8 +113,10 @@ public class EclipseJavaCodeAnalyzer2 extends JavaCodeAnalyzer {
 	// resolve
 	@Override
 	public void v5(SyntaxTree syntaxTree) {
-		// AppLog.println_d("analyzeErrors  %s", syntaxTree.getFile().getPathString());
+		// long time = System.currentTimeMillis();
 		analyzeErrors(syntaxTree);
+		// String pathString = syntaxTree.getFile().getPathString();
+		// AppLog.println_d("analyzeErrors  %s 耗时 %s", pathString, System.currentTimeMillis() - time);
 	}
 
 	// v5 -> analyzeErrors
@@ -153,12 +157,21 @@ public class EclipseJavaCodeAnalyzer2 extends JavaCodeAnalyzer {
 			// 强制模式 清除上次结果
 			clearErrors(syntaxTree);
 		}
+
 		// 必须调用 codemodel需要符号表信息
 		List<ErrorInfo> aideSemanticAnalysis = aideSemanticAnalysis(syntaxTree);
 
-		if (!forceResolve && oldVersion == nowVersion) {
-			// 复用解析结果
+		if (forceResolve || oldVersion != nowVersion) {
+			// 更新 源码版本
+			this.semanticParserVersionMap.VH(fileId, nowVersion);
 
+			// 更新版本 put
+			CompilationUnitDeclaration resolveUnit =
+					// 强制语义分析
+					forceSemanticAnalysis(fileEntry, language, aideSemanticAnalysis, generateCode);
+			return resolveUnit;
+		} else {
+			// 复用解析结果
 			// 添加 ecj 从缓存中 
 			List<ErrorInfo> ecjSemanticAnalysis = ecjSemanticAnalysisMap.get(filePath);
 			// 添加 ecjSemanticAnalysis 
@@ -167,18 +180,6 @@ public class EclipseJavaCodeAnalyzer2 extends JavaCodeAnalyzer {
 			// 添加 aideSemanticAnalysis 
 			addErrorInfo(aideSemanticAnalysis, fileEntry, language);
 			return null;
-		} else {
-			if (oldVersion != nowVersion) {
-				// 更新 源码版本
-				this.semanticParserVersionMap.VH(fileId, nowVersion);
-				
-				// addChachedFiles();
-			}
-
-			// 更新版本 put
-			CompilationUnitDeclaration resolveUnit = forceSemanticAnalysis(fileEntry, language, aideSemanticAnalysis,
-					generateCode);
-			return resolveUnit;
 		}
 	}
 
@@ -194,7 +195,6 @@ public class EclipseJavaCodeAnalyzer2 extends JavaCodeAnalyzer {
 		// 并保存结果以便复用
 
 		// 解析
-
 		// resolve 可能为null
 		CompilationUnitDeclaration resolveUnit = forceResolveUnit(fileEntry, generateCode);
 
@@ -277,8 +277,10 @@ public class EclipseJavaCodeAnalyzer2 extends JavaCodeAnalyzer {
 					case IProblem.ArgumentIsNeverUsed :
 					case IProblem.ExceptionParameterIsNeverUsed :
 					case IProblem.UnusedObjectAllocation :
-						ecjSemanticHighlighter.add(new HighlighterInfo(HighlighterType.UnUsed, startLine, startColumn,
-								endLine, endColumn));
+						// 变量 未使用
+						EclipseJavaCodeAnalyzer2.HighlighterInfo highlighterInfo = new HighlighterInfo(
+								HighlighterType.UnUsed, startLine, startColumn, endLine, endColumn);
+						ecjSemanticHighlighter.add(highlighterInfo);
 						break;
 					default :
 						// this.highlighterCallback.found(HighlighterType.UnUsed, line, column, line, endColumn);
@@ -376,8 +378,7 @@ public class EclipseJavaCodeAnalyzer2 extends JavaCodeAnalyzer {
 		if (fileEntryErrorPack != null)
 			fileEntryErrorPack.parseErrors.clear();
 	}
-	
-	
+
 	/**
 	 * 错误全部 转成 警告 (50 -> 112)
 	 * 然后由 AIDEEditor$AIDEEditorModel ef 过滤
@@ -437,7 +438,7 @@ public class EclipseJavaCodeAnalyzer2 extends JavaCodeAnalyzer {
 		public int kind;
 
 		public Vector<ErrorTable.Fix> fixes;
-		
+
 		/**
 		 * 静态方法 Java项目入口类标记
 		 */

@@ -407,8 +407,8 @@ public class ProjectEnvironment {
 			AppLog.error(e);
 			return null;
 		}
-		CompilationUnitDeclaration result = this.resolver.resolve(new CompilationUnit(data, pathString, "utf-8"),
-				generateCode);
+		CompilationUnit compilationUnit = new CompilationUnit(data, pathString, "utf-8");
+		CompilationUnitDeclaration result = this.resolver.resolve(compilationUnit, generateCode);
 
 		// 检查错误
 		if (result == null || result.compilationResult == null) {
@@ -543,7 +543,7 @@ public class ProjectEnvironment {
 			classCacheFile.delete();
 
 			// AppLog.d("编译输出", classCacheFile);
-					
+
 			OutputStream classFileOutput = null;
 			BufferedOutputStream output = null;
 			try {

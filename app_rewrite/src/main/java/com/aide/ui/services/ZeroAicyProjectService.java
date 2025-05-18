@@ -665,8 +665,8 @@ public class ZeroAicyProjectService extends ProjectService {
 		if (isOpenProject()) {
 			// 冷启动打开的项目 显示分析进度条
 			MainActivity mainActivity = ServiceContainer.getMainActivity();
-			if( mainActivity instanceof ZeroAicyMainActivity ){
-				ZeroAicyMainActivity zeroAicyMainActivity = (ZeroAicyMainActivity)mainActivity;
+			if (mainActivity instanceof ZeroAicyMainActivity) {
+				ZeroAicyMainActivity zeroAicyMainActivity = (ZeroAicyMainActivity) mainActivity;
 				zeroAicyMainActivity.showCodeAnalysisProgress();
 			}
 		}
@@ -674,10 +674,18 @@ public class ZeroAicyProjectService extends ProjectService {
 
 		// this.initAsync();
 		this.init();
-		// 猜测 aapt2 aidl
-		if (isOpenProject()) {
-			ZeroAicyProjectService.this.et(null, false);
-			//sy("init");
+		try {
+			// 猜测 aapt2 aidl
+			ThreadPoolService.postDelayedOfUi(new Runnable() {
+				@Override
+				public void run() {
+					if (isOpenProject()) {
+						ZeroAicyProjectService.this.etAsync(null, false);
+					}
+				}
+			}, 500);
+		} catch (Throwable e) {
+			AppLog.d(TAG, e);
 		}
 
 		if (this.pojectSupport != null) {

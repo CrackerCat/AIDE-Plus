@@ -3,14 +3,18 @@ package com.aide.ui.build.android;
 import abcd.wf;
 import abcd.xf;
 import android.os.Build;
+import android.text.TextUtils;
 import com.aide.common.AppLog;
 import com.aide.common.StreamUtilities;
+import com.aide.ui.ServiceContainer;
 import com.aide.ui.build.android.AaptService;
 import com.aide.ui.project.AndroidProjectSupport;
+import com.aide.ui.services.ProjectService;
 import com.aide.ui.util.FileSystem;
 import com.probelytics.annotation.MethodMark;
 import io.github.zeroaicy.aide.aapt2.Aapt2Task;
 import io.github.zeroaicy.aide.preference.ZeroAicySetting;
+import io.github.zeroaicy.aide.utils.AndroidManifestParser;
 import io.github.zeroaicy.util.IOUtils;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -26,10 +30,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import android.text.TextUtils;
-import io.github.zeroaicy.aide.utils.AndroidManifestParser;
-import com.aide.ui.ServiceContainer;
-import com.aide.ui.services.ProjectService;
 
 public class AaptService$Task {
 	// res的依赖map key res_dir_path-> value res_dir_path_list
