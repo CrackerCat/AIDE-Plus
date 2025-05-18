@@ -59,7 +59,7 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 		checkEnsureCapacity(context);
 	}
 
-	private static void checkEnsureCapacity(Context context) {
+	private static void checkEnsureCapacity(final Context context) {
 		if( !ContextUtil.isMainProcess() ){
 			return;
 		}
