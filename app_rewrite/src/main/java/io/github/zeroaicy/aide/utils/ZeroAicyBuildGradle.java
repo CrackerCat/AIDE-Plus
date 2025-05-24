@@ -42,7 +42,7 @@ import org.codehaus.groovy.antlr.parser.GroovyRecognizer;
 
 public class ZeroAicyBuildGradle extends BuildGradle {
 
-	private static String TAG = "ZeroAicyBuildGradleTest";
+	private static final String TAG = ZeroAicyBuildGradle.class.getSimpleName();
 
 	private static ZeroAicyBuildGradle singleton;
 	/**
@@ -51,7 +51,7 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 	public static synchronized ZeroAicyBuildGradle getSingleton() {
 		if (singleton == null) {
 			singleton = new ZeroAicyBuildGradle(true);
-			AppLog.d("ZeroAicyBuildGradleTest", "替换gradle解析器");
+			AppLog.d(TAG, "替换gradle解析器");
 		}
 		return singleton;
 	}
