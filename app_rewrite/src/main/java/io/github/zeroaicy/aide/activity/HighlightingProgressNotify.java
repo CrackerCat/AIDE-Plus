@@ -19,6 +19,8 @@ public class HighlightingProgressNotify implements Runnable, OpenFileService.Fil
 	AIDEAnalysisProgressBar analysisProgressBar;
 	AIDEEditorPager aideEditorPager;
 
+	OpenFileService openFileService;
+	
 	int waitCodeAnalysisCount;
 
 	int highlightingNumber;
@@ -37,7 +39,9 @@ public class HighlightingProgressNotify implements Runnable, OpenFileService.Fil
 			this.aideEditorPager = mainActivity.getAIDEEditorPager();
 			this.openedFileNumber = this.aideEditorPager.getFileEditors().size();
 			this.analysisProgressBar = mainActivity.findViewById(R.id.mainErrorProgress);
-
+			
+			this.openFileService = ServiceContainer.getOpenFileService();
+			
 			// add FileHighlightingsCallback
 			ServiceContainer.getOpenFileService().FH(this);
 
@@ -67,7 +71,7 @@ public class HighlightingProgressNotify implements Runnable, OpenFileService.Fil
 			// 退出
 			this.analysisProgressBar.setVisibility(View.INVISIBLE);
 			// 移除监听器
-			ServiceContainer.getOpenFileService().SI(this);
+			if( this.openFileService != null ) this.openFileService.SI(this);
 			return;
 		}
 
