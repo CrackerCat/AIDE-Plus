@@ -1,8 +1,14 @@
 package io.github.zeroaicy.aide.services;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.pm.ServiceInfo;
 import android.text.TextUtils;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.ServiceCompat;
 import com.aide.common.AppLog;
+import com.aide.ui.MainActivity;
 import com.aide.ui.ServiceContainer;
 import com.aide.ui.build.packagingservice.ExternalPackagingService;
 import com.aide.ui.util.FileSystem;
@@ -34,16 +40,51 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import android.app.NotificationManager;
 
 public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
+	
+	private static final String TAG = ZeroAicyExternalPackagingService.class.getSimpleName();
+
+	private static final String channelId = "other";
+	private static final int id = 0x4003;
+
+	private NotificationManager notificationManager;
+	private Notification notification;
+
+	private void runStartForeground() {
+		AppLog.d(TAG, "startForeground() start");
+		if (this.notification == null) {
+			PendingIntent pendingIntent = MainActivity.sy(this);
+			this.notification = new NotificationCompat.Builder(this, channelId)
+					// 时间
+					.setWhen(System.currentTimeMillis())
+					// 图标
+					.setSmallIcon(android.R.drawable.stat_notify_more)
+					// 标题
+					.setContentTitle("打包服务")
+					// 副标题
+					.setContentText("打包服务活动中")
+					// 
+					.setContentIntent(pendingIntent)
+					//
+					.setPriority(NotificationCompat.PRIORITY_MAX).build();
+		}
+
+		// int foregroundServiceType = ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+		//		| ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE;
+		startForeground(id, notification);
+
+		AppLog.d(TAG, "startForeground() end");
+	}
+
 	@Override
 	public void onCreate() {
 
-		AppLog.d("ZeroAicyExternalPackagingService", "初始化");
+		AppLog.d(TAG, "初始化");
 		try {
 			// 初始化 App
 			ServiceContainer.setContext(getApplicationContext());
-
 			ExternalPackagingService.ExternalPackagingServiceWorker externalPackagingServiceWorker = getExternalPackagingServiceWorker();
 			if (externalPackagingServiceWorker != null) {
 				//释放旧的
@@ -52,9 +93,13 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 				this.WB = externalPackagingServiceWorker;
 			}
 		} catch (Throwable e) {
-			AppLog.e("ZeroAicyPackagingWorker", "替换打包实现失败", e);
+			AppLog.e(TAG, "替换打包实现失败", e);
 		}
 		super.onCreate();
+
+		// 前台服务
+		runStartForeground();
+
 	}
 
 	@Override
@@ -66,6 +111,13 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 	@Override
 	public void onDestroy() {
 		AppLog.d(TAG, "onDestroy");
+		if (this.notificationManager == null) {
+			this.notificationManager = getSystemService(NotificationManager.class);
+		}
+		if (this.notification != null) {
+			this.notification = null;
+			this.notificationManager.cancel(id);
+		}
 		super.onDestroy();
 	}
 
@@ -80,10 +132,10 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 		}
 		return path;
 	}
-	private static final String TAG = "Worker";
 
 	public class ZeroAicyPackagingWorker extends PackagingWorkerWrapper {
 
+		private static final String TAG = "Worker";
 		public ZeroAicyPackagingWorker(ExternalPackagingService service) {
 			super(service);
 		}
