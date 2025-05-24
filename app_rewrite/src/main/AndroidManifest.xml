@@ -160,7 +160,11 @@
 		<service
 			android:name="io.github.zeroaicy.aide.services.ZeroAicyCodeAnalysisEngineService"
 			android:exported="true"
-			android:process=":EngineService" />
+			android:process=":EngineService" 
+			android:foregroundServiceType="dataSync|specialUse">
+			<property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+				android:value="防止代码分析服务被终止" />
+		</service>
 
 
         <activity

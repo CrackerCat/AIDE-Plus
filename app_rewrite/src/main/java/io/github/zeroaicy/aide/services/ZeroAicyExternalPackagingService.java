@@ -1,12 +1,11 @@
 package io.github.zeroaicy.aide.services;
 
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.content.pm.ServiceInfo;
 import android.text.TextUtils;
 import androidx.core.app.NotificationCompat;
-import androidx.core.app.ServiceCompat;
 import com.aide.common.AppLog;
 import com.aide.ui.MainActivity;
 import com.aide.ui.ServiceContainer;
@@ -40,7 +39,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import android.app.NotificationManager;
 
 public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 	
@@ -68,9 +66,8 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 					// 
 					.setContentIntent(pendingIntent)
 					//
-					.setPriority(NotificationCompat.PRIORITY_MAX).build();
+					.setPriority(NotificationManager.IMPORTANCE_HIGH).build();
 		}
-
 		// int foregroundServiceType = ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
 		//		| ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE;
 		startForeground(id, notification);

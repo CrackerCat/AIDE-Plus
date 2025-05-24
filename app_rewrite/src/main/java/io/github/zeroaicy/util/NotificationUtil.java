@@ -39,7 +39,7 @@ public class NotificationUtil{
 														   channelName, NotificationManager.IMPORTANCE_NONE);
         chan.setLightColor(Color.BLUE);
         chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
-        NotificationManager service = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager service = context.getSystemService(NotificationManager.class);
         service.createNotificationChannel(chan);
         return channelId;
     }

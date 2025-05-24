@@ -18,8 +18,6 @@ import java.util.Locale;
 
 public class ZeroAicyCodeAnalysisEngineService extends CodeAnalysisEngineService {
 
-	private static int id = 0x26f5;
-
 	private static final String TAG = ZeroAicyCodeAnalysisEngineService.class.getSimpleName();
 
 	private static Locale defaultLocale = Locale.getDefault();
@@ -43,10 +41,10 @@ public class ZeroAicyCodeAnalysisEngineService extends CodeAnalysisEngineService
 		setAppLocale();
 		checkCompilerImplementation();
 
-		// setNotificationAndForeground();
+		runStartForeground();
 
 		try {
-			
+
 			if (ZeroAicySetting.isEnableEnsureCapacity(false)) {
 				try {
 					AppLog.d(TAG, "启用扩容库");
@@ -54,8 +52,8 @@ public class ZeroAicyCodeAnalysisEngineService extends CodeAnalysisEngineService
 				} catch (Throwable e) {
 					AppLog.d("CompilationUnitDeclarationResolver2", "load EnsureCapacity", e);
 				}
-			}else{
-				AppLog.d(TAG, "未启用扩容库");				
+			} else {
+				AppLog.d(TAG, "未启用扩容库");
 			}
 		} catch (Throwable e) {
 			AppLog.d("CompilationUnitDeclarationResolver2", "isEnableEnsureCapacity", e);
@@ -118,41 +116,33 @@ public class ZeroAicyCodeAnalysisEngineService extends CodeAnalysisEngineService
 		}
 		if (this.notification != null) {
 			this.notification = null;
-			this.notificationManager.cancel(id);
+			this.notificationManager.cancel(ZeroAicyCodeAnalysisEngineService.id);
 		}
 	}
 
-	private void setNotificationAndForeground() {
-		// String CHANNEL_ID = "engine";
-		String CHANNEL_ID = "other";
-
+	private static final String channelId = "other";
+	private static int id = 0x26f5;
+	private void runStartForeground() {
 		try {
 			/*
 			if (this.notificationChannel == null) {
-				NotificationChannelCompat.Builder builder = new NotificationChannelCompat.Builder(CHANNEL_ID, NotificationManager.IMPORTANCE_HIGH);
-			
-				this.notificationChannel = builder.build();
-				NotificationManagerCompat from = NotificationManagerCompat.from(this);
-				from.createNotificationChannel(this.notificationChannel);	
+				setupNotificationChannel(this, ZeroAicyCodeAnalysisEngineService.channelId);
 			}//*/
 
 			if (this.notification == null) {
 				PendingIntent pendingIntent = MainActivity.sy(this);
-				NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
+				NotificationCompat.Builder builder = new NotificationCompat.Builder(this,
+						ZeroAicyCodeAnalysisEngineService.channelId);
 				builder.setWhen(System.currentTimeMillis());
 				builder.setSmallIcon(android.R.drawable.stat_notify_more);
-				builder.setContentTitle("Code Analysis");
-				builder.setContentText("Code analysis engine is active");
+				builder.setContentTitle("代码分析");
+				builder.setContentText("代码分析引擎活动中");
 				builder.setContentIntent(pendingIntent);
-				builder.setPriority(-2);
-
+				builder.setPriority(NotificationManager.IMPORTANCE_LOW);
 				this.notification = builder.build();
-
-				//startForeground服务前台化，要在5秒内调用成功，否则前台化失败
-
-				startForeground(id, notification);
-
 			}
+			//startForeground服务前台化，要在5秒内调用成功，否则前台化失败
+			startForeground(id, notification);
 		} catch (Throwable e) {
 			AppLog.e(TAG, e);
 		}
