@@ -39,9 +39,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.zip.ZipEntry;
 
 public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
-	
+
 	private static final String TAG = ZeroAicyExternalPackagingService.class.getSimpleName();
 
 	private static final String channelId = "other";
@@ -1164,20 +1165,31 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 
 				try {
 					//构建输出文件
-					PackagingStream packagingZipOutput = new PackagingStream(new FileOutputStream(outTempFile));
-					//打包dex
-					packagingDexs(dexZipPathList, packagingZipOutput);
+					PackagingStream packagingZipOutput = null;
+					try {
+						packagingZipOutput = new PackagingStream(new FileOutputStream(outTempFile));
+						//打包dex
+						packagingDexs(dexZipPathList, packagingZipOutput);
 
-					// 打包自定义 assetsSrcDirs下资源
-					packagingAssetsSrcDirsResource(packagingZipOutput);
+						// 打包自定义 assetsSrcDirs下资源
+						packagingAssetsSrcDirsResource(packagingZipOutput);
 
-					packagingSourceDirsResource(packagingZipOutput);
-					//打包依赖库资源
-					packagingJarResources(packagingZipOutput);
-					// 打包 libgdxNatives依赖资源
-					packagingLibgdxNativesResources(packagingZipOutput);
+						packagingSourceDirsResource(packagingZipOutput);
+						//打包依赖库资源
+						packagingJarResources(packagingZipOutput);
+						// 打包 libgdxNatives依赖资源
+						packagingLibgdxNativesResources(packagingZipOutput);
 
-					packagingZipOutput.close();
+						if (packagingZipOutput.getZipEntryCount() == 0) {
+							// 修复#24 -> https://github.com/ZeroAicy/AIDE-Plus/issues/24
+							// 一些安卓低版本 不允许 No entries
+							// 写入 META-INF 文件夹 占位
+							packagingZipOutput.putNextEntry(new ZipEntry("META-INF"));
+							packagingZipOutput.closeEntry();
+						}
+					} finally {
+						IOUtils.close(packagingZipOutput);
+					}
 
 					// Java项目签名
 					String signaturePath = getSignaturePath();
