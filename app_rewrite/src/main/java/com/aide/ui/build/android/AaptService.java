@@ -311,7 +311,6 @@ public class AaptService {
 
     private String getAaptPath() {
 		if (Build.VERSION.SDK_INT >= 29) {
-			AppLog.d("Using aapt: " + ServiceContainer.getContext().getApplicationInfo().nativeLibraryDir + "/libaapt.so");
 			return ServiceContainer.getContext().getApplicationInfo().nativeLibraryDir + "/libaapt.so";
 		}
 		return AssetInstallationService.DW("aapt", false);
