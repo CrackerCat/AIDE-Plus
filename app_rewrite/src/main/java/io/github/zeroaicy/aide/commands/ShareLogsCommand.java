@@ -51,13 +51,13 @@ public class ShareLogsCommand implements MenuItemCommand {
 
 		File crashLogFolder = new File(crashLogFolderPath);
 
-		String crashLogParentFolder = crashLogFolder.getParent();
-		File shareLogsZipFile = new File(crashLogParentFolder, "ShareLogs.zip");
+		final String crashLogParentFolder = crashLogFolder.getParent();
+		final File shareLogsZipFile = new File(crashLogParentFolder, "ShareLogs.zip");
 		if (shareLogsZipFile.exists()) {
 			shareLogsZipFile.delete();
 		}
 
-		List<File> logFiles = FileUtil.findFile(crashLogFolder, null);
+		final List<File> logFiles = FileUtil.findFile(crashLogFolder, null);
 
 		// 一般不会为空，除非未启用 ZeroAicy Log
 		if (logFiles.isEmpty()) {
