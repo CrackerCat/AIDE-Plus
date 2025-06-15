@@ -1157,13 +1157,12 @@ public class JavaGradleProjectSupport implements ProjectSupport {
 					}
 				}, null);
 	}
-	
-	
+
 	// 模板ID
 	private static final int game = 2;
 	private static final int java = 3;
 	private static final int ndk = 4;
-	
+
 	/**
 	 * 模板
 	 */

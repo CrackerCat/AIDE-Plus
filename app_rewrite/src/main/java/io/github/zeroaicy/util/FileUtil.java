@@ -102,11 +102,17 @@ public class FileUtil {
 	public static ArrayList<File> findFile(File mFile, String suffix) {
 		ArrayList<File> mFiles = new ArrayList<File>();
 		if (mFile.isFile()) {
-			String name = mFile.getName();
-			if (suffix == null || (name.endsWith(suffix) && !name.startsWith("."))) {
+			if (suffix == null) {
 				mFiles.add(mFile);
+			} else {
+				String name = mFile.getName();
+				if (name.endsWith(suffix) && !name.startsWith(".")) {
+					mFiles.add(mFile);
+				}
 			}
+			return mFiles;
 		}
+		
 		if (mFile.isDirectory()) {
 			Stack<File> list = new Stack<>();
 			list.push(mFile);//进栈
@@ -186,13 +192,13 @@ public class FileUtil {
 	public static void deleteFolder(File file) {
 		deleteFolder(file, true);
 	}
-	
+
 	public static void deleteFolder(File folder, boolean deleteRootDir) {
 		if (folder.isFile()) {
 			folder.delete();
 		}
 		File[] childFiles = folder.listFiles();
-		
+
 		if (childFiles != null) {
 			for (File file : childFiles) {
 				if (file.isDirectory()) {
