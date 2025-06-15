@@ -13,6 +13,8 @@ import java.util.HashSet;
 import java.util.List;
 import com.aide.ui.command.FileBrowserCommand;
 import com.aide.ui.command.AddToProjectCommand;
+import com.aide.common.AppLog;
+import io.github.zeroaicy.aide.commands.ShareLogsCommand;
 
 public class AppCommands {
 
@@ -77,11 +79,12 @@ public class AppCommands {
 				new e9(), new n9()};
 
 
+			// 菜单命令集合  [ rf 为带图标菜单命令]
 			Zo = new sf[]{new aa(), new kc(), new b9(), 
 				new rc(), new j9(), new z9(), new y9(),
-				new cd()};
+				new cd(), new ShareLogsCommand()};
 
-			//
+			// 
             VH = new sf[]{new c9(), new h9(), new pb(), 
 				new mc(), new lc(), new hb(), new wa(), 
 				new va(), new za(), new ab(), new bb(), 
@@ -113,6 +116,7 @@ public class AppCommands {
 
         }
 		catch (Throwable th) {
+			AppLog.e("AppCommands", "<cinit", th);
         }
     }
 
@@ -125,6 +129,7 @@ public class AppCommands {
 	 */
 
 	private static SparseArray<rf> rf = null;
+	// 带图标的菜单命令
 	private static SparseArray<rf> rf() {
 		if (AppCommands.rf == null) {
 			AppCommands.rf = new SparseArray<>();
@@ -146,7 +151,7 @@ public class AppCommands {
     }
 	
 	/**
-	 * 菜单
+	 * 带图标菜单
 	 * 寻找rf
 	 */
 	@Keep

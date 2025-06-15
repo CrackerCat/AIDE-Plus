@@ -140,6 +140,7 @@
 				android:title="@string/command_extract_method" />
 		</menu>
 	</item>
+
 	<!-- 代码 -->
 	<item
 		android:id="@id/editorMenuCode"
@@ -172,12 +173,14 @@
 				android:title="@string/command_replace_textually" />
 		</menu>
 	</item>
+
 	<!-- 格式化[对齐代码] -->
 	<item
 		android:id="@id/editorMenuFormatCode"
 		android:title="@string/command_format_code" />
-	
-    <item
+
+    <!-- 更多 -->
+	<item
         android:id="@id/mainMenuMore"
         android:title="@string/command_more"
 		android:showAsAction="never">
@@ -185,6 +188,7 @@
             <!--<item
 			android:id="@id/mainMenuCommunity"
 			android:title="@string/command_community" />-->
+			<!-- 教程 -->
 			<item
 				android:id="@id/mainMenuTrainerMode"
 				android:title="@string/command_learn" />
@@ -214,8 +218,9 @@
 						android:title="@string/command_file_list" />
 				</menu>
 			</item>
-			
-            <item
+
+            <!-- 格式 -->
+			<item
                 android:id="@id/editorMenuFormat"
                 android:title="@string/command_format"
                 android:showAsAction="never">
@@ -248,7 +253,12 @@
                         android:title="@string/command_close_project" />
                 </menu>
             </item>
+			
             <item
+                android:id="@+id/mainShareLogs"
+                android:title="@string/command_share_logs" />
+            
+			<item
                 android:id="@id/mainMenuSettings"
                 android:title="@string/command_settings" />
             <item

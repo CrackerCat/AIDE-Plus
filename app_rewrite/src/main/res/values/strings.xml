@@ -13,4 +13,6 @@
 	<string name="commit_options_menu_select_all">SelectAll</string>
 	<string name="commit_options_menu_inverse">Inverse</string>
 	
+	<string name="command_share_logs">Share AIDE+ Logs</string>
+
 </resources>
