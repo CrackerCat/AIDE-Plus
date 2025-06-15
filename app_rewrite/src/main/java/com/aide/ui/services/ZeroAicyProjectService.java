@@ -6,6 +6,8 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
+import android.view.Window;
+import android.view.WindowManager;
 import com.aide.common.AppLog;
 import com.aide.engine.EngineSolution;
 import com.aide.engine.service.CodeModelFactory;
@@ -17,6 +19,7 @@ import com.aide.ui.project.JavaGradleProjectSupport;
 import com.aide.ui.project.internal.GradleTools;
 import com.aide.ui.util.ClassPath;
 import com.aide.ui.util.FileSystem;
+import io.github.zeroaicy.aide.activity.ZeroAicyMainActivity;
 import io.github.zeroaicy.aide.ui.services.ThreadPoolService;
 import io.github.zeroaicy.aide.utils.Utils;
 import java.util.ArrayList;
@@ -24,11 +27,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.TreeMap;
-import io.github.zeroaicy.aide.activity.ZeroAicyMainActivity;
 
 public class ZeroAicyProjectService extends ProjectService {
 	/**
@@ -71,8 +73,11 @@ public class ZeroAicyProjectService extends ProjectService {
 	public static void showProgressDialog(Activity activity, String string, final Runnable asynTask,
 			final Runnable onUiTask) {
 		final ProgressDialog show = ProgressDialog.show(activity, null, string, true, false);
-		show.getWindow().addFlags(128);
-		show.getWindow().clearFlags(2);
+		Window window = show.getWindow();
+		// 允许窗口在输入法（IME）需要焦点时获取焦点
+		window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+		// 窗口将不再监听外部触摸事件
+		window.clearFlags(WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH);
 
 		final Runnable syncTask = new Runnable() {
 			@Override
@@ -459,18 +464,39 @@ public class ZeroAicyProjectService extends ProjectService {
 	 * etAsync将执行
 	 * 预构建，比如[aapt，aidl] -> androidProjectBuildService::yO
 	 * reloadingProject
+	 
+	 *  savedFilePaths 改变的文件(保存)
+	 * 是否重载(重新加载)项目
+	 * 文件改变回调
 	 */
 	@Override
-	public void et(final List<String> list, final boolean p) {
-
+	public void et(final List<String> savedFilePaths, final boolean reloadingProject) {
 		executorsService.submit(new Runnable() {
 			@Override
 			public void run() {
 				long nowTime = Utils.nowTime();
-				etAsync(list, p);
+				etAsync(savedFilePaths, reloadingProject);
 				AppLog.d(TAG, "pre processing sync: %sms", Utils.nowTime() - nowTime);
 			}
 		});
+	}
+
+	private void delayPreBuild() {
+		// AndroidProjectSupport 中则为 运行 aapt/aapt2 & aidl
+		// 也只有 AndroidProjectSupport 实现了 cn()
+		try {
+			ThreadPoolService.postDelayedOfUi(new Runnable() {
+				@Override
+				public void run() {
+					if (isOpenProject()) {
+						ZeroAicyProjectService.this.etAsync(null, false);
+					}
+				}
+			}, 1500);
+		} catch (Throwable e) {
+			AppLog.d(TAG, e);
+		}
+
 	}
 
 	/*****************************************************************/
@@ -543,9 +569,10 @@ public class ZeroAicyProjectService extends ProjectService {
 			public void run() {
 				// 赋值 pojectSupport
 				ZeroAicyProjectService.this.init();
-				// 猜测 aapt2 aidl (必须在主线程)
-				ZeroAicyProjectService.this.et(null, false);
 				ZeroAicyProjectService.this.jJ(); // 切换项目
+
+				// AndroidProjectSupport 中则为 运行 aapt/aapt2 & aidl
+				delayPreBuild();
 
 			}
 		};
@@ -561,9 +588,8 @@ public class ZeroAicyProjectService extends ProjectService {
 
 			}
 		};
-		String title = lastProjectDir == null ? "" : "切换项目中[请等待]...";
+		String title = lastProjectDir == null ? "打开项目中[请等待]..." : "切换项目中[请等待]...";
 		showProgressDialog(ServiceContainer.getMainActivity(), title, asynTask, onUiTask);
-
 	}
 
 	private String projectProperties = null;
@@ -674,19 +700,8 @@ public class ZeroAicyProjectService extends ProjectService {
 
 		// this.initAsync();
 		this.init();
-		try {
-			// 猜测 aapt2 aidl
-			ThreadPoolService.postDelayedOfUi(new Runnable() {
-				@Override
-				public void run() {
-					if (isOpenProject()) {
-						ZeroAicyProjectService.this.etAsync(null, false);
-					}
-				}
-			}, 500);
-		} catch (Throwable e) {
-			AppLog.d(TAG, e);
-		}
+		// AndroidProjectSupport 中则为 运行 aapt/aapt2 & aidl
+		delayPreBuild();
 
 		if (this.pojectSupport != null) {
 			ServiceContainer.getDebugger().P8(this.pojectSupport.getProjectPackageName(), true);
