@@ -185,7 +185,7 @@ public class CmakeBuild {
 			this.CMAKE_OUTPUT_DIRECTORY_PATH = cmakeOutputDirectoryPath;
 
 			// 推算变量 修复相对路径错误
-			String cmakeBuildCachePath = "/obj/cmake";
+			String cmakeBuildCachePath = "obj/cmake";
 			if (CMAKE_OUTPUT_DIRECTORY_PATH != null) {
 				int prefixEndInex = CMAKE_OUTPUT_DIRECTORY_PATH.lastIndexOf('/');
 				if (prefixEndInex > 0) {

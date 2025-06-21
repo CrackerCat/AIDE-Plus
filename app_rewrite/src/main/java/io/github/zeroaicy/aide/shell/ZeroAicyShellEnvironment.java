@@ -13,20 +13,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import android.content.pm.ApplicationInfo;
 
 public class ZeroAicyShellEnvironment implements ShellEnvironment {
-	
+
 	private static ZeroAicyShellEnvironment zeroAicyShellEnvironment;
-	public static ZeroAicyShellEnvironment getInstance(Context context){
-		if( zeroAicyShellEnvironment == null ){
+	public static ZeroAicyShellEnvironment getInstance(Context context) {
+		if (zeroAicyShellEnvironment == null) {
 			zeroAicyShellEnvironment = new ZeroAicyShellEnvironment();
 			zeroAicyShellEnvironment.init(context);
 		}
 		return zeroAicyShellEnvironment;
 	}
-	
+
 	Context applicationContext;
-	
+
 	@Override
 	public void init(Context context) {
 		if (applicationContext != null) {
@@ -34,7 +35,7 @@ public class ZeroAicyShellEnvironment implements ShellEnvironment {
 		}
 		this.applicationContext = context.getApplicationContext();
 		initProotEnv(this.applicationContext);
-		
+
 	}
 
 	@Override
@@ -46,15 +47,15 @@ public class ZeroAicyShellEnvironment implements ShellEnvironment {
 
 	@Override
 	public Map<String, String> getEnvironment(boolean isFailSafe, Map<String, String> env) {
-		
+
 		HashMap<String, String> environment = new HashMap<>();
-		if( env != null ){
+		if (env != null) {
 			environment.putAll(env);
 		}
 		putCustomizeEnv(environment);
 		return environment;
 	}
-	
+
 	@Override
 	public List<String> setupShellCommandArguments(List<String> arguments) {
 		if (!ZeroAicyShellEnvironment.ProotMod) {
@@ -76,7 +77,7 @@ public class ZeroAicyShellEnvironment implements ShellEnvironment {
 
 		return result;
 	}
-	
+
 	// proot模式
 	public static boolean ProotMod;
 
@@ -89,20 +90,20 @@ public class ZeroAicyShellEnvironment implements ShellEnvironment {
 
 	private static void initProotEnv(Context currentPackageContext) {
 
-		if (ZeroAicyShellEnvironment.PROOT_PATH != null) {
+		if (currentPackageContext == null || ZeroAicyShellEnvironment.PROOT_PATH != null) {
 			return;
 		}
 
+		ApplicationInfo applicationInfo = currentPackageContext.getApplicationInfo();
 		try {
-			ZeroAicyShellEnvironment.ProotMod = currentPackageContext
-				.getApplicationInfo().targetSdkVersion > Build.VERSION_CODES.P;
+			ZeroAicyShellEnvironment.ProotMod = applicationInfo.targetSdkVersion > Build.VERSION_CODES.P;
 		} catch (Throwable e) {
 			ZeroAicyShellEnvironment.ProotMod = true;
 		}
 
 		if (ZeroAicyShellEnvironment.PROOT_PATH == null) {
-			ZeroAicyShellEnvironment.PROOT_PATH = currentPackageContext.getApplicationInfo().nativeLibraryDir
-				+ "/libproot.so";
+			ZeroAicyShellEnvironment.PROOT_PATH = applicationInfo.nativeLibraryDir
+					+ "/libproot.so";
 		}
 
 		if (ZeroAicyShellEnvironment.PACKAGE_NAME_PATH == null) {
@@ -119,7 +120,7 @@ public class ZeroAicyShellEnvironment implements ShellEnvironment {
 		if (!ld_config_txt_file.exists() || ld_config_txt_file.length() == 0) {
 			try {
 				Files.copy(Paths.get("/linkerconfig/ld.config.txt"), ld_config_txt_file.toPath(),
-						   StandardCopyOption.REPLACE_EXISTING);
+						StandardCopyOption.REPLACE_EXISTING);
 				ld_config_txt_file.setReadable(true, false);
 			} catch (Throwable e) {
 				e.printStackTrace();
@@ -131,7 +132,7 @@ public class ZeroAicyShellEnvironment implements ShellEnvironment {
 		//为proot添加缓存路径 PROOT_TMP_DIR
 		environment.put("PROOT_TMP_DIR", PROOT_TMP_DIR);
 		//自定义参数
-		// environment.put("JAVA_TOOL_OPTIONS", "-Duser.language=zh -Duser.region=CN");
+		environment.put("JAVA_TOOL_OPTIONS", "-Duser.language=zh -Duser.region=CN");
 	}
 }
 

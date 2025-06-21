@@ -1,9 +1,13 @@
 package io.github.zeroaicy.aide.services;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
-import android.os.Build;
 import android.text.TextUtils;
+import androidx.core.app.NotificationCompat;
 import com.aide.common.AppLog;
+import com.aide.ui.MainActivity;
 import com.aide.ui.ServiceContainer;
 import com.aide.ui.build.packagingservice.ExternalPackagingService;
 import com.aide.ui.util.FileSystem;
@@ -35,16 +39,50 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.zip.ZipEntry;
 
 public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
+
+	private static final String TAG = ZeroAicyExternalPackagingService.class.getSimpleName();
+
+	private static final String channelId = "other";
+	private static final int id = 0x4003;
+
+	private NotificationManager notificationManager;
+	private Notification notification;
+
+	private void runStartForeground() {
+		AppLog.d(TAG, "startForeground() start");
+		if (this.notification == null) {
+			PendingIntent pendingIntent = MainActivity.sy(this);
+			this.notification = new NotificationCompat.Builder(this, channelId)
+					// 时间
+					.setWhen(System.currentTimeMillis())
+					// 图标
+					.setSmallIcon(android.R.drawable.stat_notify_more)
+					// 标题
+					.setContentTitle("打包服务")
+					// 副标题
+					.setContentText("打包服务活动中")
+					// 
+					.setContentIntent(pendingIntent)
+					//
+					.setPriority(NotificationManager.IMPORTANCE_HIGH).build();
+		}
+		// int foregroundServiceType = ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+		//		| ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE;
+		startForeground(id, notification);
+
+		AppLog.d(TAG, "startForeground() end");
+	}
+
 	@Override
 	public void onCreate() {
 
-		AppLog.d("ZeroAicyExternalPackagingService", "初始化");
+		AppLog.d(TAG, "初始化");
 		try {
 			// 初始化 App
 			ServiceContainer.setContext(getApplicationContext());
-
 			ExternalPackagingService.ExternalPackagingServiceWorker externalPackagingServiceWorker = getExternalPackagingServiceWorker();
 			if (externalPackagingServiceWorker != null) {
 				//释放旧的
@@ -53,9 +91,13 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 				this.WB = externalPackagingServiceWorker;
 			}
 		} catch (Throwable e) {
-			AppLog.e("ZeroAicyPackagingWorker", "替换打包实现失败", e);
+			AppLog.e(TAG, "替换打包实现失败", e);
 		}
 		super.onCreate();
+
+		// 前台服务
+		runStartForeground();
+
 	}
 
 	@Override
@@ -67,6 +109,13 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 	@Override
 	public void onDestroy() {
 		AppLog.d(TAG, "onDestroy");
+		if (this.notificationManager == null) {
+			this.notificationManager = getSystemService(NotificationManager.class);
+		}
+		if (this.notification != null) {
+			this.notification = null;
+			this.notificationManager.cancel(id);
+		}
 		super.onDestroy();
 	}
 
@@ -81,10 +130,10 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 		}
 		return path;
 	}
-	private static final String TAG = "Worker";
 
 	public class ZeroAicyPackagingWorker extends PackagingWorkerWrapper {
 
+		private static final String TAG = "Worker";
 		public ZeroAicyPackagingWorker(ExternalPackagingService service) {
 			super(service);
 		}
@@ -114,14 +163,34 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 						aAptResourcePath, nativeLibDirs, outFilePath, signaturePath, signaturePassword, signatureAlias,
 						signatureAliasPassword, buildRefresh, Ws, QX);
 
-				// 从文件夹添加原生库文件，
-				this.nativeLibZipEntryTransformer = new ZipEntryTransformer.NativeLibFileTransformer(
-						getAndroidFxtractNativeLibs());
-				this.libgdxNativesTransformer = new ZipEntryTransformer.LibgdxNativesTransformer(
-						getAndroidFxtractNativeLibs());
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && ZeroAicySetting.isEnableEnsureCapacity()) {
+				if (ZeroAicySetting.isEnableEnsureCapacity()) {
 					this.environment.put("EnsureCapacity", getLibEnsureCapacityPathPath());
 				}
+
+				// android:extractNativeLibs
+				boolean androidExtractNativeLibs = getAndroidExtractNativeLibs();
+				this.nativeLibZipEntryTransformer.setAndroidExtractNativeLibs(androidExtractNativeLibs);
+				// jar中资源
+				this.libgdxNativesTransformer.setAndroidExtractNativeLibs(androidExtractNativeLibs);
+				this.dexZipEntryTransformer.setAndroidExtractNativeLibs(androidExtractNativeLibs);
+				this.zipResourceZipEntryTransformer.setAndroidExtractNativeLibs(androidExtractNativeLibs);
+
+				// android:debuggable
+				boolean androidDebuggable = getAndroidDebuggable();
+				this.nativeLibZipEntryTransformer.setAndroidDebuggable(androidDebuggable);
+				// jar中资源
+				this.libgdxNativesTransformer.setAndroidExtractNativeLibs(androidDebuggable);
+				this.dexZipEntryTransformer.setAndroidExtractNativeLibs(androidDebuggable);
+				this.zipResourceZipEntryTransformer.setAndroidExtractNativeLibs(androidDebuggable);
+
+				// abiFilters
+				LinkedHashSet<String> cmakeAbiFilters = getZeroAicyBuildGradle().getCmakeAbiFilters(false);
+				this.nativeLibZipEntryTransformer.setAbiFilters(cmakeAbiFilters);
+				// jar中资源
+				this.libgdxNativesTransformer.setAbiFilters(cmakeAbiFilters);
+				this.dexZipEntryTransformer.setAbiFilters(cmakeAbiFilters);
+				this.zipResourceZipEntryTransformer.setAbiFilters(cmakeAbiFilters);
+
 				AppLog.d(TAG, this.environment);
 				// 初始化
 				DexingJarTask.init(this.environment);
@@ -826,11 +895,11 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 
 			// dex.zip转换器，即根目录下有classes%d.dex的zip文件的转换器
 			final ZipEntryTransformer.DexZipTransformer dexZipEntryTransformer = new ZipEntryTransformer.DexZipTransformer();
-			// 从jar依赖添加资源的过滤器，
+			// 从 jar依赖 | 文件夹 添加资源的过滤器，
 			final ZipEntryTransformer.ZipResourceTransformer zipResourceZipEntryTransformer = new ZipEntryTransformer.ZipResourceTransformer();
 			// 从文件夹添加原生库文件，
-			final ZipEntryTransformer.NativeLibFileTransformer nativeLibZipEntryTransformer;
-			final ZipEntryTransformer.LibgdxNativesTransformer libgdxNativesTransformer;
+			final ZipEntryTransformer.NativeLibFileTransformer nativeLibZipEntryTransformer = new ZipEntryTransformer.NativeLibFileTransformer();
+			final ZipEntryTransformer.LibgdxNativesTransformer libgdxNativesTransformer = new ZipEntryTransformer.LibgdxNativesTransformer();
 
 			public void minify2() throws Exception, Throwable {
 				// proguardPaths
@@ -1042,13 +1111,8 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 				//resources_ap_file
 				String aAptResourceFilePath = getAAptResourceFilePath();
 				//打包resources.ap_ 文件
-				ZipEntryTransformerService.packagingZipFile(aAptResourceFilePath, zipResourceZipEntryTransformer,
+				ZipEntryTransformerService.packagingZipFile(aAptResourceFilePath, this.zipResourceZipEntryTransformer,
 						packagingZipOutput, true);
-
-				// 从文件夹添加原生库文件，
-				ZipEntryTransformer.NativeLibFileTransformer nativeLibZipEntryTransformer = new ZipEntryTransformer.NativeLibFileTransformer(
-						getAndroidFxtractNativeLibs());
-
 				//从原生库目录添加so
 				for (String nativeLibDirPath : this.getNativeLibDirs()) {
 					File nativeLibDirFile = new File(nativeLibDirPath);
@@ -1057,13 +1121,13 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 					}
 					AppLog.d(TAG, "从原生库添加" + nativeLibDirPath);
 					ZipEntryTransformerService.packagingDirFile(nativeLibDirPath, nativeLibDirFile,
-							nativeLibZipEntryTransformer, packagingZipOutput);
+							this.nativeLibZipEntryTransformer, packagingZipOutput);
 
 				}
 
 				//打包混淆后的dex
 				ZipEntryTransformerService.packagingZipFile(getMixUpDexZipFile(false).getAbsolutePath(),
-						dexZipEntryTransformer, packagingZipOutput, false);
+						this.dexZipEntryTransformer, packagingZipOutput, false);
 
 				// 打包自定义 assetsSrcDirs下资源
 				packagingAssetsSrcDirsResource(packagingZipOutput);
@@ -1101,20 +1165,31 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 
 				try {
 					//构建输出文件
-					PackagingStream packagingZipOutput = new PackagingStream(new FileOutputStream(outTempFile));
-					//打包dex
-					packagingDexs(dexZipPathList, packagingZipOutput);
+					PackagingStream packagingZipOutput = null;
+					try {
+						packagingZipOutput = new PackagingStream(new FileOutputStream(outTempFile));
+						//打包dex
+						packagingDexs(dexZipPathList, packagingZipOutput);
 
-					// 打包自定义 assetsSrcDirs下资源
-					packagingAssetsSrcDirsResource(packagingZipOutput);
+						// 打包自定义 assetsSrcDirs下资源
+						packagingAssetsSrcDirsResource(packagingZipOutput);
 
-					packagingSourceDirsResource(packagingZipOutput);
-					//打包依赖库资源
-					packagingJarResources(packagingZipOutput);
-					// 打包 libgdxNatives依赖资源
-					packagingLibgdxNativesResources(packagingZipOutput);
+						packagingSourceDirsResource(packagingZipOutput);
+						//打包依赖库资源
+						packagingJarResources(packagingZipOutput);
+						// 打包 libgdxNatives依赖资源
+						packagingLibgdxNativesResources(packagingZipOutput);
 
-					packagingZipOutput.close();
+						if (packagingZipOutput.getZipEntryCount() == 0) {
+							// 修复#24 -> https://github.com/ZeroAicy/AIDE-Plus/issues/24
+							// 一些安卓低版本 不允许 No entries
+							// 写入 META-INF 文件夹 占位
+							packagingZipOutput.putNextEntry(new ZipEntry("META-INF"));
+							packagingZipOutput.closeEntry();
+						}
+					} finally {
+						IOUtils.close(packagingZipOutput);
+					}
 
 					// Java项目签名
 					String signaturePath = getSignaturePath();
@@ -1386,7 +1461,12 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 			/**
 			 * android:extractNativeLibs="false"必须无压缩
 			 */
-			private boolean androidFxtractNativeLibs = true;
+			private boolean androidExtractNativeLibs = true;
+			/**
+			 * android:debuggable="true" 可以打包无.so后缀的文件
+			 */
+			private boolean androidDebuggable = false;
+
 			// 低于21时d8无法dexing AIDE产生的class文件
 			private int minSdk = 21;
 
@@ -1501,7 +1581,8 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 					if (androidManifestParser == null) {
 						projectMinSdk = defaultProjectMinSdk;
 					} else {
-						this.androidFxtractNativeLibs = androidManifestParser.getExtractNativeLibs();
+						this.androidExtractNativeLibs = androidManifestParser.getExtractNativeLibs();
+						this.androidDebuggable = androidManifestParser.getDebuggable();
 
 						String minSdkVersion = androidManifestParser.getMinSdkVersion();
 						projectMinSdk = Utils.parseInt(minSdkVersion, defaultProjectMinSdk);
@@ -1619,8 +1700,11 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 			/**
 			 * 返回android:extractNativeLibs="false"的值
 			 */
-			public boolean getAndroidFxtractNativeLibs() {
-				return this.androidFxtractNativeLibs;
+			public boolean getAndroidExtractNativeLibs() {
+				return this.androidExtractNativeLibs;
+			}
+			public boolean getAndroidDebuggable() {
+				return this.androidDebuggable;
 			}
 
 			/**********共用层，共用一些相同的代码逻辑***********************************/

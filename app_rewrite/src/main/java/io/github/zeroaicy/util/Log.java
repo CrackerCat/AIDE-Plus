@@ -28,11 +28,11 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
-import io.github.zeroaicy.util.Log.AsyncOutputStreamHold;
 
 /**
  * Mock Log implementation for testing on non android host.
@@ -485,7 +485,7 @@ public final class Log {
 	private static void updateCurLogHold() {
 		Log.AsyncOutputStreamHold mLogHold = getLogHold();
 		if (mLogHold == null) {
-			mLogHold = new AsyncOutputStreamHold(Log.getLogPath());
+			mLogHold = new AsyncOutputStreamHold(Log.getLogPath(), true);
 			// 更新 日志流持有者
 			Log.mLogHold = mLogHold;
 		} else {
@@ -527,7 +527,7 @@ public final class Log {
 			return 0;
 		}
 		if (Log.mLogHold == null) {
-			Log.mLogHold = new AsyncOutputStreamHold(mLogPath);
+			Log.mLogHold = new AsyncOutputStreamHold(mLogPath, true);
 		}
 		//打印 Log为null则忽略
 		Log.println(ToString(priority, tag, msg));
@@ -582,11 +582,16 @@ public final class Log {
 	public static class AsyncOutputStreamHold implements AutoCloseable {
 		private PrintStream mLog;
 		private String logPath;
+		boolean backup;
 		//线程安全
 		public AsyncOutputStreamHold(String filePath) {
 			update(filePath);
 		}
-
+		public AsyncOutputStreamHold(String filePath, boolean backup) {
+			this.backup = backup;
+			update(filePath);
+		}
+		
 		// 构造器中调用此方法
 		// 因此设置为final
 		public final synchronized void update(String newLogPath) {
@@ -602,7 +607,7 @@ public final class Log {
 
 			File logFile = new File(this.logPath);
 			// 更新流
-			Log.AsyncOutputStreamHold.AsyncOutStream asyncOutStream = new AsyncOutStream(createOutStream(logFile));
+			Log.AsyncOutputStreamHold.AsyncOutStream asyncOutStream = new AsyncOutStream(createOutStream(logFile, this.backup));
 			this.mLog = new PrintStream(asyncOutStream);
 
 			// 如果上一个流是系统流则平滑的替换
@@ -643,26 +648,100 @@ public final class Log {
 		public static FileOutputStream createOutStream(String file) {
 			return createOutStream(new File(file));
 		}
+		
 		public static FileOutputStream createOutStream(File file) {
+			return createOutStream(file, false);
+		}
+		public static FileOutputStream createOutStream(File file, boolean backup) {
 			try {
-				checkFile(file);
+				checkFile(file, backup);
 				return new FileOutputStream(file);
 			} catch (Throwable e) {
 				e.printStackTrace();
 				throw new RuntimeException(e);
 			}
 		}
-		private static synchronized void checkFile(File file) {
-			if (!file.exists()) {
-				file = file.getParentFile();
-				if (!file.exists()) {
-					file.mkdirs();
-				} else if (file.isFile()) {
-					file.delete();
-					file.mkdirs();
+		
+		/**
+		 * checkFile 备份
+		 */
+		private static synchronized void checkFile(File file, boolean backup) {
+			if (file.exists()) {
+				// 备份旧的日志文件
+				if( backup ){
+					backupFile(file, 5);					
 				}
+				file.delete();
+				return;
+			}
+			
+			File parentFile = file.getParentFile();
+			if (!parentFile.exists()) {
+				parentFile.mkdirs();
+			} else if (parentFile.isFile()) {
+				parentFile.delete();
+				parentFile.mkdirs();
 			}
 		}
+		/**
+		 * 最大文件数量
+		 * @param limitLogCount
+		 */
+		private static SimpleDateFormat backupFileFormate = new SimpleDateFormat("MM-dd-HH-mm-ss");
+		private static void backupFile(File backupFile, int limitLogCount) {
+
+			try {
+				File parentFile = backupFile.getParentFile();
+				
+				// 备份目录 就是 备份文件的名称
+				String backupFileName = backupFile.getName();
+				String dirName = removeExtension(backupFileName);
+				if (backupFileName.equals(dirName)) {
+					dirName += "-dir";
+				}
+				File backupDir = new File(parentFile, dirName);
+				if (!backupDir.exists()) {
+					backupDir.mkdirs();
+				}
+				if (!backupDir.isDirectory()) {
+					return;
+				}
+				String format = backupFileFormate.format(new Date(backupFile.lastModified()));
+				format += ".txt";
+				backupFile.renameTo(new File(backupDir, format));
+
+				File[] files = backupDir.listFiles();
+				if (files == null || files.length == 0) {
+					return;
+				}
+				// 排序
+				Arrays.sort(files);
+
+				if (files.length <= limitLogCount) {
+					return;
+				}
+				for (int i = 0; i < files.length - limitLogCount; i++) {
+					files[i].delete();
+				}
+			} catch (Throwable e) {
+				Log.e("AsyncOutputStreamHold", "backupFile", e);
+			}
+		}
+		
+		public static String removeExtension(String filename) {
+			int dotIndex = filename.lastIndexOf('.');
+
+			// 处理特殊情况：
+			// 1. 没有后缀名（dotIndex == -1）
+			// 2. 隐藏文件（dotIndex == 0）
+			// 3. 文件名以点结尾（dotIndex == filename.length()-1）
+			if (dotIndex == -1 || dotIndex == 0 || dotIndex == filename.length() - 1) {
+				return filename;
+			}
+
+			return filename.substring(0, dotIndex);
+		}
+		
 		public static class WriteLogThread extends Thread {
 			ArrayBlockingQueue<Runnable> mQueue = new ArrayBlockingQueue<>(0x4000);
 			@Override

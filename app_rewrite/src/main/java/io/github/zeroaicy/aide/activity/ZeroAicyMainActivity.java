@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import com.aide.ui.project.internal.GradleTools;
 
 public class ZeroAicyMainActivity extends MainActivity {
 
@@ -87,6 +88,7 @@ public class ZeroAicyMainActivity extends MainActivity {
 			setUpDrawerLayout();
 		}
 		isOnCreated = true;
+		requestPostNotifications();
 		showRequestManageExternalStorage();
 
 		// 修复 MainSearchBarNoTabs 与 符号栏重叠问题
@@ -95,12 +97,12 @@ public class ZeroAicyMainActivity extends MainActivity {
 		//		layoutParams.setMargins(layoutParams.leftMargin, layoutParams.topMargin, layoutParams.rightMargin, 40);
 
 	}
-	
+
 	// 等待 代码分析进程
 	public void showCodeAnalysisProgress() {
 		runOnUiThread(new HighlightingProgressNotify());
 	}
-	
+
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -330,6 +332,22 @@ public class ZeroAicyMainActivity extends MainActivity {
 
 	}
 
+	public void requestPostNotifications() {
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+			return;
+		}
+			
+		XXPermissions.with(this).permission(android.Manifest.permission.POST_NOTIFICATIONS)
+			.request(new OnPermissionCallback() {
+				public void onDenied(List<String> permissions, boolean doNotAskAgain) {
+					// 不同意, 就一直申请
+					requestPostNotifications();
+				}
+				@Override
+				public void onGranted(List<String> list, boolean allGranted) {
+				}
+			});
+	}
 	AlertDialog showRequestAlertDialog;
 	/**
 	 * 显示授权请求弹窗
@@ -528,7 +546,7 @@ public class ZeroAicyMainActivity extends MainActivity {
 			return;
 		}
 
-		AppLog.d(TAG, "openFile this %s", this);
+		// AppLog.d(TAG, "openFile this %s", str);
 		AppLog.d(TAG, "ServiceContainer isShutdowned %s", String.valueOf(ServiceContainer.isShutdowned()));
 
 		aq(new FileSpan(str, 1, 1, 1, 1));
@@ -602,8 +620,9 @@ public class ZeroAicyMainActivity extends MainActivity {
 		if (hasGradlew) {
 			itemNameMap.putAll(ZeroAicySetting.getCommands());
 		}
-		boolean isCN = getResources().getConfiguration().locale.equals(Locale.CHINA);
-		itemNameMap.put(isCN ? "运行终端" : "Terminal", "terminal");
+		boolean isCN = getResources().getConfiguration().getLocales().get(0).equals(Locale.CHINA);
+		itemNameMap.put(isCN ? "此项目中打开终端" : "Open terminal in project", "terminal");
+		itemNameMap.put(isCN ? "打开终端" : "Open Terminal", "");
 
 		PopupMenu popupMenu = new PopupMenu(this, findViewById(R.id.mainMenuRunGradle));
 		Menu menu = popupMenu.getMenu();
@@ -615,12 +634,12 @@ public class ZeroAicyMainActivity extends MainActivity {
 					String cmdline = itemNameMap.get(itemName);
 
 					Intent launchIntentForPackage;
+					// AIDE+Termux是内置Termux
 					if ("io.github.zeroaicy.aide2".equals(getPackageName())) {
 						launchIntentForPackage = new Intent().setComponent(
 								new ComponentName(ZeroAicyMainActivity.this, "com.termux.app.TermuxActivity"));
 					} else {
 						launchIntentForPackage = getPackageManager().getLaunchIntentForPackage("com.aide.termux");
-
 					}
 
 					if (launchIntentForPackage == null) {
@@ -628,59 +647,53 @@ public class ZeroAicyMainActivity extends MainActivity {
 								"AIDE-Termux未安装或找不到主Activity");
 						return true;
 					}
+					
+					if( TextUtils.isEmpty( cmdline ) ){
+						// 此时是 打开终端
+						startActivity(launchIntentForPackage);
+						return true;
+					}
 
 					String currentAppHome = ZeroAicySetting.getCurrentAppHome();
-
 					if (currentAppHome == null) {
-
-						{
-							FileBrowserService fileBrowserService = ServiceContainer.getFileBrowserService();
-							// CurrentDir
-							String currentFilePath = fileBrowserService.j6();
-							if (currentFilePath == null) {
-								return false;
-							}
-
-							//当前文件夹
-							File currentFile = new File(currentFilePath);
-
-							//确保打开的是文件夹
-							if (!currentFile.isDirectory()) {
-								//不是文件夹，查看父目录是不是文件夹
-								File currentFileParentFile = currentFile.getParentFile();
-								if (currentFileParentFile.isDirectory()) {
-									currentFile = currentFileParentFile;
-								} else {
-									return true;
-								}
-							}
-							// 设置工作目录
-							launchIntentForPackage.putExtra(work_dir_extra, currentFile.getAbsolutePath());
+						FileBrowserService fileBrowserService = ServiceContainer.getFileBrowserService();
+						// CurrentDir
+						String currentFilePath = fileBrowserService.j6();
+						if (currentFilePath == null) {
+							return false;
 						}
-						//						com.aide.common.MessageBox.BT(ServiceContainer.getMainActivity(), "没有打开Gradle项目",
-						//								"请保证项目目录下GradleWrapper(Gradle包装器)");
-
-					} else {
-
-						File gradleProjectRootDir = new File(currentAppHome).getParentFile();
-
-						// 设置工作目录
-						launchIntentForPackage.putExtra(work_dir_extra, gradleProjectRootDir.getAbsolutePath());
-
-						if (cmdline.contains("gradle")) {
-							if (!hasGradlew(currentAppHome)) {
-								com.aide.common.MessageBox.BT(ServiceContainer.getMainActivity(), "不是Gradle项目",
-										"请保证项目目录下GradleWrapper(Gradle包装器)");
+						//当前文件夹
+						File currentFile = new File(currentFilePath);
+						//确保打开的是文件夹
+						if (!currentFile.isDirectory()) {
+							//不是文件夹，查看父目录是不是文件夹
+							File currentFileParentFile = currentFile.getParentFile();
+							if (currentFileParentFile.isDirectory()) {
+								currentFile = currentFileParentFile;
+							} else {
 								return true;
 							}
 						}
+						// 设置工作目录
+						launchIntentForPackage.putExtra(work_dir_extra, currentFile.getAbsolutePath());
+					} else {
+						File gradleProjectRootDir = new File(currentAppHome);
+						if( GradleTools.isGradleProject(gradleProjectRootDir.getAbsolutePath())){
+							// gradle项目 需要的是 父目录
+							gradleProjectRootDir = gradleProjectRootDir.getParentFile();
+						}
+						// 设置工作目录
+						launchIntentForPackage.putExtra(work_dir_extra, gradleProjectRootDir.getAbsolutePath());
 
+						if (cmdline.startsWith("gradle") && !hasGradlew(currentAppHome)) {
+							com.aide.common.MessageBox.BT(ServiceContainer.getMainActivity(), "不是Gradle项目",
+									"请保证项目目录下GradleWrapper(Gradle包装器)");
+							return true;
+						}
 						// gradle 命令
 						launchIntentForPackage.putExtra(gradle_cmd_line_extra, cmdline);
 					}
-
 					startActivity(launchIntentForPackage);
-
 					return true;
 				}
 			});

@@ -7,10 +7,26 @@
 	android:installLocation="auto">
 
 	<!-- 新增 -->
-	<!-- 管理外部储存器权限 -->
+
+	<!-- 前台服务 -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+	
+	<!-- 运行「dataSync」类型的前台服务 -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+
+	<!-- 运行「specialUse」类型的前台服务 -->
+	<uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+
+	<!-- 显示通知 -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+	<!-- Termux RunCommandService 权限 -->
+    <uses-permission android:name="com.termux.permission.RUN_COMMAND" />
+
 	<!-- 查询所有软件包 -->
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
-    
+
+	<!-- 管理外部储存器权限 -->
 	<uses-permission
 		android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
 
@@ -21,7 +37,7 @@
     <uses-permission 
 		android:name="android.permission.WRITE_EXTERNAL_STORAGE" 
 		android:maxSdkVersion="29"/>
-	
+
     <!-- 显示通知 -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- 拥有完全的网络访问权限 -->
@@ -61,7 +77,7 @@
             <action android:name="android.intent.action.VIEW" />
             <data android:mimeType="application/vnd.android.package-archive" />
         </intent>
-		
+
 	</queries>
 	<!-- com.aide.ui.AIDEApplication -->
     <application
@@ -135,7 +151,7 @@
 		android:name="com.aide.engine.service.CodeAnalysisEngineService"
 		android:exported="false"
 		android:process=":EngineService" />-->
-		
+
 		<activity
             android:theme="@style/ActivityActionbarThemeLight"
             android:label="Git commit"
@@ -143,11 +159,15 @@
             android:excludeFromRecents="true"
             android:screenOrientation="user"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|screenSize|uiMode" />
-        
+
 		<service
 			android:name="io.github.zeroaicy.aide.services.ZeroAicyCodeAnalysisEngineService"
 			android:exported="true"
-			android:process=":EngineService" />
+			android:process=":EngineService" 
+			android:foregroundServiceType="dataSync|specialUse">
+			<property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+				android:value="防止代码分析服务被终止" />
+		</service>
 
 
         <activity
@@ -167,8 +187,11 @@
 		<service
 			android:name="io.github.zeroaicy.aide.services.ZeroAicyExternalPackagingService"
 			android:exported="false"
-			android:process=":PackagingService" />
-
+			android:process=":PackagingService"
+			android:foregroundServiceType="dataSync|specialUse">
+			<property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+				android:value="防止打包服务被终止" />
+		</service>
 
 		<!-- 被修改的 -->
 		<activity
@@ -209,15 +232,15 @@
                     android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
         </activity>
-		
+
 		<!-- com.aide.ui.scm.ExternalGitService -->
 		<service
             android:name="io.github.zeroaicy.aide.scm.ZeroAicyExternalGitService"
             android:exported="false"
             android:process=":GitService" />
-		
+
 		<!-- 结束 -->
-			
+
         <activity
             android:exported="true"
 			android:name="com.dropbox.client2.android.AuthActivity"
@@ -361,7 +384,7 @@
             android:screenOrientation="user"
             android:configChanges="keyboard|keyboardHidden|locale" />
 
-		
+
         <receiver
             android:name="com.aide.ui.debugger.ADRTReceiver"
             android:exported="true">

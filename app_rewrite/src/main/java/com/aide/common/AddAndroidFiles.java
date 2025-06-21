@@ -47,7 +47,7 @@ public class AddAndroidFiles {
 			// 添加 @AIDE
 			sb.append("\n * @AIDE AIDE+ ");
 
-			sb.append("\n */");
+			sb.append("\n */\n");
 		}
 
 		return sb.toString();

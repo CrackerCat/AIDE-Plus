@@ -737,9 +737,9 @@ public class ZeroAicyExtensionInterface {
 		String customizeEditorFontPath = ZeroAicySetting.getCustomizeEditorFontPath();
 
 		if (!TextUtils.isEmpty(customizeEditorFontPath)) {
-			File customizeEditorFontFile = new File(customizeEditorFontPath);
+			final File customizeEditorFontFile = new File(customizeEditorFontPath);
 			
-			File fontCacheFile = new File(ContextUtil.getContext().getCacheDir(),
+			final File fontCacheFile = new File(ContextUtil.getContext().getCacheDir(),
 					"font/" + MD5Util.stringMD5(customizeEditorFontPath) + customizeEditorFontFile.getName());
 
 			if (fontCacheFile.exists()) {

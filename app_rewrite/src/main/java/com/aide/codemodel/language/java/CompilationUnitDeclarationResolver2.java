@@ -21,21 +21,6 @@ public class CompilationUnitDeclarationResolver2 extends org.eclipse.jdt.interna
 		// TODO: Implement this method
 		return null;
 	}
-
-	static {
-		try {
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && ZeroAicySetting.isEnableEnsureCapacity()) {
-				try {
-					System.loadLibrary("EnsureCapacity");
-				} catch (Throwable e) {
-					AppLog.d("CompilationUnitDeclarationResolver2", "load EnsureCapacity", e);
-				}
-			}
-		} catch (Throwable e) {
-			AppLog.d("CompilationUnitDeclarationResolver2", "isEnableEnsureCapacity", e);
-		}
-	}
-
 	ProjectEnvironment projecttEnvironment;
 	public CompilationUnitDeclarationResolver2(ProjectEnvironment projecttEnvironment, INameEnvironment environment,
 			IErrorHandlingPolicy policy, CompilerOptions compilerOptions, ICompilerRequestor requestor,

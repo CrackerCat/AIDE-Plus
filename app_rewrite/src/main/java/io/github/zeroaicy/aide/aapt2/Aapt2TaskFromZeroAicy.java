@@ -473,6 +473,7 @@ public class Aapt2TaskFromZeroAicy {
 		AaptService$ErrorResult aaptError = null;
 		String compileType;
 		if (!flatDirFile.exists() 
+			// flatDirFile 没有子文件夹
 			|| FileUtil.findFile(flatDirFile, null).isEmpty()) {
 			//全量编译
 			aaptError = fullCompile(aaptServiceArgs, resDir, flatDir, flatDirFile);
@@ -590,7 +591,7 @@ public class Aapt2TaskFromZeroAicy {
 
 		/*****/
 		List<String> args = new ArrayList<>();
-		args.add(aaptServiceArgs.getAapt2Path());
+		args.add(AaptServiceArgs.getAapt2Path());
 		args.add("link");
 
 		args.add("-I");
@@ -722,7 +723,7 @@ public class Aapt2TaskFromZeroAicy {
 	public static AaptService$ErrorResult fullCompile(AaptServiceArgs aaptServiceArgs, String resDir, String output) {
 		List<String> args = new ArrayList<>();
 
-		args.add(aaptServiceArgs.getAapt2Path());
+		args.add(AaptServiceArgs.getAapt2Path());
 		args.add("compile");
 
 		args.add("--dir");
@@ -844,7 +845,7 @@ public class Aapt2TaskFromZeroAicy {
 	//增量编译
 	public static AaptService$ErrorResult incrementalCompile(AaptServiceArgs aaptServiceArgs, List<String> inputFiles, String output) {
 		List<String> args = new ArrayList<>();
-		args.add(aaptServiceArgs.getAapt2Path());
+		args.add(AaptServiceArgs.getAapt2Path());
 		args.add("compile");
 		args.addAll(inputFiles);
 

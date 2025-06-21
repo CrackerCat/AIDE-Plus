@@ -14,8 +14,17 @@ import io.github.zeroaicy.aide.utils.Utils;
 import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import com.aide.common.AppLog;
+import io.github.zeroaicy.aide.services.D8TaskWrapper;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import io.github.zeroaicy.aide.ui.services.ThreadPoolService;
+import io.github.zeroaicy.util.ContextUtil;
 
 public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChangeListener {
+
+	public static final String TAG = ZeroAicySetting.class.getSimpleName();
 
 	private static SharedPreferences defaultSp;
 	public static SharedPreferences projectServiceSharedPreferences;
@@ -45,6 +54,33 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 		isWatch = context.getResources().getBoolean(R.bool.watch);
 
 		updateApkInstallTimes(context);
+
+		// 检查 EnableEnsureCapacity 库是否禁用
+		checkEnsureCapacity(context);
+	}
+
+	private static void checkEnsureCapacity(final Context context) {
+		if( !ContextUtil.isMainProcess() ){
+			return;
+		}
+		ThreadPoolService.getDefaultThreadPoolService().execute(new Runnable() {
+			@Override
+			public void run() {
+				if (!hasEnableEnsureCapacityKey()) {
+					String libEnsureCapacityPath = context.getApplicationInfo().nativeLibraryDir
+							+ "/libEnsureCapacity.so";
+					Map<String, String> environment = Collections.singletonMap("EnsureCapacity", libEnsureCapacityPath);
+					List<String> singletonList = Collections.singletonList("--help");
+					try {
+						// 闪退会自动 
+						AppLog.d(TAG, "开始测试扩容库");
+						D8TaskWrapper.runD8Task(singletonList, environment, true);
+					} catch (Throwable e) {
+						AppLog.e(TAG, "测试 扩容库是否可用 ", e);
+					}
+				}
+			}
+		});
 	}
 
 	private static boolean isReinstall;
@@ -128,7 +164,7 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 	 * 是否启用异步读取
 	 */
 	public static boolean isEnableAsynRead() {
-		return getDefaultSpBoolean("zero_aicy_enable_asyn_read", true);
+		return getDefaultSpBoolean("zero_aicy_enable_asyn_read", false);
 	}
 	public static String getProjectPunctuationjava() {
 
@@ -244,14 +280,14 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 		String trimmedResult = result.toString().trim();
 		return trimmedResult;
 	}
-	
+
 	/**
 	 * 自定义字体路径
 	 */
 	public static String getCustomizeEditorFontPath() {
 		return getDefaultSpString("zero_aicy_customize_editor_font_path", null);
 	}
-	 
+
 	/*
 	 * 构建运行
 	 */
@@ -398,8 +434,16 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 	 * d8子进程是否扩容
 	 */
 	public static boolean isEnableEnsureCapacity() {
-		return getDefaultSpBoolean("test_zero_aicy_enable_ensure_capacity", true);
+		return isEnableEnsureCapacity(true);
 	}
+	public static boolean hasEnableEnsureCapacityKey() {
+		return getDefaultSp().contains("test_zero_aicy_enable_ensure_capacity");
+	}
+	public static boolean isEnableEnsureCapacity(boolean defValue) {
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+				&& getDefaultSpBoolean("test_zero_aicy_enable_ensure_capacity", defValue);
+	}
+
 	public static boolean disableEnableEnsureCapacity() {
 		return ZeroAicySetting.defaultSp.edit().putBoolean("test_zero_aicy_enable_ensure_capacity", false).commit();
 	}
@@ -408,7 +452,7 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 	 * 上次编译器实现申请是否是 默认
 	 */
 	public static boolean isLastCompilerImplementForDefault() {
-		return "default".equals( getDefaultSpString("zero_aicy_compiler_implement", "default"));
+		return "default".equals(getDefaultSpString("zero_aicy_compiler_implement", "default"));
 	}
 
 	/**
@@ -416,6 +460,7 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 	*/
 	public static void switchLastCompilerImplement(boolean isEnableEclipseCompilerForJava) {
 		String lastCompilerImplement = isEnableEclipseCompilerForJava ? "ecj" : "default";
+		AppLog.d(TAG, "切换编译器实现 -> %s", lastCompilerImplement);
 		ZeroAicySetting.defaultSp.edit().putString("zero_aicy_compiler_implement", lastCompilerImplement).commit();
 	}
 

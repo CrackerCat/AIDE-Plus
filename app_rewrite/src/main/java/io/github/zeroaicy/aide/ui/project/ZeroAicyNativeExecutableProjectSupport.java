@@ -3,13 +3,41 @@
  * @AIDE AIDE+
 */
 package io.github.zeroaicy.aide.ui.project;
+import android.text.TextUtils;
+import com.aide.engine.EngineSolution;
+import com.aide.engine.EngineSolutionProject;
 import com.aide.ui.project.NativeExecutableProjectSupport;
-import java.io.File;
 import com.aide.ui.project.internal.GradleTools;
 import com.aide.ui.util.FileSystem;
+import io.github.zeroaicy.aide.utils.ZeroAicyBuildGradle;
+import java.io.File;
+import java.util.List;
 
 public class ZeroAicyNativeExecutableProjectSupport extends NativeExecutableProjectSupport{
+	
+	@Override
+	public EngineSolution makeEngineSolution() {
+		EngineSolution makeEngineSolution = super.makeEngineSolution();
 
+		addCmakeSourceDir(makeEngineSolution);
+
+		return makeEngineSolution;
+	}
+
+	// 添加 cmake的源码目录
+	private void addCmakeSourceDir(EngineSolution makeEngineSolution) {
+		List<EngineSolutionProject> engineSolutionProjects = (List<EngineSolutionProject>) makeEngineSolution.engineSolutionProjects;
+		for (EngineSolutionProject engineSolutionProject : engineSolutionProjects) {
+			String projectPath = engineSolutionProject.getProjectPath();
+			if( !isSupport(projectPath )){
+				continue;
+			}
+			String cmakeListsTxtPath = "cpp";
+			engineSolutionProject.fY
+				.add(new EngineSolution.File(projectPath + "/" + cmakeListsTxtPath, "C++", null, false, false));
+		}
+	}
+	
 	@Override
 	public boolean isSupport(String projectPath) {
 		//NDK C/C++本机可执行项目

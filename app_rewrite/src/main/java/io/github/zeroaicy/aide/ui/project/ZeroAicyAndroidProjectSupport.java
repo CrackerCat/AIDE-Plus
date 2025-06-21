@@ -57,7 +57,7 @@ public class ZeroAicyAndroidProjectSupport extends AndroidProjectSupport {
 			}
 
 			engineSolutionProject.fY
-					.add(new EngineSolution.File(projectPath + "/" + cmakeListsTxtPath, "C++:+", null, false, false));
+					.add(new EngineSolution.File(projectPath + "/" + cmakeListsTxtPath, "C++", null, false, false));
 		}
 	}
 
@@ -137,7 +137,10 @@ public class ZeroAicyAndroidProjectSupport extends AndroidProjectSupport {
 	@Override
 	public List<String> getAddToProjectAdvise(String string) {
 		List<String> addToProjectAdvise = super.getAddToProjectAdvise(string);
-		addToProjectAdvise.addAll(0, advises);
+
+		int size = addToProjectAdvise.size();
+		int index = size >= 4 ? 4 : size;
+		addToProjectAdvise.addAll(index, advises);
 		return addToProjectAdvise;
 	}
 
@@ -145,6 +148,10 @@ public class ZeroAicyAndroidProjectSupport extends AndroidProjectSupport {
 	public void init(String projectPath, Map<String, List<String>> libraryMapping, List<String> mainAppWearApps) {
 		super.init(projectPath, libraryMapping, mainAppWearApps);
 
+		supportAar(libraryMapping);
+	}
+
+	private void supportAar(Map<String, List<String>> libraryMapping) {
 		// libraryMapping -> key: [aar | gradle 路径] value -> 依赖路径 [必须在 key里 ]
 		// 支持 aar依赖, 遍历 主项目 项目依赖
 		for (String module : new HashSet<String>(libraryMapping.keySet())) {
@@ -168,9 +175,7 @@ public class ZeroAicyAndroidProjectSupport extends AndroidProjectSupport {
 				if (dependency instanceof BuildGradle.FileTreeDependency) {
 					BuildGradle.FileTreeDependency fileTreeDependency = (BuildGradle.FileTreeDependency) dependency;
 					path = fileTreeDependency.getDirPath(module);
-				}
-				// files
-				else if (dependency instanceof BuildGradle.FilesDependency) {
+				} else if (dependency instanceof BuildGradle.FilesDependency) {
 					BuildGradle.FilesDependency filesDependency = (BuildGradle.FilesDependency) dependency;
 					path = filesDependency.getFilesPath(module);
 				} else {
@@ -198,12 +203,13 @@ public class ZeroAicyAndroidProjectSupport extends AndroidProjectSupport {
 			}
 		}
 
-//		AppLog.println_d();
-//		for (Map.Entry<String, List<String>> entry : libraryMapping.entrySet()) {
-//			AppLog.println_d(entry.getKey());
-//			AppLog.println_d("\t\t->" + String.join("\\\n\t\t", entry.getValue()));
-//		}
-//		AppLog.println_d();
+		//		AppLog.println_d();
+		//		for (Map.Entry<String, List<String>> entry : libraryMapping.entrySet()) {
+		//			AppLog.println_d(entry.getKey());
+		//			AppLog.println_d("\t\t->" + String.join("\\\n\t\t", entry.getValue()));
+		//		}
+		//		AppLog.println_d();
+
 	}
 
 	private static void addAarFile(String aarFilePath, String explodedAarCacheDir, List<String> moduleDependencys,
@@ -219,7 +225,7 @@ public class ZeroAicyAndroidProjectSupport extends AndroidProjectSupport {
 			if (!libraryMapping.containsKey(explodedAarPath)) {
 				libraryMapping.put(explodedAarPath, new ArrayList<>());
 			}
-			
+
 			//  解压 aar
 			ZeroAicyMavenService.extractedAar(aarFilePath, explodedAarPath);
 

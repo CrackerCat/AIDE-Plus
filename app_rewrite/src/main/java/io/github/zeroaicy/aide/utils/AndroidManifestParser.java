@@ -115,10 +115,12 @@ public class AndroidManifestParser extends Configuration<AndroidManifestParser> 
 			applicationLabel = getAttributeValue(applicatonAttributes, "android:label");
 			applicationName = getAttributeValue(applicatonAttributes, "android:name");
 			applicationIcon = getAttributeValue(applicatonAttributes, "android:icon");			
+			
 			String extractNativeLibsValue = getAttributeValue(applicatonAttributes, "android:extractNativeLibs");
-			if ("false".equals(extractNativeLibsValue)) {
-				this.extractNativeLibs = false;
-			}
+			this.extractNativeLibs = !"false".equals(extractNativeLibsValue);
+			
+			String debuggableValue = getAttributeValue(applicatonAttributes, "android:debuggable");
+			this.debuggable = "true".equals(debuggableValue);
 		} 
 
 		Node usesSdkNode = getFristElementByTagName(manifestElement, "uses-sdk");
@@ -171,7 +173,8 @@ public class AndroidManifestParser extends Configuration<AndroidManifestParser> 
 	private String applicationName;
 	private String applicationIcon;
 	private boolean extractNativeLibs = true;
-
+	private boolean debuggable = false;
+	
     public String getApplicationLabel() {
         return this.applicationLabel;
     }
@@ -184,6 +187,10 @@ public class AndroidManifestParser extends Configuration<AndroidManifestParser> 
 	public boolean getExtractNativeLibs() {
         return this.extractNativeLibs;
     }
+	public boolean getDebuggable() {
+        return this.debuggable;
+    }
+	
 
 	/********************************新封装工具****************************************************/
 
@@ -191,22 +198,18 @@ public class AndroidManifestParser extends Configuration<AndroidManifestParser> 
 		if (applicatonElement == null) {
 			return false;
 		}
-		NamedNodeMap attributes = applicatonElement.getAttributes();
-		if (attributes == null) {
+		NamedNodeMap applicatonAttributes = applicatonElement.getAttributes();
+		if (applicatonAttributes == null) {
 			return false;
 		}
-		Node namedItem = attributes.getNamedItem("android:debuggable");
-
-
-		if (namedItem == null && !debuggable) {
+		
+		String debuggableValue = getAttributeValue(applicatonAttributes, "android:debuggable");
+		if (debuggableValue == null && !debuggable) {
 			return true;
 		}
-
-		boolean equals = "true".equals(namedItem.getNodeValue());
-		if (equals && debuggable) {
-			return true;
-		}
-		return false;
+		
+		boolean isDebuggable = "true".equals(debuggableValue);
+		return isDebuggable && debuggable;
 	}
 
 	// 相同时不会保存

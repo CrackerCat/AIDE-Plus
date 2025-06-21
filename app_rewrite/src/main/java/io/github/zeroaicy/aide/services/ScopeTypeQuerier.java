@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.zip.ZipFile;
 import java.io.FileNotFoundException;
 import com.aide.ui.services.AssetInstallationService;
+import io.github.zeroaicy.util.IOUtils;
 
 
 /**
@@ -192,7 +193,7 @@ public class ScopeTypeQuerier{
 
 			try{
 				//嗅探一下，d8打不开zip，不报路径😭
-				new ZipFile(libFile).close();
+				IOUtils.close(new ZipFile(libFile));
 			}
 			catch (IOException e){
 				// 坏的jar

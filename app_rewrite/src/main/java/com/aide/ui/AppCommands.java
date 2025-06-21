@@ -1,25 +1,24 @@
 package com.aide.ui;
 
+import abcd.*;
+
 import android.util.SparseArray;
-
 import androidx.annotation.Keep;
-
-import com.aide.ui.command.AddToProjectCommand;
-import com.aide.ui.command.FileBrowserCommand;
 import com.aide.ui.command.KeyStrokeCommand;
 import com.aide.ui.command.MenuItemCommand;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-
+import com.aide.ui.command.FileBrowserCommand;
+import com.aide.ui.command.AddToProjectCommand;
+import com.aide.common.AppLog;
+import io.github.zeroaicy.aide.commands.ShareLogsCommand;
 import abcd.*;
 import io.github.zeroaicy.aide.command.GotoDirCommand;
 import io.github.zeroaicy.aide.command.GotoJavaCommand;
 import io.github.zeroaicy.aide.command.GotoResCommand;
 import io.github.zeroaicy.aide.command.IconManagerCommand;
-import io.github.zeroaicy.aide.extend.OpenAideTermux;
-import io.github.zeroaicy.aide.utils.FilesRenameMenu;
 
 public class AppCommands {
 
@@ -86,9 +85,10 @@ public class AppCommands {
 				new e9(), new n9()};
 
 
-			Zo = new sf[]{new aa(), new kc(), new b9(), 
+			// 菜单命令集合  [ rf 为带图标菜单命令]
+			Zo = new sf[]{new aa(), new kc(), new b9(),
 				new rc(), new j9(), new z9(), new y9(),
-				new cd()};
+				new cd(), new ShareLogsCommand()};
 
 			//
             VH = new sf[]{new c9(), new h9(), new pb(), 
@@ -122,6 +122,7 @@ public class AppCommands {
 
         }
 		catch (Throwable th) {
+			AppLog.e("AppCommands", "<cinit", th);
         }
     }
 
@@ -134,6 +135,7 @@ public class AppCommands {
 	 */
 
 	private static SparseArray<rf> rf = null;
+	// 带图标的菜单命令
 	private static SparseArray<rf> rf() {
 		if (AppCommands.rf == null) {
 			AppCommands.rf = new SparseArray<>();
@@ -155,7 +157,7 @@ public class AppCommands {
     }
 	
 	/**
-	 * 菜单
+	 * 带图标菜单
 	 * 寻找rf
 	 */
 	@Keep
