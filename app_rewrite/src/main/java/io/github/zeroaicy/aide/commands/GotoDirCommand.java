@@ -1,4 +1,4 @@
-package io.github.zeroaicy.aide.command;
+package io.github.zeroaicy.aide.commands;
 
 import android.app.Activity;
 import android.app.AlertDialog;

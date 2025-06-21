@@ -1,4 +1,4 @@
-package io.github.zeroaicy.aide.command;
+package io.github.zeroaicy.aide.commands;
 
 import com.aide.ui.ServiceContainer;
 import com.aide.ui.command.MenuItemCommand;
@@ -8,11 +8,11 @@ import com.topjohnwu.superuser.io.SuFile;
 
 import io.github.zeroaicy.aide.preference.ZeroAicySetting;
 
-public class GotoResCommand implements MenuItemCommand {
+public class GotoJavaCommand implements MenuItemCommand {
 
     @Override
     public int getMenuItemId() {
-        return R.id.filebrowserShowResFolder;
+        return R.id.filebrowserShowJavaFolder;
     }
 
     @Override
@@ -20,22 +20,22 @@ public class GotoResCommand implements MenuItemCommand {
         String currentDir = ServiceContainer.getFileBrowserService().j6();
         String currentAppHome = ZeroAicySetting.getCurrentAppHome();
 
-        String resDir = GradleTools.yS(currentAppHome);
-        SuFile resFile = new SuFile(resDir);
+        String[] javaDir = GradleTools.getFlavourSourceDir(currentAppHome,null);
+        SuFile javaFile = new SuFile(javaDir[0]);
         SuFile currentFile = new SuFile(currentDir);
 
 
-        if (!resFile.exists()||!resFile.isDirectory()) {
+        if (!javaFile.exists()||!javaFile.isDirectory()) {
             return false;
         }
-        return !resFile.equals(currentFile);
+        return !javaFile.equals(currentFile);
     }
 
     @Override
     public boolean run() {
         String currentAppHome = ZeroAicySetting.getCurrentAppHome();
-        String resDir = GradleTools.yS(currentAppHome);
-        ServiceContainer.getFileBrowserService().Hw(resDir);
+        String[] javaDir = GradleTools.getFlavourSourceDir(currentAppHome,null);
+        ServiceContainer.getFileBrowserService().Hw(javaDir[0]);
         return true;
     }
 }
