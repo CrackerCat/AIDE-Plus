@@ -12,6 +12,13 @@
 	
 	 <!-- 新增的 -->
 	<string name="trainer_language">zh</string>
+
+
+	<!-- 2025/06/21新增 -->
+	<string name="command_files_goto_res">跳转Res文件夹</string>
+	<string name="command_files_goto_dir">文件夹跳转</string>
+	<string name="command_files_goto_java">跳转Java文件夹</string>
+	<string name="command_files_icon_manager">图标管理</string>
 	
 	<string name="preference_category_apk_sign">APK签名</string>
 	<string name="preference_category_c_indent">C++缩进</string>

@@ -2,7 +2,6 @@ package io.github.zeroaicy.aide.command;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
@@ -41,13 +40,7 @@ public class GotoDirCommand implements MenuItemCommand {
                         .setView(view)
                         .setPositiveButton(
                                 android.R.string.ok,
-                                new DialogInterface.OnClickListener() {
-
-                                    @Override
-                                    public void onClick(DialogInterface dia, int which) {
-                                        ServiceContainer.getFileBrowserService().Hw(et.getText().toString());
-                                    }
-                                })
+                                (dia, which) -> ServiceContainer.getFileBrowserService().Hw(et.getText().toString()))
                         .setNegativeButton(android.R.string.cancel, null)
                         .create();
         dialog.show();

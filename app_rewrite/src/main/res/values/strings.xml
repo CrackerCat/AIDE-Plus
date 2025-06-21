@@ -12,5 +12,12 @@
 	
 	<string name="commit_options_menu_select_all">SelectAll</string>
 	<string name="commit_options_menu_inverse">Inverse</string>
-	
+
+	<!-- 2025/06/21新增 -->
+	<string name="command_files_goto_res">Goto Res Folder</string>
+	<string name="command_files_goto_dir">Goto Dir</string>
+	<string name="command_files_goto_java">Goto Java Folder</string>
+	<string name="command_files_icon_manager">Icon Manager</string>
+
+
 </resources>
