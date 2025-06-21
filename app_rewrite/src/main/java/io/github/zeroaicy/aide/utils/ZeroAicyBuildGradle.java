@@ -401,7 +401,7 @@ public class ZeroAicyBuildGradle extends BuildGradle {
 
 				// AppLog.println_d("path -> %s", this.cmakeListsTxtPath);
 				break;
-			// cmake版本
+			// cmake版本cmake版
 
 			case "version" :
 

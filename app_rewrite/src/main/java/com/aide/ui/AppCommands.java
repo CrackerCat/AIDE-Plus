@@ -1,18 +1,25 @@
 package com.aide.ui;
 
-import abcd.*;
-
 import android.util.SparseArray;
+
 import androidx.annotation.Keep;
+
+import com.aide.ui.command.AddToProjectCommand;
+import com.aide.ui.command.FileBrowserCommand;
 import com.aide.ui.command.KeyStrokeCommand;
 import com.aide.ui.command.MenuItemCommand;
-import io.github.zeroaicy.aide.extend.OpenAideTermux;
-import io.github.zeroaicy.aide.utils.FilesRenameMenu;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import com.aide.ui.command.FileBrowserCommand;
-import com.aide.ui.command.AddToProjectCommand;
+
+import abcd.*;
+import io.github.zeroaicy.aide.command.GotoDirCommand;
+import io.github.zeroaicy.aide.command.GotoJavaCommand;
+import io.github.zeroaicy.aide.command.GotoResCommand;
+import io.github.zeroaicy.aide.command.IconManagerCommand;
+import io.github.zeroaicy.aide.extend.OpenAideTermux;
+import io.github.zeroaicy.aide.utils.FilesRenameMenu;
 
 public class AppCommands {
 
@@ -60,7 +67,9 @@ public class AppCommands {
 
 			// 文件浏览器
 			DW = new sf[]{
-				// 新建项目文件 
+				// 新建项目文件
+					new GotoResCommand(), new GotoJavaCommand(), new GotoDirCommand(),
+					new IconManagerCommand(),
 				new s9(), new ib(), new nb(), 
 				new qc(), new AddToProjectCommand(), new r9(), 
 				new oa(), new oc(), new yc(), 

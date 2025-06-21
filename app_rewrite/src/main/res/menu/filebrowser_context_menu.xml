@@ -13,7 +13,15 @@
 	<item
         android:id="@+id/filebrowserMenuOpenAideTermux"
         android:title="@string/command_files_open_aide_termux" />
-	
+    <item
+        android:id="@+id/filebrowserShowResFolder"
+        android:title="@string/command_files_goto_res" />
+    <item
+        android:id="@+id/filebrowserShowJavaFolder"
+        android:title="@string/command_files_goto_java" />
+    <item
+        android:id="@+id/filebrowserShowCustomFolder"
+        android:title="@string/command_files_goto_dir" />
     <item
         android:id="@id/filebrowserShowProjects"
         android:title="@string/command_files_show_projects" />
