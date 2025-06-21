@@ -41,12 +41,12 @@ public interface ZipEntryTransformer {
 				return null;
 			}
 			zipEntryName = "lib/" + this.curLibgdxNativesABI + "/" + zipEntryName;
-			
+
 			if (isAdded(packagingStream, zipEntryName) || isFilterAbi(zipEntryName)) {
 				// 过滤
 				return null;
 			}
-			
+
 			ZipEntry newZipEntry = new ZipEntry(zipEntryName);
 			if (!isAndroidExtractNativeLibs()) {
 				//android:extractNativeLibs="false"时必须无压缩
@@ -106,7 +106,7 @@ public interface ZipEntryTransformer {
 		public ZipEntry transformer(ZipEntry zipEntry, PackagingStream packagingStream) {
 			String zipEntryName = zipEntry.getName();
 			//过滤已存在的
-			if (isAdded(packagingStream, zipEntryName)) {
+			if (isAdded(packagingStream, zipEntryName) || this.isFilterAbi(zipEntryName)) {
 				return null;
 			}
 
@@ -119,13 +119,18 @@ public interface ZipEntryTransformer {
 			}
 
 			// 过滤lib/${abi}/xxx.so
-			if (zipEntryName.startsWith("lib/")
-					// android:debuggable="true" 可以不是so
-					&& (isAndroidDebuggable() || !zipEntryName.endsWith(".so"))
-					// 是否是 过滤abi
-					&& this.isFilterAbi(zipEntryName)) {
-				// 过滤此abi
-				return null;
+			if (zipEntryName.startsWith("lib/") && isAndroidDebuggable()) {
+				// android:debuggable="true" 可以不是so
+				if (!zipEntryName.endsWith(".so")) {
+					if (isAndroidExtractNativeLibs()) {
+						return zipEntry;
+					}
+					// 不过滤
+					ZipEntry newZipEntry = new ZipEntry(zipEntryName);
+					// lib/abi/xxx.so 下资源必须无压缩
+					newZipEntry.setMethod(ZipEntry.STORED);
+					return newZipEntry;
+				}
 			}
 
 			String zipEntryNameLowerCase = zipEntryName.toLowerCase();
