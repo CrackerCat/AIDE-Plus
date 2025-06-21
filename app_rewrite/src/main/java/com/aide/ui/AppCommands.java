@@ -1,24 +1,27 @@
 package com.aide.ui;
 
-import abcd.*;
-
 import android.util.SparseArray;
+
 import androidx.annotation.Keep;
+
+import com.aide.common.AppLog;
+import com.aide.ui.command.AddToProjectCommand;
+import com.aide.ui.command.FileBrowserCommand;
 import com.aide.ui.command.KeyStrokeCommand;
 import com.aide.ui.command.MenuItemCommand;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import com.aide.ui.command.FileBrowserCommand;
-import com.aide.ui.command.AddToProjectCommand;
-import com.aide.common.AppLog;
-import io.github.zeroaicy.aide.commands.ShareLogsCommand;
+
 import abcd.*;
-import io.github.zeroaicy.aide.command.GotoDirCommand;
-import io.github.zeroaicy.aide.command.GotoJavaCommand;
-import io.github.zeroaicy.aide.command.GotoResCommand;
-import io.github.zeroaicy.aide.command.IconManagerCommand;
+import io.github.zeroaicy.aide.commands.GotoDirCommand;
+import io.github.zeroaicy.aide.commands.GotoJavaCommand;
+import io.github.zeroaicy.aide.commands.GotoResCommand;
+import io.github.zeroaicy.aide.commands.IconManagerCommand;
+import io.github.zeroaicy.aide.commands.ShareLogsCommand;
+import io.github.zeroaicy.aide.extend.OpenAideTermux;
+import io.github.zeroaicy.aide.utils.FilesRenameMenu;
 
 public class AppCommands {
 
@@ -72,7 +75,7 @@ public class AppCommands {
 				new s9(), new ib(), new nb(), 
 				new qc(), new AddToProjectCommand(), new r9(), 
 				new oa(), new oc(), new yc(), 
-				new nc(), new FilesRenameMenu(), new v9(), 
+				new nc(), new FilesRenameMenu(), new v9(),
 				new m9(), new q9(), new p9(), 
 				new ic(), new z8(), new xb(), 
 				new ta(), new ua(), new qa(), 

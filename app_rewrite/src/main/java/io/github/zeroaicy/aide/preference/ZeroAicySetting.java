@@ -33,6 +33,9 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 	public static SharedPreferences getDefaultSp() {
 		return defaultSp;
 	}
+	public static int getDefaultSpInt(String key, @Nullable int defValue) {
+		return defaultSp.getInt(key, defValue);
+	}
 	public static String getDefaultSpString(String key, @Nullable String defValue) {
 		return defaultSp.getString(key, defValue);
 	}
@@ -350,6 +353,31 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 			defMinSdkLevel = 21;
 		}
 		return defMinSdkLevel;
+	}
+
+	/**
+	 * 翻译设置
+	 */
+
+	//开启翻译
+	public static boolean isEnableTranslate() {
+		return getDefaultSpBoolean("iyutong_translate_enable", true);
+	}
+	//本地数据库
+	public static boolean isEnableTranslatesbd() {
+		return getDefaultSpBoolean("iyutong_translate_bd_enable", false);
+	}
+	//分词
+	public static boolean isEnableTranslatesfg() {
+		return getDefaultSpBoolean("iyutong_translate_fg_enable", true);
+	}
+	//翻译引擎
+	public static String getTranslateyq() {
+		return getDefaultSpString("iyutong_translate_yq", "0");
+	}
+	//自动切换
+	public static boolean isEnableTranslateyq() {
+		return getDefaultSpBoolean("iyutong_translate_yq_enable", true);
 	}
 
 	/**
