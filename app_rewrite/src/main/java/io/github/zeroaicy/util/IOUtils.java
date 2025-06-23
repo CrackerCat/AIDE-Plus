@@ -26,13 +26,24 @@ public class IOUtils {
 		int read;
 		while ((read = bufferedInputStream.read(data)) > 0);
 	}
+	
+	public static void streamTransfer(InputStream inputStream, OutputStream outputStream) throws IOException {
+		streamTransfer(inputStream, outputStream, false);
+	}
 
-	public static void streamTransfer(InputStream bufferedInputStream, OutputStream packagingZipOutput)
+	public static void streamTransfer(InputStream inputStream, OutputStream outputStream, boolean autoClose)
 			throws IOException {
-		byte[] data = new byte[4096];
-		int read;
-		while ((read = bufferedInputStream.read(data)) > 0) {
-			packagingZipOutput.write(data, 0, read);
+		try {
+			byte[] data = new byte[4096];
+			int read;
+			while ((read = inputStream.read(data)) > 0) {
+				outputStream.write(data, 0, read);
+			}
+		} finally {
+			if (autoClose) {
+				close(inputStream);
+				close(outputStream);
+			}
 		}
 	}
 

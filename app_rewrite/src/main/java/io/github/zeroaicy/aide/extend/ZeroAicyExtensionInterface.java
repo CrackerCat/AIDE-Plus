@@ -780,7 +780,7 @@ public class ZeroAicyExtensionInterface {
 								FileUtil.deleteFolder(fontDirFile, false);
 								
 								IOUtils.streamTransfer(new FileInputStream(customizeEditorFontFile),
-										new FileOutputStream(fontCacheFile));
+										new FileOutputStream(fontCacheFile), true);
 							} catch (Throwable e) {
 								// 复制出错 删除
 								fontCacheFile.delete();
