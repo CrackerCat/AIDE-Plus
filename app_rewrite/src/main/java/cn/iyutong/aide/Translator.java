@@ -19,10 +19,11 @@ import cn.iyutong.translator.IPLoader;
 import cn.iyutong.translator.YandexWebTranslator;
 import io.github.zeroaicy.aide.preference.ZeroAicySetting;
 import io.github.zeroaicy.aide.ui.services.ThreadPoolService;
+import java.util.*;
 
 public class Translator {
 
-    private static final List<String> list = new ArrayList<>();
+    private static final Set<String> transl_text_set = Collections.synchronizedSet(new HashSet<>());
     private static final String TAG = "Ytranslator";
     private static final MMKV kv = MMKV.mmkvWithID("Ytranslator", MMKV.MULTI_PROCESS_MODE);
 
@@ -40,17 +41,17 @@ public class Translator {
             return null;
         }
 
-        if (list.contains(text)) {
+        if (transl_text_set.contains(text)) {
             AppLog.d(TAG, "翻译中...");
             return "翻译中...";
         } else {
             AppLog.d(TAG, "正在翻译...");
             AppLog.d(TAG, "添加..." + text);
-            list.add(text);
+            transl_text_set.add(text);
             ThreadPoolService.getDefaultThreadPoolService().submit(() -> {
                 transl(text,0);
                 AppLog.d(TAG, "删除..." + text);
-                list.remove(text);
+                transl_text_set.remove(text);
             });
             if (ck != null && ck.equals("@Iyutong翻译失败@IyutongAuto")) {
                 return "翻译失败,正在重新翻译...";
