@@ -19,6 +19,9 @@ import com.aide.engine.SourceEntity;
 import com.aide.ui.AIDEEditor;
 import com.aide.ui.ServiceContainer;
 import com.aide.ui.rewrite.R;
+
+import cn.iyutong.aide.Translator;
+import io.github.zeroaicy.aide.preference.ZeroAicySetting;
 import io.github.zeroaicy.aide.ui.services.ThreadPoolService;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -55,6 +58,7 @@ public class EditorCompletionAdapter extends ArrayAdapter<SourceEntity> {
 		View rootView;
 
 		TextView completionEntryName;
+		TextView completionEntryNamefy;
 		ImageView completionEntryImage;
 		ImageView completionHelpButton;
 		public ViewHolder(View rootView) {
@@ -63,6 +67,7 @@ public class EditorCompletionAdapter extends ArrayAdapter<SourceEntity> {
 			completionEntryName = findViewById(R.id.completionEntryName);
 			completionEntryImage = findViewById(R.id.completionEntryImage);
 			completionHelpButton = findViewById(R.id.completionHelpButton);
+			completionEntryNamefy = findViewById(R.id.completionEntryNamefy);
 
 		}
 
@@ -171,6 +176,16 @@ public class EditorCompletionAdapter extends ArrayAdapter<SourceEntity> {
 				default:
 					entryNameView.setText(entityName);
 					break;
+			}
+
+			if (ZeroAicySetting.isEnableTranslate()){
+				String text = Translator.text(entityName);
+				if (text.isEmpty()){
+					viewholder.completionEntryNamefy.setVisibility(View.GONE);
+				} else {
+					viewholder.completionEntryNamefy.setText(text);
+					viewholder.completionEntryNamefy.setVisibility(View.VISIBLE);
+				}
 			}
 
 			// 追加 api 版本信息

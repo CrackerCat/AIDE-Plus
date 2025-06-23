@@ -8,6 +8,8 @@ import android.os.StrictMode;
 import com.aide.common.AppLog;
 import com.aide.ui.AIDEApplication;
 import com.aide.ui.ServiceContainer;
+import com.tencent.mmkv.MMKV;
+
 import io.github.zeroaicy.aide.highlight.CodeTheme;
 import io.github.zeroaicy.aide.preference.ZeroAicySetting;
 import io.github.zeroaicy.aide.shell.ShellEnvironmentUtils;
@@ -109,6 +111,8 @@ public class ZeroAicyAIDEApplication extends AIDEApplication {
 			// 重置
 			edit.putInt("ShownVersion", 0).apply();
 		}
+
+		MMKV.initialize(this);
 
 		// Return if this application is not in debug mode 
 		AppLog.d(TAG, "Application初始化耗时: " + (System.currentTimeMillis() - now) + "ms");
