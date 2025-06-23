@@ -170,7 +170,6 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 				// android:extractNativeLibs
 				boolean androidExtractNativeLibs = getAndroidExtractNativeLibs();
 				this.nativeLibZipEntryTransformer.setAndroidExtractNativeLibs(androidExtractNativeLibs);
-				// jar中资源
 				this.libgdxNativesTransformer.setAndroidExtractNativeLibs(androidExtractNativeLibs);
 				this.dexZipEntryTransformer.setAndroidExtractNativeLibs(androidExtractNativeLibs);
 				this.zipResourceZipEntryTransformer.setAndroidExtractNativeLibs(androidExtractNativeLibs);
@@ -178,15 +177,13 @@ public class ZeroAicyExternalPackagingService extends ExternalPackagingService {
 				// android:debuggable
 				boolean androidDebuggable = getAndroidDebuggable();
 				this.nativeLibZipEntryTransformer.setAndroidDebuggable(androidDebuggable);
-				// jar中资源
-				this.libgdxNativesTransformer.setAndroidExtractNativeLibs(androidDebuggable);
-				this.dexZipEntryTransformer.setAndroidExtractNativeLibs(androidDebuggable);
-				this.zipResourceZipEntryTransformer.setAndroidExtractNativeLibs(androidDebuggable);
+				this.libgdxNativesTransformer.setAndroidDebuggable(androidDebuggable);
+				this.dexZipEntryTransformer.setAndroidDebuggable(androidDebuggable);
+				this.zipResourceZipEntryTransformer.setAndroidDebuggable(androidDebuggable);
 
 				// abiFilters
 				LinkedHashSet<String> cmakeAbiFilters = getZeroAicyBuildGradle().getCmakeAbiFilters(false);
 				this.nativeLibZipEntryTransformer.setAbiFilters(cmakeAbiFilters);
-				// jar中资源
 				this.libgdxNativesTransformer.setAbiFilters(cmakeAbiFilters);
 				this.dexZipEntryTransformer.setAbiFilters(cmakeAbiFilters);
 				this.zipResourceZipEntryTransformer.setAbiFilters(cmakeAbiFilters);
