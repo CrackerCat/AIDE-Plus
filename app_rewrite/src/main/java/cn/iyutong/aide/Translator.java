@@ -22,9 +22,9 @@ import io.github.zeroaicy.aide.ui.services.ThreadPoolService;
 
 public class Translator {
 
-    private static List<String> list = new ArrayList<>();
+    private static final List<String> list = new ArrayList<>();
     private static final String TAG = "Ytranslator";
-    private static MMKV kv = MMKV.mmkvWithID("Ytranslator", MMKV.MULTI_PROCESS_MODE);
+    private static final MMKV kv = MMKV.mmkvWithID("Ytranslator", MMKV.MULTI_PROCESS_MODE);
 
     private static final IPLoader ipLoader = new IPLoader();
 
@@ -45,9 +45,12 @@ public class Translator {
             return "翻译中...";
         } else {
             AppLog.d(TAG, "正在翻译...");
-            ThreadPoolService.getDefaultThreadPoolService().execute(() -> {
-                list.add(text);
+            AppLog.d(TAG, "添加..." + text);
+            list.add(text);
+            ThreadPoolService.getDefaultThreadPoolService().submit(() -> {
                 transl(text,0);
+                AppLog.d(TAG, "删除..." + text);
+                list.remove(text);
             });
             if (ck != null && ck.equals("@Iyutong翻译失败@IyutongAuto")) {
                 return "翻译失败,正在重新翻译...";
@@ -70,7 +73,6 @@ public class Translator {
                     result = BingWebTranslator.translate(wz, "auto", "zh-CN");
                     break;
                 case 1:
-
                     result = GoogleCNTranslator.translate(ipLoader, wz, "auto", "zh");
                     break;
                 case 2:
@@ -84,14 +86,12 @@ public class Translator {
                     break;
             }
             kv.encode(text,result);
-            list.remove(text);
             AppLog.d(TAG, "翻译成功");
         } catch (Exception e) {
             e.printStackTrace();
             if (ZeroAicySetting.isEnableTranslateyq()){
                 if (a>=3){
                     AppLog.d(TAG, "翻译失败");
-                    list.remove(text);
                     kv.encode(text,"@Iyutong翻译失败@IyutongAuto");
                     return;
                 }
@@ -100,7 +100,6 @@ public class Translator {
                 return;
             }
             AppLog.d(TAG, "翻译失败...");
-            list.remove(text);
             kv.encode(text,"@Iyutong翻译失败@IyutongAuto");
         }
     }
