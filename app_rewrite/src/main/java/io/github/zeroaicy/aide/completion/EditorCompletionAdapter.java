@@ -59,6 +59,7 @@ public class EditorCompletionAdapter extends ArrayAdapter<SourceEntity> {
 
 		TextView completionEntryName;
 		TextView completionEntryNamefy;
+		TextView completionEntryNamebf;
 		ImageView completionEntryImage;
 		ImageView completionHelpButton;
 		public ViewHolder(View rootView) {
@@ -68,6 +69,7 @@ public class EditorCompletionAdapter extends ArrayAdapter<SourceEntity> {
 			completionEntryImage = findViewById(R.id.completionEntryImage);
 			completionHelpButton = findViewById(R.id.completionHelpButton);
 			completionEntryNamefy = findViewById(R.id.completionEntryNamefy);
+			completionEntryNamebf = findViewById(R.id.completionEntryNamebf);
 
 		}
 
@@ -130,6 +132,7 @@ public class EditorCompletionAdapter extends ArrayAdapter<SourceEntity> {
 
 		if (sourceEntity == null) {
 			viewholder.completionEntryName.setText("No matches");
+			viewholder.completionEntryNamefy.setVisibility(View.GONE);
 			viewholder.completionEntryImage.setImageResource(R.drawable.browser_empty);
 			viewholder.completionHelpButton.setVisibility(View.GONE);
 			return entryView;
@@ -140,6 +143,8 @@ public class EditorCompletionAdapter extends ArrayAdapter<SourceEntity> {
 
 			// entityName
 			String entityName = sourceEntity.Mr();
+
+			viewholder.completionEntryNamebf.setText(entityName);
 
 			switch (sourceEntityType) {
 				case MethodType: 

@@ -12,6 +12,7 @@ import android.preference.Preference;
 import android.content.Intent;
 import android.app.Activity;
 
+import cn.iyutong.aide.Translator;
 import io.github.zeroaicy.aide.highlight.HighlightActivity;
 
 import android.net.Uri;
@@ -57,8 +58,7 @@ public class ZeroAicySettingsFragment extends PreferenceFragment {
                                 .setTitle("清楚本地数据库")
                                 .setMessage("清楚本地数据库中已翻译的内容，清楚后下次需要重新翻译，是否确认清楚？")
                                 .setPositiveButton("确定", (dialog, which) -> {
-                                    MMKV kv = MMKV.mmkvWithID("Ytranslator", MMKV.MULTI_PROCESS_MODE);
-                                    kv.clearAll();
+                                    Translator.clearall();
                                     Toast.makeText(getActivity(), "数据库清楚完成", Toast.LENGTH_SHORT).show();
                                 })
                                 .setNegativeButton("取消", (dialog, which) -> {

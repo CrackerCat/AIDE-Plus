@@ -2,4 +2,6 @@
 <resources>
     <item name="completionEntryNamefy"
         type="id" />
+    <item name="completionEntryNamebf"
+        type="id" />
 </resources>
