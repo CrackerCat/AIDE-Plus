@@ -25,7 +25,9 @@ public class Translator {
 	private static final IPLoader ipLoader = new IPLoader();
 
 	public static String text(String text) {
-
+		if (TextUtils.isEmpty(text.trim())) {
+			return null;
+		}
 		String ck = kv.decodeString(text);
 		if (!TextUtils.isEmpty(ck) && !ck.equals(TranslatorFail)) {
 			return ck;

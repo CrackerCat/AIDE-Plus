@@ -180,7 +180,7 @@ public class EditorCompletionAdapter extends ArrayAdapter<SourceEntity> {
 
 			if (ZeroAicySetting.isEnableTranslate()){
 				String text = Translator.text(entityName);
-				if (text.isEmpty()){
+				if (TextUtils.isEmpty(text)){
 					viewholder.completionEntryNamefy.setVisibility(View.GONE);
 				} else {
 					viewholder.completionEntryNamefy.setText(text);
