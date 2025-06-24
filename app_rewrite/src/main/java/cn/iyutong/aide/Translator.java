@@ -45,10 +45,10 @@ public class Translator {
 				transl(text, 0);
 				transl_text_set.remove(text);
 			});
-			if (TextUtils.isEmpty(ck) || ck.equals(TranslatorFail)) {
-				return "翻译失败,正在重新翻译...";
-			}
-			return "正在翻译...";
+            if (ck != null && ck.equals(TranslatorFail)) {
+                return "翻译失败,正在重新翻译...";
+            }
+            return "正在翻译...";
 		}
 	}
 
@@ -89,10 +89,8 @@ public class Translator {
 				kv.encode(text, TranslatorFail);
 				return;
 			}
-			AppLog.d(TAG, "翻译失败,重试中..." + a);
+			AppLog.d(TAG, "翻译失败,重试中...." + a);
 			transl(text, a + 1);
-			return;
-
 		}
 	}
 
