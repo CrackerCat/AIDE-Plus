@@ -19,7 +19,6 @@ import android.widget.Toast;
 import com.aide.common.AppLog;
 import com.aide.ui.ServiceContainer;
 import com.aide.ui.command.MenuCommand;
-import com.aide.ui.command.MenuItemCommand;
 import com.aide.ui.rewrite.R;
 
 import cn.iyutong.aide.YAIDEEditor;
