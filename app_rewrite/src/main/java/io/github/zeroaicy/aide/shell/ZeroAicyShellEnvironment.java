@@ -133,6 +133,9 @@ public class ZeroAicyShellEnvironment implements ShellEnvironment {
 		environment.put("PROOT_TMP_DIR", PROOT_TMP_DIR);
 		//自定义参数
 		environment.put("JAVA_TOOL_OPTIONS", "-Duser.language=zh -Duser.region=CN");
+		
+		//en_US.UTF-8
+		environment.put("LANG", "zh_CN.UTF-8");
 	}
 }
 
