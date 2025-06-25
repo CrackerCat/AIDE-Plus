@@ -65,6 +65,8 @@ dependencies {
 
 	api "androidx.core:core:1.13.0"
 	api "androidx.preference:preference:1.2.1"
+	api "androidx.constraintlayout:constraintlayout:2.2.1"
+	
 	// kotlin std lib
 	api "org.jetbrains.kotlin:kotlin-stdlib:2.0.0"
 	
