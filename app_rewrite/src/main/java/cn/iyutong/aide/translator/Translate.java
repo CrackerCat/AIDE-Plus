@@ -170,7 +170,7 @@ public class Translate implements MenuCommand {
         try {
             String wz = YAIDEEditor.getText();
             AppLog.d(TAG,wz);
-            if (ZeroAicySetting.isEnableTranslatctf()&&wz.matches("^[^\s\n]*$")) {
+            if (ZeroAicySetting.isEnableTranslatctf()&&wz.matches("^[^\\s\\n]*$")) {
                 AppLog.d(TAG,wz);
                 wz = EnglishWordTokenizer.joinWithSpace(EnglishWordTokenizer.smartTokenizeEnhanced(wz));
             }
