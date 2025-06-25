@@ -1,4 +1,4 @@
-package cn.iyutong.aide;
+package cn.iyutong.aide.quickkeysbar;
 
 import com.aide.ui.MainActivity;
 import com.aide.ui.QuickKeysBar;
