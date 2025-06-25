@@ -21,6 +21,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import android.os.*;
 
 public class ApkSignerService {
 	// 流将自动关闭
@@ -123,12 +124,13 @@ public class ApkSignerService {
 	}
 
 	private static void signerApk(int minSdkVersion, PrivateKey privateKey, X509Certificate certificate, File unsignedApk, File signedApk) throws Throwable {
-		
+		// 以后引入 ZeroAicyBuildGradle 来设置 v1 v2 v3的签名开关
+		// 可以减少 参数数量的变动 
 		SharedPreferences defaultSp = ZeroAicySetting.getDefaultSp();
-		boolean isApksignv1 = defaultSp.getBoolean("apksign_v1", true);
-		boolean isApksignv2 = defaultSp.getBoolean("apksign_v2", true);
+		boolean isApksignv1 = defaultSp.getBoolean("apksign_v1", minSdkVersion < Build.VERSION_CODES.N);
+		boolean isApksignv2 = defaultSp.getBoolean("apksign_v2", minSdkVersion < Build.VERSION_CODES.P);
 		boolean isApksignv3 = defaultSp.getBoolean("apksign_v3", true);
-
+		
 		ApkSigner.SignerConfig signerConfig = new ApkSigner.SignerConfig.Builder("ANDROID",  privateKey, Collections.singletonList(certificate))
 			.build();
 		ApkSigner.Builder builder = new ApkSigner.Builder(Collections.singletonList(signerConfig));
