@@ -93,7 +93,7 @@ public class Translate implements MenuCommand {
         lx.setOnClickListener(v -> {
             AlertDialog dialog =
                     new AlertDialog.Builder(context)
-                            .setTitle("选择翻译引擎")
+                            .setTitle("选择翻译语言")
                             .setItems(items2, (dia, which) -> {
                                 lxa = which;
                                 lx.setText(items2[lxa]);
