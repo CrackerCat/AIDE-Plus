@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.aide.common.AppLog;
 import com.aide.ui.ServiceContainer;
+import com.aide.ui.command.MenuCommand;
 import com.aide.ui.command.MenuItemCommand;
 import com.aide.ui.rewrite.R;
 
@@ -30,7 +31,7 @@ import cn.iyutong.translator.YandexWebTranslator;
 import io.github.zeroaicy.aide.preference.ZeroAicySetting;
 import io.github.zeroaicy.aide.ui.services.ThreadPoolService;
 
-public class Translate implements MenuItemCommand {
+public class Translate implements MenuCommand {
 
     private static final String TAG = "翻译";
 
@@ -41,7 +42,7 @@ public class Translate implements MenuItemCommand {
 
     @Override
     public boolean isEnabled() {
-        return !TextUtils.isEmpty(YAIDEEditor.getText().trim());
+        return true;
     }
 
     private int yqa = 0;
@@ -165,8 +166,13 @@ public class Translate implements MenuItemCommand {
             ThreadPoolService.postOfUi(() -> fy.setText(result));
         } catch (Throwable e) {
             AppLog.e(TAG,e);
-            ThreadPoolService.postOfUi(() -> fy.setText("翻译失败:" + e.toString()));
+            ThreadPoolService.postOfUi(() -> fy.setText("选择的文字太多会报错哦。\n尝试换个一个翻译引擎吧！\nBing翻译最多1000字符\n谷歌翻译最多5000字符\n" + e.toString()));
         }
+    }
+
+    @Override
+    public boolean isVisible(boolean b) {
+        return !TextUtils.isEmpty(YAIDEEditor.getText().trim());
     }
 }
 

@@ -54,14 +54,13 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp">
+        android:layout_marginStart="30dp"
+        android:layout_marginEnd="30dp">
 
             <TextView
                 android:id="@id/yt_translate_tc_fy"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center"
                 android:text="翻译中..."
                 android:textIsSelectable="true"
                 android:textSize="16dp" />
