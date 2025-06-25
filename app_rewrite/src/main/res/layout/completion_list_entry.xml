@@ -23,13 +23,13 @@
             android:text=" "
             style="@style/BrowserLabelSmall" />
         <TextView
-            android:id="@id/completionEntryNamefy"
+            android:id="@+id/completionEntryNamefy"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=" "
             style="@style/BrowserLabelSmallGray" />
         <TextView
-            android:id="@id/completionEntryNamebf"
+            android:id="@+id/completionEntryNamebf"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=" "

@@ -134,17 +134,36 @@ public class Translate implements MenuCommand {
     }
 
     private void transl() {
-        String from = switch (lxa) {
-            case 0, 1 -> "auto";
-            case 2 -> "en";
-            case 3 -> "zh";
-            default -> null;
-        };
-        String to = switch (lxa) {
-            case 0, 2 -> "zh";
-            case 1, 3 -> "en";
-            default -> null;
-        };
+        String from;
+        switch (lxa) {
+            case 0:
+            case 1:
+                from = "auto";
+                break;
+            case 2:
+                from = "en";
+                break;
+            case 3:
+                from = "zh";
+                break;
+            default:
+                from = null;
+                break;
+        }
+        String to;
+        switch (lxa) {
+            case 0:
+            case 2:
+                to = "zh";
+                break;
+            case 1:
+            case 3:
+                to = "en";
+                break;
+            default:
+                to = null;
+                break;
+        }
         if (from == null) {
             ThreadPoolService.postOfUi(() -> fy.setText("翻译语言设置错误"));
             return;
@@ -156,13 +175,24 @@ public class Translate implements MenuCommand {
                 AppLog.d(TAG,wz);
                 wz = EnglishWordTokenizer.joinWithSpace(EnglishWordTokenizer.smartTokenizeEnhanced(wz));
             }
-            String result = switch (yqa) {
-                case 0 -> BingWebTranslator.translate(wz, from, to);
-                case 1 -> GoogleCNTranslator.translate(Translator.ipLoader, wz, from, to);
-                case 2 -> YandexWebTranslator.translate(wz, from, to);
-                case 3 -> BaiduWebTranslator.translate(wz, from, to);
-                default -> "错误";
-            };
+            String result;
+            switch (yqa) {
+                case 0:
+                    result = BingWebTranslator.translate(wz, from, to);
+                    break;
+                case 1:
+                    result = GoogleCNTranslator.translate(Translator.ipLoader, wz, from, to);
+                    break;
+                case 2:
+                    result = YandexWebTranslator.translate(wz, from, to);
+                    break;
+                case 3:
+                    result = BaiduWebTranslator.translate(wz, from, to);
+                    break;
+                default:
+                    result = "错误";
+                    break;
+            }
             ThreadPoolService.postOfUi(() -> fy.setText(result));
         } catch (Throwable e) {
             AppLog.e(TAG,e);

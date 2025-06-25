@@ -29,7 +29,7 @@
         android:showAsAction="always" />
     <item
         android:icon="?ic_yt_translate"
-        android:id="@id/yttranslate"
+        android:id="@+id/yttranslate"
         android:title="翻译"
         android:showAsAction="always" />
 	<item

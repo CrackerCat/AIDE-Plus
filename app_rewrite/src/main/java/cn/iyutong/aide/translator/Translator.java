@@ -143,13 +143,24 @@ public class Translator {
 			if (ZeroAicySetting.isEnableTranslatesfg()) {
 				wz = EnglishWordTokenizer.joinWithSpace(EnglishWordTokenizer.smartTokenizeEnhanced(text));
 			}
-			String result = switch ((b + a) % 4) {
-                case 0 -> BingWebTranslator.translate(wz, "auto", "zh-CN");
-                case 1 -> GoogleCNTranslator.translate(ipLoader, wz, "auto", "zh");
-                case 2 -> YandexWebTranslator.translate(wz, "auto", "zh");
-                case 3 -> BaiduWebTranslator.translate(wz, "auto", "zh");
-                default -> "错误";
-            };
+			String result;
+			switch ((b + a) % 4) {
+				case 0:
+					result = BingWebTranslator.translate(wz, "auto", "zh-CN");
+					break;
+				case 1:
+					result = GoogleCNTranslator.translate(ipLoader, wz, "auto", "zh");
+					break;
+				case 2:
+					result = YandexWebTranslator.translate(wz, "auto", "zh");
+					break;
+				case 3:
+					result = BaiduWebTranslator.translate(wz, "auto", "zh");
+					break;
+				default:
+					result = "错误";
+					break;
+			}
 			kv.encode(text, result);
 		} catch (Throwable e) {
 			if (!ZeroAicySetting.isEnableTranslateyq()) {

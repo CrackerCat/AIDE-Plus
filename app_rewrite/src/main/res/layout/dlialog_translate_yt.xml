@@ -15,7 +15,7 @@
         android:orientation="horizontal">
 
         <TextView
-            android:id="@id/yt_translate_tc_yq"
+            android:id="@+id/yt_translate_tc_yq"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="翻译引擎"
@@ -29,7 +29,7 @@
         android:layout_height="match_parent">
 
         <TextView
-            android:id="@id/yt_translate_tc_fy_lx"
+            android:id="@+id/yt_translate_tc_fy_lx"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="自动->中文"
@@ -58,7 +58,7 @@
         android:layout_marginEnd="30dp">
 
             <TextView
-                android:id="@id/yt_translate_tc_fy"
+                android:id="@+id/yt_translate_tc_fy"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="翻译中..."

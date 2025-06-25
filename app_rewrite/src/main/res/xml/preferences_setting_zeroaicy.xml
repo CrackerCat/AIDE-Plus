@@ -249,6 +249,39 @@
 
         </PreferenceCategory>
 
+        <PreferenceCategory
+            android:title="文本翻译">
+
+            <ListPreference
+                android:key="iyutong_translate_tc_yq"
+                android:title="选择默认翻译引擎"
+                android:summary="从列表中选择默认翻译引擎"
+                android:entries="@array/iyutong_translate_yq_xs"
+                android:entryValues="@array/iyutong_translate_yq_z"
+                android:defaultValue="0" />
+
+            <ListPreference
+                android:key="iyutong_translate_tc_lx"
+                android:title="选择默认翻译语言"
+                android:summary="从列表中选择默认翻译语言"
+                android:entries="@array/iyutong_translate_yq_lx"
+                android:entryValues="@array/iyutong_translate_yq_z"
+                android:defaultValue="0" />
+
+            <SwitchPreference
+                android:defaultValue="true"
+                android:key="iyutong_translate_tc_gs_enable"
+                android:summary="保存在弹窗中选择的翻译语言与翻译引擎"
+                android:title="记住设置" />
+
+            <SwitchPreference
+                android:defaultValue="true"
+                android:key="iyutong_translate_tc_fg_enable"
+                android:summary="将驼峰式和下划线分隔后翻译，以提高翻译准确率，只有在选择没有空格与换行的文字时生效"
+                android:title="驼峰式和下划线分隔" />
+
+        </PreferenceCategory>
+
     </PreferenceScreen>
 
     <!-- 工程设置 -->
