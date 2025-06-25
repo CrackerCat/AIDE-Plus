@@ -148,6 +148,8 @@
         <item name="android:colorPrimaryDark">@color/primary_dark_material</item>
         <item name="android:colorAccent">@color/accent_material</item>
         <item name="android:colorEdgeEffect">?android:colorAccent</item>
+		<item name="ic_yt_refresh">@drawable/ic_yt_refresh_d</item>
+        
     </style>
 
 
@@ -162,6 +164,8 @@
         <item name="android:colorPrimaryDark">@color/primary_dark_material_light</item>
         <item name="android:colorAccent">@color/accent_material_light</item>
         <item name="android:colorEdgeEffect">?android:colorAccent</item>
+		<item name="ic_yt_refresh">@drawable/ic_yt_refresh_l</item>
+        
     </style>
 
 	<style name="Animation.Material.Dialog" parent="@android:style/Animation.Dialog">
@@ -180,6 +184,7 @@
         <item name="android:colorPrimaryDark">@color/primary_dark_material</item>
         <item name="android:colorAccent">@color/accent_material</item>
         <item name="android:colorEdgeEffect">?android:colorAccent</item>
+		<item name="ic_yt_refresh">@drawable/ic_yt_refresh_d</item>
     </style>
 
     <style name="AlertDialogThemeLight" parent="@style/Base.Theme.Material.Light.Dialog.Alert" />
@@ -192,6 +197,8 @@
         <item name="android:colorPrimaryDark">@color/primary_dark_material_light</item>
         <item name="android:colorAccent">@color/accent_material_light</item>
         <item name="android:colorEdgeEffect">?android:colorAccent</item>
+		<item name="ic_yt_refresh">@drawable/ic_yt_refresh_l</item>
+	
     </style>
 
 	<!--tab样式-->
