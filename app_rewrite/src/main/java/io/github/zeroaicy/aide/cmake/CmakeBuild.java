@@ -272,7 +272,8 @@ public class CmakeBuild {
 				if (ndkVersions == null || ndkVersions.length == 0) {
 					cmakeBuild.addErrorInfo("未发现ndk可用版本: " + ndkDir.getAbsolutePath());
 				} else {
-					//警告
+					// 排序
+					Arrays.sort(ndkVersions);
 					setNdkVersion(ndkVersions[ndkVersions.length - 1]);
 				}
 			}
