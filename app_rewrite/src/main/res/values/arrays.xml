@@ -7,6 +7,13 @@
         <item>百度翻译</item>
     </string-array>
 
+    <string-array name="iyutong_translate_yq_lx">
+        <item>自动->中文</item>
+        <item>自动->英文</item>
+        <item>英文->中文</item>
+        <item>中文->英文</item>
+    </string-array>
+
     <string-array name="iyutong_translate_yq_z">
         <item>0</item>
         <item>1</item>

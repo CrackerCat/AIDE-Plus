@@ -4,4 +4,16 @@
         type="id" />
     <item name="completionEntryNamebf"
         type="id" />
+    <item name="yttranslate"
+        type="id" />
+    <item name="yt_translate_tc_fy"
+        type="id" />
+    <item name="yt_translate_tc_sx"
+        type="id" />
+    <item name="yt_translate_tc_zh"
+        type="id" />
+    <item name="yt_translate_tc_fy_lx"
+        type="id" />
+    <item name="yt_translate_tc_yq"
+        type="id" />
 </resources>

@@ -1,18 +1,16 @@
 package io.github.zeroaicy.aide.preference;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 
 import com.aide.ui.rewrite.R;
-import com.tencent.mmkv.MMKV;
 
 import android.preference.Preference;
 import android.content.Intent;
 import android.app.Activity;
 
-import cn.iyutong.aide.Translator;
+import cn.iyutong.aide.translator.Translator;
 import io.github.zeroaicy.aide.highlight.HighlightActivity;
 
 import android.net.Uri;

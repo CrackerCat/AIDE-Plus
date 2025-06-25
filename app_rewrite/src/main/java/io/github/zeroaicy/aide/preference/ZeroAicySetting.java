@@ -43,6 +43,14 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 		return defaultSp.getBoolean(key, defValue);
 	}
 
+	public static void setDefaultSpString(String key, @Nullable String value) {
+		defaultSp.edit().putString(key, value).apply();
+	}
+
+	public static void setDefaultSpBoolean(String key, @Nullable boolean value) {
+		defaultSp.edit().putBoolean(key, value).apply();
+	}
+
 	private static SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener;
 	private static boolean isWatch;
 	public static void init(Context context) {
@@ -378,6 +386,30 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 	//自动切换
 	public static boolean isEnableTranslateyq() {
 		return getDefaultSpBoolean("iyutong_translate_yq_enable", true);
+	}
+
+
+	//选择翻译引擎
+	public static String getTranslatetcyq() {
+		return getDefaultSpString("iyutong_translate_tc_yq", "0");
+	}
+	public static void setTranslatetcyq(String value) {
+		setDefaultSpString("iyutong_translate_tc_yq", value);
+	}
+	//翻译语言
+	public static String getTranslatetclx() {
+		return getDefaultSpString("iyutong_translate_tc_lx", "0");
+	}
+	public static void setTranslatetclx(String value) {
+		setDefaultSpString("iyutong_translate_tc_lx", value);
+	}
+	//记住选择
+	public static boolean isTranslatetcEnable() {
+		return getDefaultSpBoolean("iyutong_translate_tc_gs_enable", true);
+	}
+	//驼峰
+	public static boolean isEnableTranslatctf() {
+		return getDefaultSpBoolean("iyutong_translate_tc_fg_enable", true);
 	}
 
 	/**

@@ -14,13 +14,12 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.aide.common.AIDEHelpActivityStarter;
-import com.aide.common.AppLog;
 import com.aide.engine.SourceEntity;
 import com.aide.ui.AIDEEditor;
 import com.aide.ui.ServiceContainer;
 import com.aide.ui.rewrite.R;
 
-import cn.iyutong.aide.Translator;
+import cn.iyutong.aide.translator.Translator;
 import io.github.zeroaicy.aide.preference.ZeroAicySetting;
 import io.github.zeroaicy.aide.ui.services.ThreadPoolService;
 import java.util.ArrayList;

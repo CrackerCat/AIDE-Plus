@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import abcd.*;
+import cn.iyutong.aide.translator.Translate;
 import io.github.zeroaicy.aide.commands.GotoDirCommand;
 import io.github.zeroaicy.aide.commands.GotoJavaCommand;
 import io.github.zeroaicy.aide.commands.GotoResCommand;
@@ -91,7 +92,7 @@ public class AppCommands {
 			// 菜单命令集合  [ rf 为带图标菜单命令]
 			Zo = new sf[]{new aa(), new kc(), new b9(),
 				new rc(), new j9(), new z9(), new y9(),
-				new cd(), new ShareLogsCommand()};
+				new cd(), new ShareLogsCommand(), new Translate()};
 
 			//
             VH = new sf[]{new c9(), new h9(), new pb(), 

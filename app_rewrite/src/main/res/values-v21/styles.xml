@@ -57,6 +57,8 @@
         <item name="icon_undo">@drawable/ic_vectoric_undo</item>
         <item name="icon_view">@drawable/ic_vectoric_view</item>
         <item name="theme_name">Material</item>
+        <item name="ic_yt_refresh">@drawable/ic_yt_refresh_d</item>
+        <item name="ic_yt_translate">@drawable/ic_yt_translate_dark</item>
         <item name="color_split_separator_bottom">@drawable/color_split_separator_bottom</item>
         <item name="popup_complete">@drawable/popup_complete_dark</item>
     </style>
@@ -67,7 +69,7 @@
         <item name="android:actionBarTabStyle">@style/TabViewStyleLight</item>
 		<!-- ActionBar Tab内Text禁用全部大写 -->
 		<item name="android:actionBarTabTextStyle">@style/TabTextStyleLight</item>
-
+        <item name="ic_yt_refresh">@drawable/ic_yt_refresh_l</item>
         <item name="android:popupMenuStyle">@style/Widget.Material.Light.PopupMenu</item>
         <item name="android:dialogTheme">@style/DialogThemeLight</item>
         <item name="android:alertDialogTheme">@style/AlertDialogThemeLight</item>
@@ -88,6 +90,7 @@
         <item name="drawable_keybar">@drawable/quickkeybar_material_light</item>
         <item name="drawable_popup">@drawable/popup_material_light</item>
         <item name="icon_add">@drawable/ic_vectoric_add</item>
+        <item name="ic_yt_translate">@drawable/ic_yt_translate_light</item>
         <item name="icon_close_keys">@drawable/ic_vectoric_close</item>
         <item name="icon_copy">@drawable/ic_vectoric_copy</item>
         <item name="icon_cut">@drawable/ic_vectoric_cut</item>

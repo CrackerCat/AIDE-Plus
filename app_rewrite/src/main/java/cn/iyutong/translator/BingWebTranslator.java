@@ -21,6 +21,7 @@ public class BingWebTranslator {
     static {
         LANG_MAP.put("auto", "auto-detect");
         LANG_MAP.put("zh-CN", "zh-Hans");
+        LANG_MAP.put("zh", "zh-Hans");
         LANG_MAP.put("zh-TW", "zh-Hant");
         LANG_MAP.put("iw", "he");
         LANG_MAP.put("hmn", "mww");

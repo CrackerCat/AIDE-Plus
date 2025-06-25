@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="ActivityActionbarThemeDark" parent="@android:style/Theme.Holo">
+        <item name="ic_yt_translate">@drawable/ic_yt_translate_dark</item>
+        <item name="ic_yt_refresh">@drawable/ic_yt_refresh_d</item>
+    </style>
+    <style name="ActivityActionbarThemeLight" parent="@android:style/Theme.Holo.Light">
+        <item name="ic_yt_translate">@drawable/ic_yt_translate_light</item>
+        <item name="ic_yt_refresh">@drawable/ic_yt_refresh_l</item>
+    </style>
+</resources>

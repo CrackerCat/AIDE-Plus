@@ -10,30 +10,21 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.PopupMenu;
-import android.widget.ScrollView;
-import android.widget.TextView;
 
 import com.aide.engine.SourceEntity;
 import com.aide.ui.AIDEEditorCompletion;
 import com.aide.ui.views.CompletionListView;
-import com.blankj.utilcode.util.LogUtils;
-import com.blankj.utilcode.util.ReflectUtils;
 
 import androidx.annotation.Keep;
 
 import java.util.Objects;
 
-import cn.iyutong.aide.Translator;
+import cn.iyutong.aide.translator.Translator;
 import io.github.zeroaicy.aide.preference.ZeroAicySetting;
 
 // Lcom/aide/ui/AIDEEditorCompletion$d继承此类

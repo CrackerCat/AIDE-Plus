@@ -1,4 +1,4 @@
-package cn.iyutong.aide;
+package cn.iyutong.aide.translator;
 
 import cn.iyutong.text.EnglishWordTokenizer;
 import cn.iyutong.translator.BaiduWebTranslator;
@@ -37,7 +37,7 @@ public class Translator {
 	private static final String TranslatorFail = "@Iyutong翻译失败@IyutongAuto";
 	private static final MMKV kv = MMKV.mmkvWithID("Ytranslator", MMKV.SINGLE_PROCESS_MODE);
 
-	private static final IPLoader ipLoader = new IPLoader();
+	public static final IPLoader ipLoader = new IPLoader();
 
 	//获取翻译内容
 	public static String text(String text) {
@@ -139,12 +139,11 @@ public class Translator {
 	private static void transl(String text, int a) {
 		try {
 			int b = Integer.parseInt(ZeroAicySetting.getTranslateyq());
-			String result;
 			String wz = text;
 			if (ZeroAicySetting.isEnableTranslatesfg()) {
 				wz = EnglishWordTokenizer.joinWithSpace(EnglishWordTokenizer.smartTokenizeEnhanced(text));
 			}
-            result = switch ((b + a) % 4) {
+			String result = switch ((b + a) % 4) {
                 case 0 -> BingWebTranslator.translate(wz, "auto", "zh-CN");
                 case 1 -> GoogleCNTranslator.translate(ipLoader, wz, "auto", "zh");
                 case 2 -> YandexWebTranslator.translate(wz, "auto", "zh");
