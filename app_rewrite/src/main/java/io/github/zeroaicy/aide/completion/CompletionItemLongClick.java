@@ -32,11 +32,11 @@ import io.github.zeroaicy.aide.preference.ZeroAicySetting;
 @Keep
 public class CompletionItemLongClick implements AdapterView.OnItemLongClickListener {
 
-    private CompletionListView completionListViewa;
+    private CompletionListView completionListView;
 
     @Keep
     public CompletionItemLongClick(AIDEEditorCompletion aideEditorCompletion, CompletionListView completionListView) {
-        completionListViewa = completionListView;
+        this.completionListView = completionListView;
     }
 
     @Override
@@ -46,11 +46,12 @@ public class CompletionItemLongClick implements AdapterView.OnItemLongClickListe
         Menu menu = popupMenu.getMenu();
 
         if (ZeroAicySetting.isEnableTranslate()) {
-            Translator.clongclick(menu, completionListViewa,view);
+            Translator.clongclick(menu, completionListView,view);
         }
 
-        Object item = completionListViewa.getItemAtPosition(position);
-        if (item instanceof SourceEntity sourceEntity) {
+        Object item = completionListView.getItemAtPosition(position);
+        if (item instanceof SourceEntity) {
+			SourceEntity sourceEntity = (SourceEntity) item;
             if (sourceEntity.Ws() != null) {
                 menu.add("查看文档")
                         .setOnMenuItemClickListener(
