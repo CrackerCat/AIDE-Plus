@@ -95,9 +95,12 @@ public class EngineSolutionProject implements Parcelable {
 		// 项目名 此EngineSolutionProject唯一id
 		// 项目命名空间
 		this.projectName = projectName;
-		
 		// rootNamespace
         this.mb = projectPath;
+		if( this.mb == null ){
+			com.aide.common.AppLog.d("EngineSolution.Hw 异常测试", projectName);
+			com.aide.common.AppLog.w("EngineSolution.Hw 异常测试", new Throwable());
+		}
 		
 		// configuration
         this.jw = configuration;
@@ -206,6 +209,11 @@ public class EngineSolutionProject implements Parcelable {
     public EngineSolutionProject(Parcel dest) {
 		this.projectName = dest.readString();
 		this.mb = dest.readString();
+		if( this.mb == null ){
+			com.aide.common.AppLog.d("EngineSolution.Hw 异常测试", projectName);
+			com.aide.common.AppLog.w("EngineSolution.Hw 异常测试", new Throwable());
+		}
+		
 		this.jw = dest.readString();
 		this.k2 = dest.readInt() != 0;
 		this.zh = dest.readString();
