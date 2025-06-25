@@ -145,7 +145,7 @@ public class Translate implements MenuItemCommand {
             default -> null;
         };
         if (from == null) {
-            fy.setText("翻译语言设置错误");
+            ThreadPoolService.postOfUi(() -> fy.setText("翻译语言设置错误"));
             return;
         }
         try {
@@ -162,10 +162,10 @@ public class Translate implements MenuItemCommand {
                 case 3 -> BaiduWebTranslator.translate(wz, from, to);
                 default -> "错误";
             };
-            fy.setText(result);
+            ThreadPoolService.postOfUi(() -> fy.setText(result));
         } catch (Throwable e) {
             AppLog.e(TAG,e);
-            fy.setText("翻译失败:" + e.toString());
+            ThreadPoolService.postOfUi(() -> fy.setText("翻译失败:" + e.toString()));
         }
     }
 }
