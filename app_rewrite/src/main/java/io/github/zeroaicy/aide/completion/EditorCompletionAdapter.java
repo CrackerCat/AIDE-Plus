@@ -44,6 +44,17 @@ public class EditorCompletionAdapter extends ArrayAdapter<SourceEntity> {
 		initAsync();
     }
 
+	public static void setEditCurInput(ArrayAdapter<?> arrayAdapter, String editCurInput) {
+		if( arrayAdapter instanceof EditorCompletionAdapter){
+			((EditorCompletionAdapter)arrayAdapter).setEditCurInput(editCurInput);
+		}
+	}
+	
+	private String editCurInput;
+	private void setEditCurInput(String editCurInput) {
+		this.editCurInput = editCurInput;
+	}
+
     private void DW(TextView textView, int start, int end, int color) {
 		((Spannable) textView.getText()).setSpan(new ForegroundColorSpan(color), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
     }

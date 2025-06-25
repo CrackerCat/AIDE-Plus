@@ -679,9 +679,12 @@ public class ZeroAicyExtensionInterface {
 	 * 必须返回 ArrayAdapter
 	 */
 	@Keep
-	public static ArrayAdapter<SourceEntity> getEditorCompletionAdapter(AIDEEditor aideEditor,
+	public static ArrayAdapter<?> getEditorCompletionAdapter(AIDEEditor aideEditor,
 			List<SourceEntity> sourceEntitys) {
 		return new EditorCompletionAdapter(aideEditor, sourceEntitys);
+	}
+	public static void setEditCurInput(ArrayAdapter<?> arrayAdapter, String editCurInput){
+		EditorCompletionAdapter.setEditCurInput(arrayAdapter, editCurInput);
 	}
 
 	/**
