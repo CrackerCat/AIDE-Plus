@@ -13,35 +13,43 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import cn.iyutong.aide.translator.Translator;
 import com.aide.common.AIDEHelpActivityStarter;
+import com.aide.common.AppLog;
 import com.aide.engine.SourceEntity;
 import com.aide.ui.AIDEEditor;
+import com.aide.ui.MainActivity;
 import com.aide.ui.ServiceContainer;
+import com.aide.ui.activities.a;
 import com.aide.ui.rewrite.R;
-
-import cn.iyutong.aide.translator.Translator;
 import io.github.zeroaicy.aide.preference.ZeroAicySetting;
 import io.github.zeroaicy.aide.ui.services.ThreadPoolService;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class EditorCompletionAdapter extends ArrayAdapter<SourceEntity> {
-
-	private Map<String, ApiVersionInfo> infoMap = new ConcurrentHashMap<>();
+public class EditorCompletionAdapter extends ArrayAdapter<Object> {
+	private static final int maxinitApiVersionSize = 0x1000;
+	private static Map<String, ApiVersionInfo> infoMap = new ConcurrentHashMap<>(maxinitApiVersionSize * 2);
 
 	private AIDEEditor aideEditor;
 
 	private final List<SourceEntity> sourceEntitys;
+	private final List<QuickCode> quickCodes = new ArrayList<>();
+
     public EditorCompletionAdapter(AIDEEditor aideEditor, List<SourceEntity> sourceEntitys) {
-        super(aideEditor.getContext(), R.layout.completion_list_entry, sourceEntitys);
+        super(aideEditor.getContext(), R.layout.completion_list_entry, new ArrayList<>());
 		this.aideEditor = aideEditor;
-		this.sourceEntitys = sourceEntitys;
 
 		ApiVersionCompletion.preLoad(getContext());
-		initAsync();
+
+		this.sourceEntitys = sourceEntitys;
+
+		initApiVersionInfoAsync(this.sourceEntitys);
+
     }
 
 	public static void setEditCurInput(ArrayAdapter<?> arrayAdapter, String editCurInput) {
@@ -49,10 +57,21 @@ public class EditorCompletionAdapter extends ArrayAdapter<SourceEntity> {
 			((EditorCompletionAdapter)arrayAdapter).setEditCurInput(editCurInput);
 		}
 	}
-	
-	private String editCurInput;
+
 	private void setEditCurInput(String editCurInput) {
-		this.editCurInput = editCurInput;
+		if(!this.quickCodes.isEmpty()){
+			this.quickCodes.clear();
+		}
+		// 忽略大小写
+		editCurInput = editCurInput.toLowerCase();
+		// 重新匹配 QuickCode
+		for(QuickCode quickCode : QuickCode.getAll()){
+			String name = quickCode.getNameLowerCase();
+			if( name.startsWith(editCurInput) ){
+				this.quickCodes.add(quickCode);
+			}
+		}
+		notifyDataSetChanged();
 	}
 
     private void DW(TextView textView, int start, int end, int color) {
@@ -89,38 +108,58 @@ public class EditorCompletionAdapter extends ArrayAdapter<SourceEntity> {
 	}
 
 
-	private int clearCount = 0;
 	@Override
 	public void clear() {
-		super.clear();
-		clearCount++;
-		if (clearCount < 0) {
-			// 防止溢出
-			clearCount = 0;
-		}
-		if (clearCount % 2 == 0 
-			&& this.infoMap.size() > 0x2000) {
-			// 减少缓存clear次数
-			this.infoMap.clear();
-		}
-
+		// 清除
+		this.quickCodes.clear();
+		this.sourceEntitys.clear();
 	}
 
+	// 忽略没有被调用
 	@Override
-	public void addAll(Collection<? extends SourceEntity> collection) {
-		super.addAll(collection);
+	public void add(Object object) {
+		if( object instanceof SourceEntity){
+			this.sourceEntitys.add((SourceEntity)object);
+		}
+	}
+
+
+	@Override
+	public void addAll(Collection<? extends Object> collection) {
+		this.sourceEntitys.addAll((List<SourceEntity>)collection);
+		notifyDataSetChanged();
 	}
 
 
 	// 从 add -> addAll 减少 notifyDataSetChanged调用次数
 	@Override
 	public void notifyDataSetChanged() {
-		// AppLog.println_e("notifyDataSetChanged()");
-		List<SourceEntity> sourceEntitys = this.sourceEntitys;
-		if (!sourceEntitys.isEmpty()) {
-			initAsync();
-		}
+		initApiVersionInfoAsync(this.sourceEntitys);
 		super.notifyDataSetChanged();
+	}
+
+	@Override
+	public int getCount() {
+		return this.quickCodes.size() + this.sourceEntitys.size();
+	}
+	@Override
+	public Object getItem(int position) {
+		int quickCodesSize = this.quickCodes.size();
+		if( position < quickCodesSize){
+			return this.quickCodes.get(position);
+		}
+		return this.sourceEntitys.get(position - quickCodesSize);
+	}
+
+	private static final int QuickCodeType = -1;
+	private static final int SourceEntityType = 1;
+	@Override
+	public int getItemViewType(int position) {
+		int quickCodesSize = this.quickCodes.size();
+		if( position < quickCodesSize){
+			return QuickCodeType;
+		}
+		return SourceEntityType;
 	}
 
 	@Override
@@ -138,131 +177,162 @@ public class EditorCompletionAdapter extends ArrayAdapter<SourceEntity> {
 			viewholder = (ViewHolder) entryView.getTag();
 		}
 
-		SourceEntity sourceEntity = getItem(position);
-
-		if (sourceEntity == null) {
+		Object item = getItem(position);
+		if (item == null) {
 			viewholder.completionEntryName.setText("No matches");
 			viewholder.completionEntryNamefy.setVisibility(View.GONE);
 			viewholder.completionEntryImage.setImageResource(R.drawable.browser_empty);
 			viewholder.completionHelpButton.setVisibility(View.GONE);
 			return entryView;
-		} else {
-			int sourceEntityType = sourceEntityTypes[sourceEntity.j3().ordinal()];
-
-			TextView entryNameView = viewholder.completionEntryName;
-
-			// entityName
-			String entityName = sourceEntity.Mr();
-
-			viewholder.completionEntryNamebf.setText(entityName);
-
-			switch (sourceEntityType) {
-				case MethodType: 
-				case FieldType: 
-				case VariableType: {
-						// : + typeName
-						String typeNameSuffix = sourceEntity.a8();
-						if (typeNameSuffix != null) {
-							String text = entityName + typeNameSuffix;
-							entryNameView.setText(text, TextView.BufferType.SPANNABLE);
-							DW(entryNameView, entityName.length(), text.length(), aideEditor.getResources().getColor(R.color.browser_label_gray));
-						} else {
-							entryNameView.setText(entityName);
-						}
-					}
-					break;
-				case ClassType: {
-						//
-						if (sourceEntity.gW()) {
-							// sourceEntity.J8() 包名
-							String text = entityName + " - " + sourceEntity.J8();
-							entryNameView.setText(text, TextView.BufferType.SPANNABLE);
-							DW(entryNameView, entityName.length(), text.length(), aideEditor.getResources().getColor(R.color.browser_label_gray));
-						} else {
-							entryNameView.setText(entityName);
-						}
-					}
-					break;
-				case KeywordType: {
-						entryNameView.setText(entityName, TextView.BufferType.SPANNABLE);
-						j6(entryNameView, 0, entityName.length());
-					}
-					break;
-				default:
-					entryNameView.setText(entityName);
-					break;
-			}
-
-			if (ZeroAicySetting.isEnableTranslate()){
-				String text = Translator.text(entityName);
-				if (TextUtils.isEmpty(text)){
-					viewholder.completionEntryNamefy.setVisibility(View.GONE);
-				} else {
-					viewholder.completionEntryNamefy.setText(text);
-					viewholder.completionEntryNamefy.setVisibility(View.VISIBLE);
-				}
-			}
-
-			// 追加 api 版本信息
-			final String docUrl = sourceEntity.Ws();
-			ApiVersionInfo info = docUrl == null ? ApiVersionInfo.Empty : infoMap.get(docUrl);
-			setTo(entryNameView, info);
-
-
-			ImageView completionEntryImage = viewholder.completionEntryImage;
-			switch (sourceEntityType) {
-				case MethodType: {
-						if (sourceEntity.er()) {
-							completionEntryImage.setImageResource(R.drawable.box_light_red);
-						} else {
-							completionEntryImage.setImageResource(R.drawable.box_red);
-						}
-					}
-					break;
-				case FieldType:
-					if (sourceEntity.er()) {
-						completionEntryImage.setImageResource(R.drawable.box_light_blue);
-					} else {
-						completionEntryImage.setImageResource(R.drawable.box_blue);
-					}
-					break;
-				case VariableType:
-					completionEntryImage.setImageResource(R.drawable.box_blue);
-					break;
-				case ClassType:
-					if (sourceEntity.er()) {
-						completionEntryImage.setImageResource(R.drawable.objects_light);
-					} else {
-						completionEntryImage.setImageResource(R.drawable.objects);
-					}
-					break;
-				case PackageType:
-					completionEntryImage.setImageResource(R.drawable.pakage);					
-					break;
-				default:
-					completionEntryImage.setImageResource(R.drawable.browser_empty);
-					break;
-			}
-
-			View completionHelpButton = viewholder.completionHelpButton;
-
-			completionHelpButton.setVisibility(docUrl != null ? View.VISIBLE : View.GONE);
-			if (docUrl != null) {
-				completionHelpButton.setOnClickListener(new View.OnClickListener(){
-						@Override
-						public void onClick(View v) {
-							ServiceContainer.getMainActivity().getAIDEEditorPager().Eq();
-							AIDEHelpActivityStarter.DW(ServiceContainer.getMainActivity(), docUrl, com.aide.ui.activities.a.v5().toString());
-						}
-					});
-				// new a(this, Ws));
-			}
+		}
+		int itemViewType = getItemViewType(position);
+		if( itemViewType == QuickCodeType){
+			showQuickCode((QuickCode)item, viewholder);
+		}else if( itemViewType == SourceEntityType){			
+			showSourceEntity((SourceEntity)item, viewholder);
+		}else{
+			viewholder.completionEntryName.setText("No matches");
+			viewholder.completionEntryNamefy.setVisibility(View.GONE);
+			viewholder.completionEntryImage.setImageResource(R.drawable.browser_empty);
+			viewholder.completionHelpButton.setVisibility(View.GONE);
 		}
 		return entryView;
+
     }
 
-	private void initAsync() {
-		List<SourceEntity> sourceEntitys = this.sourceEntitys;
+	private void showQuickCode(QuickCode quickCode, EditorCompletionAdapter.ViewHolder viewholder) {
+		ImageView completionEntryImage = viewholder.completionEntryImage;
+		TextView entryNameView = viewholder.completionEntryName;
+
+
+		completionEntryImage.setImageResource(R.drawable.objects);
+		String name = quickCode.getName();
+
+		String text = name + " -\n" +quickCode.getCodeText();
+		entryNameView.setText(text, TextView.BufferType.SPANNABLE);
+		DW(entryNameView, name.length(), text.length(), getContext().getColor(R.color.browser_label_gray));
+
+		viewholder.completionHelpButton.setVisibility(View.GONE);
+		viewholder.completionEntryNamefy.setVisibility(View.GONE);
+
+	}
+
+	private void showSourceEntity(SourceEntity sourceEntity, ViewHolder viewholder) {
+
+		int sourceEntityType = sourceEntityTypes[sourceEntity.j3().ordinal()];
+
+		TextView entryNameView = viewholder.completionEntryName;
+
+		// entityName
+		String entityName = sourceEntity.Mr();
+
+		viewholder.completionEntryNamebf.setText(entityName);
+
+		switch (sourceEntityType) {
+			case MethodType: 
+			case FieldType: 
+			case VariableType: {
+					// : + typeName
+					String typeNameSuffix = sourceEntity.a8();
+					if (typeNameSuffix != null) {
+						String text = entityName + typeNameSuffix;
+						entryNameView.setText(text, TextView.BufferType.SPANNABLE);
+						DW(entryNameView, entityName.length(), text.length(), getContext().getColor(R.color.browser_label_gray));
+					} else {
+						entryNameView.setText(entityName);
+					}
+				}
+				break;
+			case ClassType: {
+					//
+					if (sourceEntity.gW()) {
+						// sourceEntity.J8() 包名
+						String text = entityName + " - " + sourceEntity.J8();
+						entryNameView.setText(text, TextView.BufferType.SPANNABLE);
+						DW(entryNameView, entityName.length(), text.length(), getContext().getColor(R.color.browser_label_gray));
+					} else {
+						entryNameView.setText(entityName);
+					}
+				}
+				break;
+			case KeywordType: {
+					entryNameView.setText(entityName, TextView.BufferType.SPANNABLE);
+					j6(entryNameView, 0, entityName.length());
+				}
+				break;
+			default:
+				entryNameView.setText(entityName);
+				break;
+		}
+
+		if (ZeroAicySetting.isEnableTranslate()){
+			String text = Translator.text(entityName);
+			if (TextUtils.isEmpty(text)){
+				viewholder.completionEntryNamefy.setVisibility(View.GONE);
+			} else {
+				viewholder.completionEntryNamefy.setText(text);
+				viewholder.completionEntryNamefy.setVisibility(View.VISIBLE);
+			}
+		}
+
+		// 追加 api 版本信息
+		final String docUrl = sourceEntity.Ws();
+		ApiVersionInfo info = docUrl == null ? ApiVersionInfo.Empty : infoMap.get(docUrl);
+		setTo(entryNameView, info);
+
+
+		ImageView completionEntryImage = viewholder.completionEntryImage;
+		switch (sourceEntityType) {
+			case MethodType: {
+					if (sourceEntity.er()) {
+						completionEntryImage.setImageResource(R.drawable.box_light_red);
+					} else {
+						completionEntryImage.setImageResource(R.drawable.box_red);
+					}
+				}
+				break;
+			case FieldType:
+				if (sourceEntity.er()) {
+					completionEntryImage.setImageResource(R.drawable.box_light_blue);
+				} else {
+					completionEntryImage.setImageResource(R.drawable.box_blue);
+				}
+				break;
+			case VariableType:
+				completionEntryImage.setImageResource(R.drawable.box_blue);
+				break;
+			case ClassType:
+				if (sourceEntity.er()) {
+					completionEntryImage.setImageResource(R.drawable.objects_light);
+				} else {
+					completionEntryImage.setImageResource(R.drawable.objects);
+				}
+				break;
+			case PackageType:
+				completionEntryImage.setImageResource(R.drawable.pakage);					
+				break;
+			default:
+				completionEntryImage.setImageResource(R.drawable.browser_empty);
+				break;
+		}
+
+		View completionHelpButton = viewholder.completionHelpButton;
+
+		completionHelpButton.setVisibility(docUrl != null ? View.VISIBLE : View.GONE);
+		if (docUrl != null) {
+			completionHelpButton.setOnClickListener(new View.OnClickListener(){
+					@Override
+					public void onClick(View v) {
+						MainActivity mainActivity = ServiceContainer.getMainActivity();
+						mainActivity.getAIDEEditorPager().Eq();
+						a v5 = com.aide.ui.activities.a.v5();
+						AIDEHelpActivityStarter.DW(mainActivity, docUrl, v5.toString());
+					}
+				});
+		}
+	}
+
+	private static void initApiVersionInfoAsync(List<SourceEntity> sourceEntitys) {
 		if (sourceEntitys.isEmpty()) {
 			return;
 		}
@@ -280,6 +350,25 @@ public class EditorCompletionAdapter extends ArrayAdapter<SourceEntity> {
 	private static void initApiVersionInfo(List<SourceEntity> sourceEntitys, Map<String, ApiVersionInfo> infoMap) {
 		if (infoMap == null) {
 			return;
+		}
+
+		// 防止 infoMap 一直增长
+		int infoMapSize = infoMap.size();
+		if( infoMapSize > maxinitApiVersionSize){
+			int needRemoveNumber = infoMapSize - maxinitApiVersionSize;
+			Iterator<Map.Entry<String, ApiVersionInfo>> iterator = infoMap.entrySet().iterator();
+			while (iterator.hasNext() && needRemoveNumber > 0) {
+				Map.Entry<String, ApiVersionInfo> entry = iterator.next();
+				ApiVersionInfo value = entry.getValue();
+				if (value == ApiVersionInfo.Empty || value.memberInfo == null) {
+					iterator.remove();
+					needRemoveNumber--;
+				}else if( needRemoveNumber % 8 == 0 ) {
+					// 带 memberInfo 构造起来耗时
+					iterator.remove();
+					needRemoveNumber--;
+				}
+			}
 		}
 		for (SourceEntity sourceEntity : sourceEntitys) {
 			if (sourceEntity == null) {
@@ -382,38 +471,30 @@ public class EditorCompletionAdapter extends ArrayAdapter<SourceEntity> {
 
 	static final int[] sourceEntityTypes;
 	static {
-		int[] iArr = new int[SourceEntity.b.values().length];
-		sourceEntityTypes = iArr;
-
+		sourceEntityTypes = new int[SourceEntity.b.values().length];
 		try {
-			iArr[SourceEntity.b.Method.ordinal()] = MethodType;
-		}
-		catch (NoSuchFieldError unused) {
+			sourceEntityTypes[SourceEntity.b.Method.ordinal()] = MethodType;
+		} catch (Throwable e) {
 		}
 		try {
 			sourceEntityTypes[SourceEntity.b.Field.ordinal()] = FieldType;
-		}
-		catch (NoSuchFieldError unused2) {
+		} catch (Throwable e) {
 		}
 		try {
 			sourceEntityTypes[SourceEntity.b.Variable.ordinal()] = VariableType;
-		}
-		catch (NoSuchFieldError unused3) {
+		} catch (Throwable e) {
 		}
 		try {
 			sourceEntityTypes[SourceEntity.b.Class.ordinal()] = ClassType;
-		}
-		catch (NoSuchFieldError unused4) {
+		} catch (Throwable e) {
 		}
 		try {
 			sourceEntityTypes[SourceEntity.b.Keyword.ordinal()] = KeywordType;
-		}
-		catch (NoSuchFieldError unused5) {
+		} catch (Throwable e) {
 		}
 		try {
 			sourceEntityTypes[SourceEntity.b.Package.ordinal()] = PackageType;
-		}
-		catch (NoSuchFieldError unused6) {
+		} catch (Throwable e) {
 		}
 	}
 
