@@ -10,10 +10,13 @@ import com.aide.common.KeyStroke;
 import com.aide.ui.AIDEEditor;
 import com.aide.ui.AIDEEditorExtend;
 import com.aide.ui.AIDEEditorPager;
+import com.aide.ui.MainActivity;
 import com.aide.ui.ServiceContainer;
 import com.aide.ui.command.KeyStrokeCommand;
 import com.aide.ui.command.MenuItemCommand;
 import com.aide.ui.rewrite.R;
+import com.aide.ui.services.EngineService;
+import com.aide.ui.services.OpenFileService;
 import com.aide.ui.util.FileSpan;
 import com.aide.ui.util.FileSystem;
 import com.aide.ui.views.editor.EditorModel;
@@ -38,7 +41,6 @@ import org.eclipse.text.edits.TextEdit;
 public class ma implements MenuItemCommand, KeyStrokeCommand {
 
 	public ma() {
-
 	}
 
 	public KeyStroke getKeyStroke() {
@@ -62,30 +64,15 @@ public class ma implements MenuItemCommand, KeyStrokeCommand {
 		return false;
 	}
 
-	@Override
-	public boolean run() {
-		AIDEEditorPager aideEditorPager = ServiceContainer.getMainActivity().getAIDEEditorPager();
+	private static String getEditorText(EditorModel editorModel) {
+		EditorModel.h textBuffer = editorModel.pN(new char[0x8000]);
+		return String.valueOf(textBuffer.j6, 0, textBuffer.DW);
+	}
 
-		if (ZeroAicySetting.isEnableEclipseJavaFormat()) {
-			String currentFilePath = aideEditorPager.getVisibleFile();
-			if (currentFilePath == null) {
-				return true;
-			}
-
-			String suffixName = FileSystem.getSuffixName(currentFilePath).toLowerCase();
-
-			if ("java".equals(suffixName)) {
-				// 
-				AIDEEditor currentEditor = AIDEEditorExtend.getCurrentEditor(aideEditorPager);
-				ThreadPoolService defaultThreadPoolService = ThreadPoolService.getDefaultThreadPoolService();
-				defaultThreadPoolService.submit(new FormatterRunnable(currentEditor));
-				return true;
-			}
-		}
-
+	private void formatFormAIDE(AIDEEditorPager aideEditorPager) {
 		FileSpan currentFileSpan = aideEditorPager.getCurrentFileSpan();
-
-		ServiceContainer.getMainActivity().delayedShowAnalyzingProgressDialog();
+		MainActivity mainActivity = ServiceContainer.getMainActivity();
+		mainActivity.delayedShowAnalyzingProgressDialog();
 
 		// selectionStartLine
 		int startLine = currentFileSpan.DW;
@@ -93,19 +80,44 @@ public class ma implements MenuItemCommand, KeyStrokeCommand {
 		int endLine = currentFileSpan.Hw;
 
 		if (startLine == endLine) {
-			endLine = ServiceContainer.getMainActivity().getAIDEEditorPager().getCurrentFileLineCount();
+			endLine = aideEditorPager.getCurrentFileLineCount();
 			startLine = 1;
 		}
-		ServiceContainer.getEngineService().Hw(ServiceContainer.getOpenFileService().getVisibleFile(), startLine,
-											   endLine, ServiceContainer.getMainActivity().getAIDEEditorPager().getTabSize());
+		OpenFileService openFileService = ServiceContainer.getOpenFileService();
+		EngineService engineService = ServiceContainer.getEngineService();
+		String visibleFile = openFileService.getVisibleFile();
+		int tabSize = aideEditorPager.getTabSize();
+		engineService.Hw(visibleFile, startLine, endLine, tabSize);
+	}
+	@Override
+	public boolean run() {
+		AIDEEditorPager aideEditorPager = ServiceContainer.getMainActivity().getAIDEEditorPager();
+		String currentFilePath = aideEditorPager.getVisibleFile();
+		if (currentFilePath == null) {
+			return true;
+		}
+
+		String suffixName = FileSystem.getSuffixName(currentFilePath).toLowerCase();
+		if ("c".equals(suffixName) || "h".equals(suffixName) || "cpp".equals(suffixName)) {
+			
+			return true;
+		}
+		if (ZeroAicySetting.isEnableEclipseJavaFormat() && "java".equals(suffixName)) {
+			AIDEEditor currentEditor = AIDEEditorExtend.getCurrentEditor(aideEditorPager);
+			ThreadPoolService defaultThreadPoolService = ThreadPoolService.getDefaultThreadPoolService();
+			defaultThreadPoolService.submit(new JavaFormatterRunnable(currentEditor));
+			return true;
+		}
+
+		formatFormAIDE(aideEditorPager);
 		return true;
 	}
 
-	public static class FormatterRunnable implements Runnable {
+	public static class JavaFormatterRunnable implements Runnable {
 
 		AIDEEditor currentEditor;
 
-		public FormatterRunnable(AIDEEditor currentEditor) {
+		public JavaFormatterRunnable(AIDEEditor currentEditor) {
 			this.currentEditor = currentEditor;
 		}
 
@@ -121,8 +133,7 @@ public class ma implements MenuItemCommand, KeyStrokeCommand {
 						format(editorModel);
 					}
 				}
-			}
-			catch (Throwable e) {
+			} catch (Throwable e) {
 				AppLog.e("Format Code", e);
 			}
 
@@ -130,13 +141,11 @@ public class ma implements MenuItemCommand, KeyStrokeCommand {
 
 		// 防止污染 defaultSettingsMap
 		private static final Map<String, String> defaultSettingsMap = DefaultCodeFormatterOptions.getDefaultSettings()
-		.getMap();
+				.getMap();
 
 		private void format(AIDEEditor.t editorModel) throws MalformedTreeException, BadLocationException {
-			EditorModel.h textBuffer = editorModel.pN(new char[0x8000]);
-			String inputText = String.valueOf(textBuffer.j6, 0, textBuffer.DW);
+			String inputText = getEditorText(editorModel);
 
-			
 			IDocument doc = new Document(inputText);
 
 			int kind = CodeFormatter.K_COMPILATION_UNIT;
@@ -150,7 +159,7 @@ public class ma implements MenuItemCommand, KeyStrokeCommand {
 			String lineSeparator = "\n";
 			// 修改增量 基于 charArray offset
 			TextEdit edit = codeFormatter.format(kind, inputText, 0, inputText.length(), indentationLevel,
-												 lineSeparator);
+					lineSeparator);
 			if (edit == null) {
 				return;
 			}
@@ -164,6 +173,7 @@ public class ma implements MenuItemCommand, KeyStrokeCommand {
 
 	}
 
+	// 填充格式化文本
 	public static class ApplyTextRunnable implements Runnable {
 		AIDEEditor currentEditor;
 		String formatterOutputText;
@@ -192,20 +202,17 @@ public class ma implements MenuItemCommand, KeyStrokeCommand {
 					// 替换 行列皆以 1开始
 					// editorModel.cb(startLine, startColumn, endLine + 1, endColumn + 1, outputText, false, true);
 
-					/*
-
-					 */
 					AIDEEditor.EditorView editorView = AIDEEditorExtend.getEditorView(this.currentEditor);
-					
+
 					this.currentEditor.getKeyStrokeDetector().U2();
-					
+
 					int caretLine = editorView.getCaretLine();
 					int caretColumn = editorView.getCaretColumn();
 					// 清空数据
 					editorModel.Bx(new SelectedRegion(0, 0, endLine, endColumn), editorModel);
 					// 写入格式化 文本
 					editorModel.a5(0, 0, new StringReader(outputText), editorModel);
-				
+
 					editorView.TI(caretColumn, caretLine);
 				}
 			}
