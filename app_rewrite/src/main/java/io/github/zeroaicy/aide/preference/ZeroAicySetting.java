@@ -177,120 +177,6 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 	public static boolean isEnableAsynRead() {
 		return getDefaultSpBoolean("zero_aicy_enable_asyn_read", false);
 	}
-	public static String getProjectPunctuationjava() {
-
-		String JAVA = getDefaultSpString("Myfz_project_Punctuation_java",
-				"{ } ( ) ; , . = \\ | & ! [ ] < > + - / * ? : _");
-
-		String processed = replaceChar(JAVA);
-		processed = spaces(processed);
-		processed = space(processed);
-		return processed;
-
-	}
-	public static String getProjectPunctuationxml() {
-		String XML = getDefaultSpString("Myfz_project_Punctuation_xml", "< > / = \\ : @ + ( ) ; , . | & ! [ ] { } _ -");
-		String processed = replaceChar(XML);
-		processed = spaces(processed);
-		processed = space(processed);
-
-		return processed;
-
-	}
-	public static String getProjectPunctuationcss() {
-		String CSS = getDefaultSpString("Myfz_project_Punctuation_css", "{ } - : . ; # % ( ) \\ ' @ > = [ ] / * !");
-		String processed = replaceChar(CSS);
-		processed = spaces(processed);
-		processed = space(processed);
-
-		return processed;
-
-	}
-	//替换字符
-	public static String replaceChar(String input) {
-		StringBuilder result = new StringBuilder();
-		for (char c : input.toCharArray()) {
-			switch (c) {
-				case '"' :
-					result.append('"');
-					break;
-				case '&' :
-					result.append("&");
-					break;
-				case '<' :
-					result.append("<");
-					break;
-				case '>' :
-					result.append(">");
-					break;
-				case '\\' :
-					result.append("\\");
-					break;
-				case '\n' :
-					result.append(" ");
-					break;
-				case '\t' :
-					result.append(" ");
-					break;
-				case '\r' :
-					result.append(" ");
-					break;
-				default :
-					result.append(c);
-					break;
-			}
-		}
-		return result.toString();
-	}
-
-	//删除所有空格
-	public static String space(String input) {
-		StringBuilder result = new StringBuilder();
-		for (int i = 0; i < input.length(); i++) {
-			char ch = input.charAt(i);
-			result.append(ch);
-			if (!Character.isLetterOrDigit(ch)) {
-				int nextIndex = i + 1;
-				boolean hasSpace = false;
-				while (nextIndex < input.length() && input.charAt(nextIndex) == ' ') {
-					hasSpace = true;
-					nextIndex++;
-				}
-				if (!hasSpace) {
-					result.append(' ');
-				}
-				i = nextIndex - 1;
-			}
-		}
-		return spaces(result.toString().trim());
-	}
-
-	//每个字符后面添加一个空格
-	public static String spaces(String input) {
-		StringBuilder result = new StringBuilder();
-		for (int i = 0; i < input.length(); i++) {
-			char ch = input.charAt(i);
-			result.append(ch);
-			if (!Character.isLetterOrDigit(ch)) {
-				if (i + 1 >= input.length() || input.charAt(i + 1) != ' ') {
-					result.append(' ');
-				}
-			} else if (ch == ' ') {
-
-				int spaceCount = 0;
-				while (i + 1 < input.length() && input.charAt(i + 1) == ' ') {
-					spaceCount++;
-					i++;
-				}
-
-				if (spaceCount > 0) {
-					result.append(' ');
-				}
-			}
-		}
-		String trimmedResult = result.toString().trim();
-		return trimmedResult;
-	}
 
 	/**
 	 * 自定义字体路径
@@ -411,6 +297,42 @@ public class ZeroAicySetting implements SharedPreferences.OnSharedPreferenceChan
 	public static boolean isEnableTranslatctf() {
 		return getDefaultSpBoolean("iyutong_translate_tc_fg_enable", true);
 	}
+
+
+	/**
+	 * 快捷输入
+	 */
+
+	//底部栏新样式
+	public static boolean isEnabledblxys() {
+		return getDefaultSpBoolean("iyutong_dbkjsrys_enable", true);
+	}
+
+	//设置显示主题
+	public static String isEnabledblxyszt(){
+		return getDefaultSpString("iyutong_dbkjsrys_xszt","默认");
+	}
+
+	public static String getProjectPunctuationjava() {
+		return getDefaultSpString("Myfz_project_Punctuation_java",
+				"#TAB {#LEFT-#UP} {#RIGHT-#DOWN-→↓} [#HOME-行首] [#END-行尾] { } ( ) ; , . =  \\ \" | & ! [ ] < > + - / * ? : _");
+	}
+	public static String getProjectPunctuationxml() {
+		return getDefaultSpString("Myfz_project_Punctuation_xml",
+				"#TAB < > / = \\ \" : @ + ( ) ; , . | & ! [ ] { } _ -");
+	}
+	public static String getProjectPunctuationcss() {
+		return getDefaultSpString("Myfz_project_Punctuation_css",
+				"#TAB { } - : . ; # % ( ) \\ \" ' @ > = [ ] / * ! _");
+	}
+
+	public static String getProjectPunctuationqt() {
+		return getDefaultSpString("Myfz_project_Punctuation_qt",
+				"#TAB { } - : . ; # % ( ) \\ ' @ > = [ ] / * ! _");
+	}
+
+
+
 
 	/**
 	 * 工程设置

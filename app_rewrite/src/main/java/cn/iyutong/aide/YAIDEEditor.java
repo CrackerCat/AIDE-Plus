@@ -1,6 +1,9 @@
 package cn.iyutong.aide;
 
 import android.content.Context;
+import android.view.KeyCharacterMap;
+import android.view.KeyEvent;
+
 import com.aide.ui.AIDEEditor;
 import com.aide.ui.AIDEEditorExtend;
 import com.aide.ui.AIDEEditorPager;
@@ -21,6 +24,10 @@ public class YAIDEEditor {
 		MainActivity mainActivity = ServiceContainer.getMainActivity();
 		AIDEEditorPager aideEditorPager = mainActivity.getAIDEEditorPager();
 		return AIDEEditorExtend.getCurrentEditor(aideEditorPager);
+	}
+
+	public static boolean isyuwenjian(){
+		return !ServiceContainer.getMainActivity().getAIDEEditorPager().getFileEditors().isEmpty();
 	}
 
 	//在光标处插入文本
@@ -46,6 +53,16 @@ public class YAIDEEditor {
 		Context context = ServiceContainer.getContext();
 		oEditor.getEditorModel().ys(caretColumn, caretLine, insertTabsAsSpaces, tabSize, stringReader, context);
 		oEditor.eN(caretLine, endLineNumber);
+	}
+
+	public static void setKey(String src) {
+		KeyEvent[] events = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD)
+				.getEvents(src.toCharArray());
+		if (events != null) {
+			for (KeyEvent keyEvent : events) {
+				ServiceContainer.getMainActivity().dispatchKeyEvent(keyEvent);
+			}
+		}
 	}
 }
 

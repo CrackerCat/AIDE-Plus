@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@id/quickKeyBar"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:gravity="end"
+    android:visibility="gone"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@id/quickKeyBarKeysContainer"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="?drawable_keybar"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/dmbq"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/dmtckjj"
+                    android:layout_width="match_parent"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content" />
+
+                <ImageView
+                    android:id="@id/quickKeyBarCloseButton"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:background="?android:selectableItemBackground"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:scaleType="centerInside"
+                    android:src="?icon_close_keys" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@id/quickKeyBarOpenButtonContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@id/quickKeyBarOpenButton"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:background="?android:selectableItemBackground"
+            android:clickable="true"
+            android:gravity="center"
+            android:scaleType="centerInside"
+            android:src="?icon_open_keys" />
+    </LinearLayout>
+</LinearLayout>

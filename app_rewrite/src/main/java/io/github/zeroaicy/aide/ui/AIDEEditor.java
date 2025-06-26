@@ -19,6 +19,8 @@ import com.aide.ui.views.editor.Color;
 import com.aide.ui.views.editor.EditorModel;
 import com.aide.ui.views.editor.EditorModelKt;
 import com.aide.ui.views.editor.TextBuffer;
+
+import cn.iyutong.aide.quickkeysbar.YQuickKeys;
 import io.github.zeroaicy.aide.ui.services.ThreadPoolService;
 import io.github.zeroaicy.util.IOUtils;
 import java.io.Reader;
@@ -130,96 +132,9 @@ public class AIDEEditor extends com.aide.ui.AIDEEditor {
 		return super.getOEditorView();
 	}
 
-	private int getIndentationSize() {
-		String lowerCase = getFilePath().toLowerCase();
-		if (lowerCase.endsWith(".java")) {
-			return AppPreferences.getJavaIndentationSize();
-		}
-		if (lowerCase.endsWith(".js")) {
-			return AppPreferences.getJsIndentationSize();
-		}
-
-		if (lowerCase.endsWith(".c") || lowerCase.endsWith(".cpp") || lowerCase.endsWith(".h")
-				|| lowerCase.endsWith(".cc") || lowerCase.endsWith(".hh") || lowerCase.endsWith(".hpp")) {
-			return AppPreferences.getCppIndentationSize();
-		}
-
-		if (lowerCase.endsWith(".xml")) {
-			return AppPreferences.getXmlIndentationSize();
-		}
-
-		if (lowerCase.endsWith(".html") || lowerCase.endsWith(".htm")) {
-			return AppPreferences.getHtmlIndentationSize();
-		}
-		if (lowerCase.endsWith(".css")) {
-			return AppPreferences.getCssIndentationSize();
-		}
-		return getTabSize();
-
-	}
-
 	@Override
 	public String getQuickKeys() {
-
-		StringBuilder indentationBuilder = new StringBuilder();
-		int indentationSize = getIndentationSize();
-		if (indentationSize % getTabSize() == 0) {
-			int tabCount = indentationSize / getTabSize();
-			for (int count = 0; count < tabCount; count++) {
-				indentationBuilder.append("\t");
-			}
-		} else {
-			for (int count = 0; count < indentationSize; count++) {
-				// s 代表空格
-				indentationBuilder.append("s");
-			}
-		}
-		String indentation = indentationBuilder.toString();
-
-		String filePath = getFilePath();
-		String pathLowerCase = filePath.toLowerCase();
-
-		if (pathLowerCase.endsWith(".css")) {
-			String Punctuationcss = ZeroAicySetting.getProjectPunctuationcss();
-			if (TextUtils.isEmpty(Punctuationcss) || "null".equals(Punctuationcss)) {
-				return indentation + " { } - : . ; # % ( ) \\ &quot; ' @ > = [ ] / * !";
-			} else {
-				return indentation + " " + Punctuationcss;
-			}
-		}
-		if (pathLowerCase.endsWith(".xml") || pathLowerCase.endsWith(".html") || pathLowerCase.endsWith(".htm")) {
-			String Punctuationxml = ZeroAicySetting.getProjectPunctuationxml();
-			if (TextUtils.isEmpty(Punctuationxml) || "null".equals(Punctuationxml)) {
-				return indentation + " < > / = \\ &quot;  : @ + ( ) ; , . | & ! [ ] { } _ -";
-			} else {
-				return indentation + " " + Punctuationxml;
-			}
-		}
-		
-		if (pathLowerCase.endsWith(".java") || pathLowerCase.endsWith(".js")) {
-			String Punctuationjava = ZeroAicySetting.getProjectPunctuationjava();
-			if (TextUtils.isEmpty(Punctuationjava) || "null".equals(Punctuationjava)) {
-
-				return indentation + " { } ( ) ; , . = \\ &quot; | & ! [ ] < > + - / * ? : _";
-			} else {
-				return indentation + " " + Punctuationjava;
-			}
-		}
-
-		//		if (lowerCase.endsWith(".css")) {
-		//			return indentation + " { } - : . ; # % ( ) \" ' @ > = [ ] / * !";
-		//		}
-		//		if (lowerCase.endsWith(".xml") || lowerCase.endsWith(".html") || lowerCase.endsWith(".htm")) {
-		//			return indentation + " < > / = \" : @ + ( ) ; , . | & ! [ ] { } _ -";
-		//		}
-		//		if (lowerCase.endsWith(".java") || lowerCase.endsWith(".js")) {
-		//			return indentation + " { } ( ) ; , . = \" | & ! [ ] < > + - / * ? : _";
-		//		}
-
-		// 比如gradle
-		return indentation + " { } ( ) ; , . = \" | & ! [ ] < > + - / * :";
-
-		//return super.getQuickKeys();
+		return YQuickKeys.getText();
 	}
 
 	/**

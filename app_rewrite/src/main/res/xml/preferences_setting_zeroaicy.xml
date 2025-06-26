@@ -86,31 +86,6 @@
             android:key="zero_aicy_enable_asyn_read"
             android:summary="异步加载文件--偶尔会闪退[原因待排\n建议开启自动保存15s]"
             android:title="编辑器启用异步读取" />
-        <PreferenceCategory android:title="自定义符号设置">
-
-            <EditTextPreference
-                android:defaultValue="&lt;\n&gt;\n / \n=\n \\ \n&quot; \n: \n@ \n+ \n( \n) \n; \n, \n. \n| \n&amp; \n! \n[ \n] \n{ \n} \n_ \n-"
-                android:hint="请填写xml符号"
-                android:key="Myfz_project_Punctuation_xml"
-                android:selectAllOnFocus="true"
-                android:summary="请填写xml编辑框下方的标点符号"
-                android:title="自定义XML符号" />
-
-            <EditTextPreference
-                android:defaultValue="{ \n} \n( \n) \n; \n, \n. \n= \n \\ \n&quot; \n| \n&amp; \n! \n[ \n] \n&lt; \n&gt; \n+ \n- \n/ \n* \n? \n: \n_"
-                android:hint="请填写java符号"
-                android:key="Myfz_project_Punctuation_java"
-                android:selectAllOnFocus="true"
-                android:summary="请填写java代码编辑框下方的标点符号"
-                android:title="自定义JAVA符号" />
-            <EditTextPreference
-                android:defaultValue="{ \n} \n- \n: \n. \n; \n# \n% \n( \n) \n \\ \n&quot; \n' \n@ \n> \n= \n[ \n] \n/ \n* \n!"
-                android:hint="请填写css符号"
-                android:key="Myfz_project_Punctuation_css"
-                android:selectAllOnFocus="true"
-                android:summary="请填写css编辑框下方的标点符号"
-                android:title="自定义CSS符号" />
-        </PreferenceCategory>
         <PreferenceCategory android:title="字体">
             <EditTextPreference
                 android:hint="字体路径，加载失败会删除，请自行备份"
@@ -204,11 +179,72 @@
     </PreferenceScreen>
 
     <PreferenceScreen
+        android:summary="配置快捷输入设置"
+        android:title="快捷输入">
+
+        <PreferenceCategory android:title="底部快捷栏">
+
+            <SwitchPreference
+                android:defaultValue="true"
+                android:key="iyutong_dbkjsrys_enable"
+                android:summary="使用新的底部快捷栏(重启生效)"
+                android:title="新样式快捷栏" />
+
+            <ListPreference
+                android:defaultValue="默认"
+                android:entries="@array/iyutong_dbkjsrys_z"
+                android:entryValues="@array/iyutong_dbkjsrys_z"
+                android:key="iyutong_dbkjsrys_xszt"
+                android:summary="设置底部快捷栏的显示状态"
+                android:title="设置显示状态" />
+
+        </PreferenceCategory>
+
+        <PreferenceCategory
+            android:title="快捷符号">
+
+            <EditTextPreference
+                android:defaultValue="#TAB \n&lt; \n&gt; \n/ \n= \n\\ \n&quot; \n: \n@ \n+ \n( \n) \n; \n, \n. \n| \n&amp; \n! \n[ \n] \n{ \n} \n_ \n-"
+                android:hint="请填写xml符号"
+                android:key="Myfz_project_Punctuation_xml"
+                android:selectAllOnFocus="true"
+                android:summary="请填写xml编辑框下方的标点符号"
+                android:title="自定义XML符号" />
+
+            <EditTextPreference
+                android:defaultValue="#TAB \n{#LEFT-#UP} \n{#RIGHT-#DOWN-→↓} \n[#HOME-行首] \n[#END-行尾] \n{ \n} \n( \n) \n; \n, \n. \n= \n\\ \n&quot; \n| \n&amp; \n! \n[ \n] \n&lt; \n&gt; \n+ \n- \n/ \n* \n? \n: \n_"
+                android:hint="请填写java符号"
+                android:key="Myfz_project_Punctuation_java"
+                android:selectAllOnFocus="true"
+                android:summary="请填写java代码编辑框下方的标点符号"
+                android:title="自定义JAVA符号" />
+
+            <EditTextPreference
+                android:defaultValue="#TAB \n{ \n} \n- \n: \n. \n; \n# \n% \n( \n) \n\\ \n&quot; \n' \n@ \n> \n= \n[ \n] \n/ \n* \n! \n_"
+                android:hint="请填写css符号"
+                android:key="Myfz_project_Punctuation_css"
+                android:selectAllOnFocus="true"
+                android:summary="请填写css编辑框下方的标点符号"
+                android:title="自定义CSS符号" />
+
+            <EditTextPreference
+                android:defaultValue="#TAB \n{ \n} \n- \n: \n. \n; \n# \n% \n( \n) \n\\ \n' \n@ \n> \n= \n[ \n] \n/ \n* \n! \n_"
+                android:hint="请填写其他符号"
+                android:key="Myfz_project_Punctuation_qt"
+                android:selectAllOnFocus="true"
+                android:summary="请填写其他编辑框下方的标点符号"
+                android:title="自定义其他符号" />
+
+        </PreferenceCategory>
+
+    </PreferenceScreen>
+
+
+    <PreferenceScreen
         android:summary="配置翻译设置"
         android:title="翻译">
 
-        <PreferenceCategory
-            android:title="代码补全">
+        <PreferenceCategory android:title="代码补全">
 
             <SwitchPreference
                 android:defaultValue="true"
@@ -228,12 +264,12 @@
                 android:title="清楚本地数据库" />
 
             <ListPreference
-                android:key="iyutong_translate_yq"
-                android:title="选择默认翻译引擎"
-                android:summary="从列表中选择默认翻译引擎"
+                android:defaultValue="0"
                 android:entries="@array/iyutong_translate_yq_xs"
                 android:entryValues="@array/iyutong_translate_yq_z"
-                android:defaultValue="0" />
+                android:key="iyutong_translate_yq"
+                android:summary="从列表中选择默认翻译引擎"
+                android:title="选择默认翻译引擎" />
 
             <SwitchPreference
                 android:defaultValue="true"
@@ -249,24 +285,23 @@
 
         </PreferenceCategory>
 
-        <PreferenceCategory
-            android:title="文本翻译">
+        <PreferenceCategory android:title="文本翻译">
 
             <ListPreference
-                android:key="iyutong_translate_tc_yq"
-                android:title="选择默认翻译引擎"
-                android:summary="从列表中选择默认翻译引擎"
+                android:defaultValue="0"
                 android:entries="@array/iyutong_translate_yq_xs"
                 android:entryValues="@array/iyutong_translate_yq_z"
-                android:defaultValue="0" />
+                android:key="iyutong_translate_tc_yq"
+                android:summary="从列表中选择默认翻译引擎"
+                android:title="选择默认翻译引擎" />
 
             <ListPreference
-                android:key="iyutong_translate_tc_lx"
-                android:title="选择默认翻译语言"
-                android:summary="从列表中选择默认翻译语言"
+                android:defaultValue="0"
                 android:entries="@array/iyutong_translate_yq_lx"
                 android:entryValues="@array/iyutong_translate_yq_z"
-                android:defaultValue="0" />
+                android:key="iyutong_translate_tc_lx"
+                android:summary="从列表中选择默认翻译语言"
+                android:title="选择默认翻译语言" />
 
             <SwitchPreference
                 android:defaultValue="true"

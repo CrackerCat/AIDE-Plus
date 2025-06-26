@@ -20,4 +20,11 @@
         <item>2</item>
         <item>3</item>
     </string-array>
+
+    <string-array name="iyutong_dbkjsrys_z">
+        <item>默认</item>
+        <item>始终显示</item>
+        <item>始终隐藏</item>
+    </string-array>
+
 </resources>
