@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.database.DataSetObserver;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -17,6 +18,7 @@ import android.text.InputType;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.Menu;
@@ -32,8 +34,11 @@ import android.widget.Toast;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.core.content.FileProvider;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.viewpager.widget.PagerAdapter;
+
 import com.aide.common.AndroidHelper;
 import com.aide.common.AppLog;
+import com.aide.ui.AIDEEditorPager;
 import com.aide.ui.MainActivity;
 import com.aide.ui.ServiceContainer;
 import com.aide.ui.rewrite.R;
@@ -45,6 +50,8 @@ import com.aide.ui.views.SplitView;
 import com.hjq.permissions.OnPermissionCallback;
 import com.hjq.permissions.XXPermissions;
 import com.probelytics.Probelytics;
+
+import cn.iyutong.aide.YAIDEEditor;
 import io.github.zeroaicy.aide.extend.ZeroAicyExtensionInterface;
 import io.github.zeroaicy.aide.preference.ZeroAicyPreferencesActivity;
 import io.github.zeroaicy.aide.preference.ZeroAicySetting;
@@ -95,6 +102,20 @@ public class ZeroAicyMainActivity extends MainActivity {
 		//		LinearLayout mainSearchBarNoTabsView = this.findViewById(R.id.mainSearchBarNoTabs);
 		//		ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) mainSearchBarNoTabsView.getLayoutParams();
 		//		layoutParams.setMargins(layoutParams.leftMargin, layoutParams.topMargin, layoutParams.rightMargin, 40);
+
+
+		//低部栏关闭
+		AIDEEditorPager aideEditorPager = this.getAIDEEditorPager();
+		PagerAdapter adapter = aideEditorPager.getAdapter();
+		adapter.registerDataSetObserver(new DataSetObserver() {
+			@Override
+			public void onChanged() {
+				if (aideEditorPager.getFileEditors().isEmpty()) {
+					j6(false);
+				}
+				super.onChanged();
+			}
+		});
 
 	}
 

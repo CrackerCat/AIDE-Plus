@@ -47,6 +47,37 @@ public class ZeroAicySettingsFragment extends PreferenceFragment {
             }
         });
 
+        setOnPreferenceClickListener("iyutong_project_Punctuation", new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                new AlertDialog.Builder(getActivity())
+                        .setTitle("使用说明与注意事项")
+                        .setMessage("每个按键用空格或者换行隔开，注意旧的底部栏只支持单字符输入并且只支持 #TAB 这一个转义符，其他均不支持，不支持的东西将不显示，转义符必须使用全大写\n\n特殊转义符号含义：\n\n" +
+                                "功能按键：\n" +
+                                "#TAB        Tab键\n" +
+                                "#LEFT       方向键左\n" +
+                                "#RIGHT      方向键右\n" +
+                                "#UP         方向键上\n" +
+                                "#DOWN       方向键下\n" +
+                                "#HOME       光标移到行首\n" +
+                                "#END        光标移到行尾\n\n" +
+                                "替换符号：\n" +
+                                "#KG         空格\n" +
+                                "#ZH         -符号\n" +
+                                "#HH         换行\n\n" +
+                                "事件按键：\n" +
+                                "{单击输入-长按输入}\n" +
+                                "{单击输入-长按输入-按键文字}\n" +
+                                "[点击输入-按键文字]\n" +
+                                "(长按输入-按键文字))\n" +
+                                "(长按输入)")
+                        .setPositiveButton("知道了", (dialog, which) -> {
+                        })
+                        .show();
+                return false;
+            }
+        });
+
         //清楚本地数据库
         setOnPreferenceClickListener("iyutong_translate",
                 new Preference.OnPreferenceClickListener() {

@@ -235,6 +235,11 @@
                 android:summary="请填写其他编辑框下方的标点符号"
                 android:title="自定义其他符号" />
 
+            <Preference
+                android:key="iyutong_project_Punctuation"
+                android:summary="点击查看使用说明与注意事项"
+                android:title="填写说明" />
+
         </PreferenceCategory>
 
     </PreferenceScreen>

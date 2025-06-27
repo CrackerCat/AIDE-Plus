@@ -37,17 +37,11 @@ public class DmtckjjAdapter extends BaseRecyclerAdapter<String> {
         TextView textView = holder.findViewById(R.id.quickKeyBarButton);
         String replace = item.replace("s", " ");
 
-        String regex = "\\{([^\\s-]+)-([^\\s-]+)-([^\\s-]+)\\}";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(replace);
-
-        String regex1 = "\\{([^\\s-]+)-([^\\s-]+)\\}";
-        Pattern pattern1 = Pattern.compile(regex1);
-        Matcher matcher1 = pattern1.matcher(replace);
-
-        String regex2 = "\\[([^\\s-]+)-([^\\s-]+)\\]";
-        Pattern pattern2 = Pattern.compile(regex2);
-        Matcher matcher2 = pattern2.matcher(replace);
+        Matcher matcher = Pattern.compile("\\{([^\\s-]+)-([^\\s-]+)-([^\\s-]+)\\}").matcher(replace);
+        Matcher matcher1 = Pattern.compile("\\{([^\\s-]+)-([^\\s-]+)\\}").matcher(replace);
+        Matcher matcher2 = Pattern.compile("\\[([^\\s-]+)-([^\\s-]+)\\]").matcher(replace);
+        Matcher matcher3 = Pattern.compile("\\(([^\\s-]+)-([^\\s-]+)\\)").matcher(replace);
+        Matcher matcher4 = Pattern.compile("\\(([^\\s-]+)\\)").matcher(replace);
 
         if (matcher.find()) {
             String A1 = matcher.group(1);
@@ -73,6 +67,21 @@ public class DmtckjjAdapter extends BaseRecyclerAdapter<String> {
             String B3 = matcher2.group(2);
             textView.setText(shijwz(B3));
             textView.setOnClickListener(v -> shij(A3));
+        } else if (matcher3.find()) {
+            String A4 = matcher3.group(1);
+            String B4 = matcher3.group(2);
+            textView.setText(shijwz(B4));
+            textView.setOnLongClickListener(v -> {
+                shij(A4);
+                return true;
+            });
+        } else if (matcher4.find()) {
+            String A5 = matcher4.group(1);
+            textView.setText(shijwz(A5));
+            textView.setOnLongClickListener(v -> {
+                shij(A5);
+                return true;
+            });
         } else {
             textView.setText(shijwz(replace));
             textView.setOnClickListener(v -> shij(replace));
@@ -98,7 +107,7 @@ public class DmtckjjAdapter extends BaseRecyclerAdapter<String> {
             case "#END":
                 return "▶";
             default:
-                return src;
+                return src.replaceAll("#KG", "▓").replaceAll("#ZH","-").replaceAll("#HH", "﹂");
         }
     }
 
@@ -127,10 +136,11 @@ public class DmtckjjAdapter extends BaseRecyclerAdapter<String> {
                 simulateDirectionKey(KeyEvent.KEYCODE_MOVE_END);
                 break;
             default:
-                if (src.length() == 1) {
-                    YAIDEEditor.setKey(src);
+                String src1 = src.replaceAll("#KG", " ").replaceAll("#ZH","-").replaceAll("#HH", "\n");
+                if (src1.length() == 1) {
+                    YAIDEEditor.setKey(src1);
                 } else {
-                    YAIDEEditor.setText(src);
+                    YAIDEEditor.setText(src1);
                 }
                 break;
         }
