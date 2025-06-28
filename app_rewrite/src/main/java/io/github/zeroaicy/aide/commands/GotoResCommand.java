@@ -1,14 +1,14 @@
 package io.github.zeroaicy.aide.commands;
 
 import com.aide.ui.ServiceContainer;
-import com.aide.ui.command.MenuItemCommand;
+import com.aide.ui.command.MenuCommand;
 import com.aide.ui.project.internal.GradleTools;
 import com.aide.ui.rewrite.R;
 import com.topjohnwu.superuser.io.SuFile;
 
 import io.github.zeroaicy.aide.preference.ZeroAicySetting;
 
-public class GotoResCommand implements MenuItemCommand {
+public class GotoResCommand implements MenuCommand {
 
     @Override
     public int getMenuItemId() {
@@ -37,5 +37,10 @@ public class GotoResCommand implements MenuItemCommand {
         String resDir = GradleTools.yS(currentAppHome);
         ServiceContainer.getFileBrowserService().Hw(resDir);
         return true;
+    }
+
+    @Override
+    public boolean isVisible(boolean b) {
+        return isEnabled();
     }
 }
