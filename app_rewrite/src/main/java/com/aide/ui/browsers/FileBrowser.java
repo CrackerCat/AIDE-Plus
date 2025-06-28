@@ -18,6 +18,7 @@ import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.Keep;
 import androidx.appcompat.widget.LinearLayoutCompat;
@@ -35,7 +36,6 @@ import com.aide.ui.ServiceContainer;
 import com.aide.ui.command.FileBrowserCommand;
 import com.aide.ui.firebase.FireBaseLogEvent;
 import com.aide.ui.rewrite.R;
-import com.aide.ui.rewrite.databinding.ItemFilebrowserEntryBinding;
 import com.aide.ui.services.FileBrowserService;
 import com.aide.ui.util.FileSystem;
 import com.aide.ui.views.CustomKeysListView;
@@ -58,7 +58,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-import io.github.zeroaicy.aide.ui.view.BreadcrumbItem;
 import io.github.zeroaicy.aide.ui.view.BreadcrumbView;
 import io.github.zeroaicy.aide.utils.FilesSystem;
 import io.github.zeroaicy.aide.utils.FilesSystemKt;
@@ -295,7 +294,6 @@ public class FileBrowser extends LinearLayoutCompat implements
             J8(item.getFullPath());
             //ToastUtils.showLong("点击了："+item.getName()+"路径"+item.getFullPath());
 
-            return null;
         });
 
         ((ImageView) listView.findViewById(R.id.browserHeaderIcon)).setImageResource(R.drawable.folder_open);
@@ -437,8 +435,8 @@ public class FileBrowser extends LinearLayoutCompat implements
 
     }
 
-    public List<BreadcrumbItem> createList(String fullPath) {
-        List<BreadcrumbItem> items = new ArrayList<>();
+    public List<BreadcrumbView.BreadcrumbItem> createList(String fullPath) {
+        List<BreadcrumbView.BreadcrumbItem> items = new ArrayList<>();
         if (fullPath == null || fullPath.isEmpty()) return items;
 
         String[] segments = fullPath.replaceAll("^/+", "").split("/");
@@ -446,9 +444,9 @@ public class FileBrowser extends LinearLayoutCompat implements
 
         for (String segment : segments) {
             currentPath.append("/").append(segment);
-            items.add(new BreadcrumbItem(segment, currentPath.toString()));
+            items.add(new BreadcrumbView.BreadcrumbItem(segment, currentPath.toString()));
         }
-        items.add(0,new BreadcrumbItem("/", "/"));
+        items.add(0,new BreadcrumbView.BreadcrumbItem("/", "/"));
         return items;
     }
 
@@ -509,18 +507,25 @@ public class FileBrowser extends LinearLayoutCompat implements
             View inflate = convertView == null ? LayoutInflater.from(fileBrowser.getContext()).inflate(R.layout.item_filebrowser_entry, parent, false) : convertView;
             Data j6 = j6(position);
 
-            ItemFilebrowserEntryBinding binding = ItemFilebrowserEntryBinding.bind(inflate);
 //            String currentDir = ServiceContainer.getFileBrowserService().j6();
 //            String currentEditor = ServiceContainer.getMainActivity().getAIDEEditorPager().getVisibleFile();
 
 
-            binding.smallIcon.setVisibility(View.GONE);
-            binding.subtitle.setText("");
-            binding.barStart.setVisibility(View.GONE);
-            binding.bgView.setVisibility(View.GONE);
+            ImageView icon = inflate.findViewById(R.id.filebrowserEntryFileImage);
+            TextView title = inflate.findViewById(R.id.filebrowserEntryName);
+            ImageView smallIcon = inflate.findViewById(R.id.small_icon);
+            TextView subtitle = inflate.findViewById(R.id.subtitle);
+            View barStart = inflate.findViewById(R.id.bar_start);
+            View bgView = inflate.findViewById(R.id.bg_view);
+
+
+            smallIcon.setVisibility(View.GONE);
+            subtitle.setText("");
+            barStart.setVisibility(View.GONE);
+            bgView.setVisibility(View.GONE);
 
             int iconResId = j6.v5;
-            String title = j6.j6;
+            String title_j6 = j6.j6;
 
             if (j6.FH != null && iconResId != R.drawable.folder_open)
                 label:{
@@ -528,32 +533,32 @@ public class FileBrowser extends LinearLayoutCompat implements
 
                     boolean isFileInArchive = isFileInArchive(file);
 
-                    binding.title.setText(file.getName());
-                    binding.icon.setImageResource(iconResId);
+                    title.setText(file.getName());
+                    icon.setImageResource(iconResId);
                     if (isFileInArchive) {
                         SuFile currentEditorFile = new SuFile(ServiceContainer.getMainActivity().getAIDEEditorPager().getVisibleFile());
                         if (file.getAbsolutePath().equals(currentEditorFile.getAbsolutePath())) {
-                            binding.barStart.setVisibility(View.VISIBLE);
-                            binding.bgView.setVisibility(View.VISIBLE);
+                            barStart.setVisibility(View.VISIBLE);
+                            bgView.setVisibility(View.VISIBLE);
                         } else {
-                            binding.barStart.setVisibility(View.GONE);
-                            binding.bgView.setVisibility(View.GONE);
+                            barStart.setVisibility(View.GONE);
+                            bgView.setVisibility(View.GONE);
                         }
                         break label;
                     }
                     if (file.isDirectory()) {
-                        binding.smallIcon.setVisibility(View.VISIBLE);
-                        binding.smallIcon.setImageDrawable(null);
+                        smallIcon.setVisibility(View.VISIBLE);
+                        smallIcon.setImageDrawable(null);
                     } else if (file.isFile()) {
                         String currentPath = ServiceContainer.getMainActivity().getAIDEEditorPager().getVisibleFile();
                         if (currentPath != null) {
                             SuFile currentEditorFile = new SuFile(currentPath);
                             if (file.getAbsolutePath().equals(currentEditorFile.getAbsolutePath())) {
-                                binding.barStart.setVisibility(View.VISIBLE);
-                                binding.bgView.setVisibility(View.VISIBLE);
+                                barStart.setVisibility(View.VISIBLE);
+                                bgView.setVisibility(View.VISIBLE);
                             } else {
-                                binding.barStart.setVisibility(View.GONE);
-                                binding.bgView.setVisibility(View.GONE);
+                                barStart.setVisibility(View.GONE);
+                                bgView.setVisibility(View.GONE);
                             }
                         }
 
@@ -570,14 +575,15 @@ public class FileBrowser extends LinearLayoutCompat implements
                                 PackageManager pm = Utils.getApp().getPackageManager();
                                 if (pm == null) return null;
                                 PackageInfo packageInfo = pm.getPackageArchiveInfo(file.getAbsolutePath(), 0);
-                                Bitmap icon = null;
+                                Bitmap icon_pkg = null;
                                 if (packageInfo != null) {
-                                    icon = mLoader.loadIcon(packageInfo.applicationInfo);
+                                    assert packageInfo.applicationInfo != null;
+                                    icon_pkg = mLoader.loadIcon(packageInfo.applicationInfo);
                                 }
-                                binding.icon.setImageBitmap(icon);
-                                // binding.icon.setImageDrawable(Objects.requireNonNull(AppUtils.getApkInfo(file)).getIcon());
+                                icon.setImageBitmap(icon_pkg);
+                                // icon.setImageDrawable(Objects.requireNonNull(AppUtils.getApkInfo(file)).getIcon());
                             } catch (Throwable e) {
-                                binding.icon.setImageResource(iconResId);
+                                icon.setImageResource(iconResId);
                             }
                         } else if (filename.endsWith(".svg")) {
                             FileInputStream is = null;
@@ -586,10 +592,10 @@ public class FileBrowser extends LinearLayoutCompat implements
                                 SVG svg = SVG.getFromInputStream(is);
                                 Picture pic = svg.renderToPicture();
                                 if (pic != null) {
-                                    binding.icon.setImageDrawable(new PictureDrawable(pic));
+                                    icon.setImageDrawable(new PictureDrawable(pic));
                                 }
                             } catch (Throwable e) {
-                                binding.icon.setImageResource(iconResId);
+                                icon.setImageResource(iconResId);
                             } finally {
                                 CloseUtils.closeIOQuietly(is);
                             }
@@ -597,21 +603,21 @@ public class FileBrowser extends LinearLayoutCompat implements
                                 || filename.endsWith(".jpg")
                                 || filename.endsWith(".jpeg")
                                 || filename.endsWith(".webp")) {
-                            Glide.with(binding.icon)
+                            Glide.with(icon)
                                     .load(file)
                                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                                     .skipMemoryCache(false)
                                     .dontAnimate()
                                     .thumbnail(0.1f)
                                     .transition(DrawableTransitionOptions.withCrossFade())
-                                    .into(binding.icon);
+                                    .into(icon);
                         } else if (filename.endsWith(".gif")) {
                             Glide.with(inflate.getContext())
                                     .asGif()
                                     .load(file)
                                     .diskCacheStrategy(DiskCacheStrategy.DATA)
                                     .transition(DrawableTransitionOptions.withCrossFade(0))
-                                    .into(binding.icon);
+                                    .into(icon);
                         } else if (filename.endsWith(".zip")
                                 || filename.endsWith(".7z")
                                 || filename.endsWith(".tar")
@@ -624,24 +630,24 @@ public class FileBrowser extends LinearLayoutCompat implements
                                 || filename.endsWith(".rar")
                                 || filename.endsWith(".aar")
                         ) {
-                            binding.icon.setImageResource(R.drawable.file_type_zip);
+                            icon.setImageResource(R.drawable.file_type_zip);
                         } else if (filename.endsWith(".pom")) {
-                            binding.icon.setImageResource(R.drawable.file_type_xml);
+                            icon.setImageResource(R.drawable.file_type_xml);
                         }
                     }
 
 
                 }
             else {
-                binding.icon.setImageResource(iconResId);
-                binding.title.setText(title);
+                icon.setImageResource(iconResId);
+                title.setText(title_j6);
             }
 
 
-            if (binding.subtitle.getText().toString().length() == 0) {
-                binding.subtitle.setVisibility(View.GONE);
+            if (subtitle.getText().toString().length() == 0) {
+                subtitle.setVisibility(View.GONE);
             } else {
-                binding.subtitle.setVisibility(View.VISIBLE);
+                subtitle.setVisibility(View.VISIBLE);
             }
 
 
@@ -652,16 +658,16 @@ public class FileBrowser extends LinearLayoutCompat implements
                         @Override
                         public void onGlobalLayout() {
                             final ViewTreeObserver.OnGlobalLayoutListener THIS = this;
-                            binding.getRoot().post(() -> {
+                            inflate.post(() -> {
                                 int width = finalconverView.getWidth();
                                 int height = finalconverView.getHeight();
-                                ViewGroup.LayoutParams lp = binding.bgView.getLayoutParams();
+                                ViewGroup.LayoutParams lp = bgView.getLayoutParams();
                                 lp.width = width;
                                 lp.height = height;
-                                binding.bgView.setLayoutParams(lp);
-                                ViewGroup.LayoutParams lp2 = binding.barStart.getLayoutParams();
+                                bgView.setLayoutParams(lp);
+                                ViewGroup.LayoutParams lp2 = barStart.getLayoutParams();
                                 lp2.height = height;
-                                binding.barStart.setLayoutParams(lp2);
+                                barStart.setLayoutParams(lp2);
                                 finalconverView.getViewTreeObserver().removeOnGlobalLayoutListener(THIS);
                             });
                         }
@@ -738,7 +744,14 @@ public class FileBrowser extends LinearLayoutCompat implements
     }
 
 
-    private record FileComparator(List<File> list, int type) implements Comparator<File> {
+    static class FileComparator implements Comparator<File> {
+        private final List<File> list;
+        private final int type;
+
+        public FileComparator(List<File> list, int type) {
+            this.list = list;
+            this.type = type;
+        }
 
         @Override
         public int compare(File s1, File s2) {
@@ -746,13 +759,10 @@ public class FileBrowser extends LinearLayoutCompat implements
                 String sa1 = getFileName(s1);
                 String sa2 = getFileName(s2);
 
-                // 比较名称
                 String name1 = getNameFromString(sa1);
                 String name2 = getNameFromString(sa2);
-                int result = name1
-                        .compareToIgnoreCase(name2);
+                int result = name1.compareToIgnoreCase(name2);
 
-                // 如果名称相同，则按数字排序
                 if (result == 0) {
                     int num1 = getIntFromString(sa1);
                     int num2 = getIntFromString(sa2);
@@ -766,14 +776,12 @@ public class FileBrowser extends LinearLayoutCompat implements
             return 0;
         }
 
-        // 获取字符串名称
         private String getNameFromString(String source) {
             String replace = source.replaceAll("\\d+", "");
             if (replace.isEmpty()) return source;
             return Pinyin.toPinyin(replace, " ");
         }
 
-        // 获取字符串中的数字
         private int getIntFromString(String s) {
             String num = s.replaceAll("\\D", "");
             if (num.isEmpty()) {
@@ -791,7 +799,13 @@ public class FileBrowser extends LinearLayoutCompat implements
             return name;
         }
 
-    }
+        public int getType() {
+            return type;
+        }
 
+        public List<File> getList() {
+            return list;
+        }
+    }
 
 }
